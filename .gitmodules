@@ -7,3 +7,6 @@
 [submodule "tools/src/vswhere"]
 	path = tools/src/vswhere
 	url = http://github.com/viknash/vswhere.git
+[submodule "tools/src/premake-core"]
+	path = tools/src/premake-core
+	url = http://github.com/viknash/premake-core.git
