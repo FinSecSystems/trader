@@ -10,3 +10,6 @@
 [submodule "tools/src/premake-core"]
 	path = tools/src/premake-core
 	url = http://github.com/viknash/premake-core.git
+[submodule "tools/src/cmake"]
+	path = tools/src/cmake
+	url = http://github.com/viknash/cmake.git
