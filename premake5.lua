@@ -8,8 +8,9 @@
             system "Windows"
             architecture "x64"
             toolset "v140"
-		    flags { "ExtraWarnings", "MultiProcessorCompile" }
+		    flags { "MultiProcessorCompile" }
             buildoptions    { "/GR-", "/doc" }
+			warnings "Extra"
 
         filter { "platforms:Win64-Clang" }
             system "Windows"
@@ -48,19 +49,19 @@
 		targetname  "trader"
 		language    "C++"
 		kind        "ConsoleApp"
-		includedirs { "source", "deps/task_scheduler/include", "samples", "deps/IntelSEAPI/ittnotify/include" }
-		debugdir    "samples/profile"
+		includedirs { "src", "deps/task_scheduler/include", "deps/intel_se_api/ittnotify/include" }
+		debugdir    "src"
 		pchheader   "stdafx.h"
-		pchsource   "samples/profile/stdafx.cpp"
-		links       "deps/IntelSEAPI/bin/ittnotify64.lib"
+		pchsource   "src/stdafx.cpp"
+		links       "deps/intel_se_api/bin/ittnotify64.lib"
 
 		files
 		{
 			"*.txt", "**.lua","**.md",
-			"samples/profile/**.h", "samples/profile/**.cpp",
+			"src/**.h", "src/**.cpp",
 			"include/**.h",
-			"samples/common/**.h", "samples/common/**.cpp",
-			"deps/IntelSEAPI/ittnotify/include/*.h", "deps/IntelSEAPI/ittnotify/include/*.hpp", "deps/IntelSEAPI/ittnotify/include/*.cpp"
+			"src/**.h", "src/**.cpp",
+			"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp"
 		}
 
 		excludes
