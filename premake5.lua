@@ -49,7 +49,13 @@
 		targetname  "trader"
 		language    "C++"
 		kind        "ConsoleApp"
-		includedirs { "src", "deps/task_scheduler/include", "deps/intel_se_api/ittnotify/include" }
+		includedirs {
+            "src",
+            "deps/task_scheduler/include",
+            "deps/intel_se_api/ittnotify/include",
+            "deps/poco/Net/include",
+            "deps/poco/Foundation/include",
+            }
 		debugdir    "src"
 		pchheader   "stdafx.h"
 		pchsource   "src/stdafx.cpp"
@@ -71,10 +77,18 @@
 		filter "configurations:debug"
 			targetdir   "bin/debug"
 			debugdir    "samples/profile"
+		    links       { 
+                "deps/poco/lib64/PocoFoundationd.lib",
+                "deps/poco/lib64/PocoNetd.lib",
+                }
 
 		filter "configurations:release"
 			targetdir   "bin/release"
 			debugdir    "samples/profile"
+		    links       { 
+                "deps/poco/lib64/PocoFoundation.lib",
+                "deps/poco/lib64/PocoNet.lib",
+                }
 
 		filter "system:windows"
 
