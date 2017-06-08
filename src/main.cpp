@@ -1,96 +1,173 @@
-//
-// httpget.cpp
-//
-// $Id: //poco/1.4/Net/samples/httpget/src/httpget.cpp#3 $
-//
-// This sample demonstrates the HTTPClientSession and the HTTPCredentials classes.
-//
-// Copyright (c) 2005-2012, Applied Informatics Software Engineering GmbH.
-// and Contributors.
-//
-// SPDX-License-Identifier:	BSL-1.0
-//
-
 #include "stdafx.h"
-#include "Poco/Net/HTTPClientSession.h"
-#include "Poco/Net/HTTPRequest.h"
-#include "Poco/Net/HTTPResponse.h"
-#include <Poco/Net/HTTPCredentials.h>
+#include "Poco/Util/Application.h"
+#include "Poco/Util/Option.h"
+#include "Poco/Util/OptionSet.h"
+#include "Poco/Util/HelpFormatter.h"
+#include "Poco/File.h"
+#include "Poco/FileStream.h"
 #include "Poco/StreamCopier.h"
-#include "Poco/NullStream.h"
-#include "Poco/Path.h"
-#include "Poco/URI.h"
-#include "Poco/Exception.h"
+#include "fyb.h"
 #include <iostream>
+#include <iomanip>
 
 
-using Poco::Net::HTTPClientSession;
-using Poco::Net::HTTPRequest;
-using Poco::Net::HTTPResponse;
-using Poco::Net::HTTPMessage;
-using Poco::StreamCopier;
-using Poco::Path;
-using Poco::URI;
-using Poco::Exception;
+using Poco::Util::Application;
+using Poco::Util::Option;
+using Poco::Util::OptionSet;
+using Poco::Util::HelpFormatter;
+using Poco::Util::AbstractConfiguration;
+using Poco::Util::OptionCallback;
 
 
-bool doRequest(Poco::Net::HTTPClientSession& session, Poco::Net::HTTPRequest& request, Poco::Net::HTTPResponse& response)
+class TraderApp : public Application
 {
-	session.sendRequest(request);
-	std::istream& rs = session.receiveResponse(response);
-	std::cout << response.getStatus() << " " << response.getReason() << std::endl;
-	if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
-	{
-		StreamCopier::copyStream(rs, std::cout);
-		return true;
-	}
-	else
-	{
-		Poco::NullOutputStream null;
-		StreamCopier::copyStream(rs, null);
-		return false;
-	}
-}
+public:
+    TraderApp()
+    {
+    }
+
+protected:
+    void defineOptions(OptionSet& options)
+    {
+        Application::defineOptions(options);
+
+        options.addOption(
+            Option("help", "h", "Display help information on command line arguments.")
+            .required(false)
+            .repeatable(false)
+            .callback(OptionCallback<TraderApp>(this, &TraderApp::handleHelp)));
+
+        options.addOption(
+            Option("message", "m", "Specify the status message to post.")
+            .required(false)
+            .repeatable(false)
+            .argument("message")
+            .callback(OptionCallback<TraderApp>(this, &TraderApp::handleMessage)));
+
+        options.addOption(
+            Option("ckey", "c", "Specify the consumer key.")
+            .required(false)
+            .repeatable(false)
+            .argument("consumer key")
+            .callback(OptionCallback<TraderApp>(this, &TraderApp::handleConsumerKey)));
+
+        options.addOption(
+            Option("csecret", "s", "Specify the consumer secret.")
+            .required(false)
+            .repeatable(false)
+            .argument("consumer secret")
+            .callback(OptionCallback<TraderApp>(this, &TraderApp::handleConsumerSecret)));
+
+        options.addOption(
+            Option("token", "t", "Specify the access token.")
+            .required(false)
+            .repeatable(true)
+            .argument("access token")
+            .callback(OptionCallback<TraderApp>(this, &TraderApp::handleAccessToken)));
+
+        options.addOption(
+            Option("tsecret", "S", "Specify the access token secret.")
+            .required(false)
+            .repeatable(true)
+            .argument("access token secret")
+            .callback(OptionCallback<TraderApp>(this, &TraderApp::handleAccessTokenSecret)));
+    }
+
+    void handleHelp(const std::string& name, const std::string& value)
+    {
+        displayHelp();
+        stopOptionsProcessing();
+    }
+
+    void handleConsumerKey(const std::string& name, const std::string& value)
+    {
+        _consumerKey = value;
+    }
+
+    void handleConsumerSecret(const std::string& name, const std::string& value)
+    {
+        _consumerSecret = value;
+    }
+
+    void handleAccessToken(const std::string& name, const std::string& value)
+    {
+        _accessToken = value;
+    }
+
+    void handleAccessTokenSecret(const std::string& name, const std::string& value)
+    {
+        _accessTokenSecret = value;
+    }
+
+    void handleMessage(const std::string& name, const std::string& value)
+    {
+        _message = value;
+    }
+
+    void displayHelp()
+    {
+        HelpFormatter helpFormatter(options());
+        helpFormatter.setCommand(commandName());
+        helpFormatter.setUsage("OPTIONS");
+        helpFormatter.setHeader("A simple command line client for posting status updates.");
+        helpFormatter.format(std::cout);
+    }
+
+    int main(const std::vector<std::string>& args)
+    {
+        try
+        {
+           // if (!_message.empty())
+            {
+                /*
+                Poco::Path filePath("config.json");
+
+                std::ostringstream ostr;
+
+                if (filePath.isFile())
+                {
+                    Poco::File inputFile(filePath);
+                    if (inputFile.exists())
+                    {
+                        Poco::FileInputStream fis(filePath.toString());
+                        Poco::StreamCopier::copyStream(fis, ostr);
+                    }
+                    else
+                    {
+                        std::cout << filePath.toString() << " doesn't exist!" << std::endl;
+                        return 1;
+                    }
+                }
+
+                std::string jsonStr = ostr.str();
+                Poco::JSON::Parser sparser(0);
+                sparser.parse(jsonStr);
+                Poco::DynamicAny result = sparser.result();
+                */
 
 
-int main(int argc, char** argv)
-{
-	if (argc != 2)
-	{
-		Path p(argv[0]);
-		std::cout << "usage: " << p.getBaseName() << " <uri>" << std::endl;
-		std::cout << "       fetches the resource identified by <uri> and print it to the standard output" << std::endl;
-		return 1;
-	}
 
-	try
-	{
-		URI uri(argv[1]);
-		std::string path(uri.getPathAndQuery());
-		if (path.empty()) path = "/";
+                Fyb fyb;
+                fyb.login(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
+                double ask = fyb.tickerdetailed();
+                std::cout << ask << std::endl;
+            }
+        }
+        catch (Poco::Exception& exc)
+        {
+            std::cerr << exc.displayText() << std::endl;
+            return Application::EXIT_SOFTWARE;
+        }
+        return Application::EXIT_OK;
+    }
 
-		std::string username;
-		std::string password;
-		Poco::Net::HTTPCredentials::extractCredentials(uri, username, password);
-		Poco::Net::HTTPCredentials credentials(username, password);
+private:
+    std::string _consumerKey;
+    std::string _consumerSecret;
+    std::string _accessToken;
+    std::string _accessTokenSecret;
+    std::string _message;
+};
 
-		HTTPClientSession session(uri.getHost(), uri.getPort());
-		HTTPRequest request(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
-		HTTPResponse response;
-		if (!doRequest(session, request, response))
-		{
-			credentials.authenticate(request, response);
-			if (!doRequest(session, request, response))
-			{
-				std::cerr << "Invalid username or password" << std::endl;
-				return 1;
-			}
-		}
-	}
-	catch (Exception& exc)
-	{
-		std::cerr << exc.displayText() << std::endl;
-		return 1;
-	}
-	return 0;
-}
+
+POCO_APP_MAIN(TraderApp)
