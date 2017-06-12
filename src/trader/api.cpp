@@ -13,7 +13,7 @@
 
 
 #include "stdafx.h"
-#include "fyb.h"
+#include "api.h"
 #include "Poco/Net/HTTPSClientSession.h"
 #include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/HTTPResponse.h"
@@ -24,27 +24,18 @@
 #include "Poco/StreamCopier.h"
 
 
-const std::string Fyb::FYB_URI("https://www.fybsg.com/api/SGD/");
-
-
-Fyb::Fyb():
-	_uri(FYB_URI)
+Api::Api(const std::string& uri) :
+    _uri(uri)
 {
 }
 
 	
-Fyb::Fyb(const std::string& FybURI):
-	_uri(FybURI)
-{
-}
-
-	
-Fyb::~Fyb()
+Api::~Api()
 {
 }
 
 
-void Fyb::login(const std::string& consumerKey, const std::string& consumerSecret, const std::string& token, const std::string& tokenSecret)
+void Api::login(const std::string& consumerKey, const std::string& consumerSecret, const std::string& token, const std::string& tokenSecret)
 {
 	_consumerKey    = consumerKey;
 	_consumerSecret = consumerSecret;
@@ -52,27 +43,12 @@ void Fyb::login(const std::string& consumerKey, const std::string& consumerSecre
 	_tokenSecret    = tokenSecret;
 }
 
-	
-Poco::Int64 Fyb::update(const std::string& status)
-{
-	Poco::Net::HTMLForm form;
-	form.set("status", status);
-	Poco::AutoPtr<Poco::Util::AbstractConfiguration> pResult = invoke(Poco::Net::HTTPRequest::HTTP_POST, "update", &form);
-	return pResult->getInt64("id", 0);
-}
 
-double Fyb::tickerdetailed()
-{
-    Poco::AutoPtr<Poco::Util::AbstractConfiguration> pResult = invoke(Poco::Net::HTTPRequest::HTTP_GET, "tickerdetailed");
-    return pResult->getDouble("Ask", 0);
-}
-
-
-Poco::AutoPtr<Poco::Util::AbstractConfiguration> Fyb::invoke(const std::string& httpMethod, const std::string& FybMethod, Poco::Net::HTMLForm* form)
+Poco::AutoPtr<Poco::Util::AbstractConfiguration> Api::invoke(const std::string& httpMethod, const std::string& FybMethod, Poco::Net::HTMLForm* form)
 {
 	// Create the request URI.
 	// We use the JSON version of the Fyb API.
-	Poco::URI uri(_uri + FybMethod + ".json");
+	Poco::URI uri(_uri + FybMethod + "." + _extension);
 	
 	Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort());
 	Poco::Net::HTTPRequest req(httpMethod, uri.getPath(), Poco::Net::HTTPMessage::HTTP_1_1);
@@ -106,6 +82,6 @@ Poco::AutoPtr<Poco::Util::AbstractConfiguration> Fyb::invoke(const std::string& 
 	}
 	else
 	{
-		throw Poco::ApplicationException("Fyb Error", pResult->getString("errors[0].message", ""));
+		throw Poco::ApplicationException("Api Error", pResult->getString("errors[0].message", ""));
 	}
 }

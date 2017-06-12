@@ -74,44 +74,82 @@
                 "LinkTimeOptimization"
             }
 
-	project "trader"
-		targetname  "trader"
+        filter "files:premake5.lua"
+           -- A message to display while this build step is running (optional)
+           buildmessage 'Generating Projects'
+
+           -- One or more commands to run (required)
+           buildcommands {
+              '$(SolutionDir)build\\genproj.cmd'
+           }
+
+           -- One or more outputs resulting from the build (required)
+           buildoutputs { '$(SolutionDir)trader.sln' }
+
+    project "genproj"
+		targetname  "genproj"
+        kind "Makefile"
+
+		files
+		{
+            "*.lua"
+		}
+
+        buildcommands {
+            "$(SolutionDir)build\\genproj.cmd"
+        }
+
+        rebuildcommands {
+            "{RMDIR} $(SolutionDir)*.vcxproj*",
+            "{RMDIR} $(SolutionDir)*.sln*",
+            "$(SolutionDir)build\\genproj.cmd"
+        }
+
+        cleancommands {
+            "{RMDIR} $(SolutionDir)*.vcxproj*",
+            "{RMDIR} $(SolutionDir)*.sln*",
+        }
+
+	project "codegen"
+		targetname  "codegen"
 		language    "C++"
 		kind        "ConsoleApp"
 		includedirs {
-            "src",
+            "src/codegen",
             "deps/task_scheduler/include",
             "deps/intel_se_api/ittnotify/include",
             "deps/poco/Net/include",
-            "deps/poco/NetSSL_OpenSSL/include",
+            "deps/poco/NetSSL_Win/include",
             "deps/poco/Crypto/include",
             "deps/poco/Foundation/include",
             "deps/poco/Util/include",
             "deps/poco/openssl/include",
             "deps/poco/JSON/include"
             }
-		debugdir    "src"
 		pchheader   "stdafx.h"
-		pchsource   "src/stdafx.cpp"
+		pchsource   "src/codegen/stdafx.cpp"
 		links       "deps/intel_se_api/bin/ittnotify64.lib"
         debugenvs {
             "PATH=$(SolutionDir)deps\\poco\\bin64"
         }
+        debugargs {
+            "/i:$(SolutionDir)data\\apis",
+            "/o:$(SolutionDir)tmp\\codegen"
+        }
 
 		files
 		{
-			"*.txt", "**.lua","**.md",
-			"src/**.h", "src/**.cpp",
+			"*.txt","**.md",
+			"src/codegen/**.h", "src/codegen/**.cpp",
 			"include/**.h",
-			"src/**.h", "src/**.cpp",
 			"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
             "deps/poco/Crypto/include/**.h", "deps/poco/Crypto/src/**.cpp",
             "deps/poco/Foundation/include/**.h", "deps/poco/Foundation/src/**.cpp",
             "deps/poco/JSON/include/**.h", "deps/poco/JSON/src/**.cpp",
             "deps/poco/Net/include/**.h", "deps/poco/Net/src/**.cpp",
-            "deps/poco/NetSSL_OpenSSL/include/**.h", "deps/poco/NetSSL_OpenSSL/src/**.cpp",
+            "deps/poco/NetSSL_Win/include/**.h", "deps/poco/NetSSL_Win/src/**.cpp",
             "deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
-            "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp",
+            "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp"
 		}
 
         filter "files:deps/**.*"
@@ -127,7 +165,7 @@
 		    links       { 
                 "deps/poco/lib64/PocoFoundationd.lib",
                 "deps/poco/lib64/PocoNetd.lib",
-                "deps/poco/lib64/PocoNetSSLd.lib",
+                "deps/poco/lib64/PocoNetSSLWind.lib",
                 "deps/poco/lib64/PocoUtild.lib",
                 "deps/poco/lib64/PocoCryptod.lib",
                 "deps/poco/lib64/ssleay64MDd.lib",
@@ -141,7 +179,107 @@
 		    links       { 
                 "deps/poco/lib64/PocoFoundation.lib",
                 "deps/poco/lib64/PocoNet.lib",
-                "deps/poco/lib64/PocoNetSSL.lib",
+                "deps/poco/lib64/PocoNetSSLWin.lib",
+                "deps/poco/lib64/PocoUtil.lib",
+                "deps/poco/lib64/PocoCrypto.lib",
+                "deps/poco/lib64/ssleay64MD.lib",
+                "deps/poco/lib64/libeay64MD.lib",
+                "deps/poco/lib64/PocoJSON.lib"
+                }
+
+	project "apis"
+		targetname  "apis"
+        kind "Makefile"
+
+		files
+		{
+            "data/**.json"
+		}
+
+       buildcommands {
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe -i=$(SolutionDir)data\\apis -o=$(SolutionDir)tmp\\codegen"
+       }
+
+       rebuildcommands {
+            "{RMDIR} $(SolutionDir)tmp\codegen",
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe -i=$(SolutionDir)data\\apis -o=$(SolutionDir)tmp\\codegen"
+       }
+
+       cleancommands {
+            "{RMDIR} $(SolutionDir)tmp\\codegen"
+       }
+
+
+	project "trader"
+		targetname  "trader"
+		language    "C++"
+		kind        "ConsoleApp"
+        dependson   { 
+            "codegen"
+            }
+		includedirs {
+            "src",
+            "deps/task_scheduler/include",
+            "deps/intel_se_api/ittnotify/include",
+            "deps/poco/Net/include",
+            "deps/poco/NetSSL_Win/include",
+            "deps/poco/Crypto/include",
+            "deps/poco/Foundation/include",
+            "deps/poco/Util/include",
+            "deps/poco/openssl/include",
+            "deps/poco/JSON/include"
+            }
+		pchheader   "stdafx.h"
+		pchsource   "src/trader/stdafx.cpp"
+		links       "deps/intel_se_api/bin/ittnotify64.lib"
+        debugenvs {
+            "PATH=$(SolutionDir)deps\\poco\\bin64"
+        }
+
+		files
+		{
+			"*.txt", "**.md",
+			"src/trader/**.h", "src/trader/**.cpp",
+			"include/**.h",
+			"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
+            "deps/poco/Crypto/include/**.h", "deps/poco/Crypto/src/**.cpp",
+            "deps/poco/Foundation/include/**.h", "deps/poco/Foundation/src/**.cpp",
+            "deps/poco/JSON/include/**.h", "deps/poco/JSON/src/**.cpp",
+            "deps/poco/Net/include/**.h", "deps/poco/Net/src/**.cpp",
+            "deps/poco/NetSSL_Win/include/**.h", "deps/poco/NetSSL_Win/src/**.cpp",
+            "deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
+            "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp",
+            "tmp/codegen/**.h", "tmp/codegen/**.cpp"
+		}
+
+        filter "files:deps/**.*"
+            flags { "ExcludeFromBuild" }
+
+		excludes
+		{
+		}
+
+		filter "configurations:debug"
+			targetdir   "bin/debug"
+			debugdir    "bin/debug"
+		    links       { 
+                "deps/poco/lib64/PocoFoundationd.lib",
+                "deps/poco/lib64/PocoNetd.lib",
+                "deps/poco/lib64/PocoNetSSLWind.lib",
+                "deps/poco/lib64/PocoUtild.lib",
+                "deps/poco/lib64/PocoCryptod.lib",
+                "deps/poco/lib64/ssleay64MDd.lib",
+                "deps/poco/lib64/libeay64MDd.lib",
+                "deps/poco/lib64/PocoJSONd.lib"
+                }
+
+		filter "configurations:release"
+			targetdir   "bin/release"
+			debugdir    "bin/release"
+		    links       { 
+                "deps/poco/lib64/PocoFoundation.lib",
+                "deps/poco/lib64/PocoNet.lib",
+                "deps/poco/lib64/PocoNetSSLWin.lib",
                 "deps/poco/lib64/PocoUtil.lib",
                 "deps/poco/lib64/PocoCrypto.lib",
                 "deps/poco/lib64/ssleay64MD.lib",
@@ -151,15 +289,5 @@
 
 		filter "system:windows"
 
-        filter "files:premake5.lua"
-           -- A message to display while this build step is running (optional)
-           buildmessage 'Generating Projects'
 
-           -- One or more commands to run (required)
-           buildcommands {
-              '$(SolutionDir)build\\genproj.cmd'
-           }
-
-           -- One or more outputs resulting from the build (required)
-           buildoutputs { '$(SolutionDir)trader.sln' }
 

@@ -23,10 +23,8 @@ REM Setup Visual Studio Environment
 doskey devenv=devenv.exe /useenv $*
 
 IF NOT "%LatestVS%"=="" (
-	rem call "%LatestVS%\Common7\Tools\VsDevCmd.bat"
-	set VS150COMNTOOLS=%LatestVS%\Common7\Tools\
+	set "VS150COMNTOOLS=%LatestVS%\Common7\Tools\"
 	%comspec% /k "%LatestVS%\VC\Auxiliary\Build\vcvarsall.bat" x64
-	pause
 ) ELSE (
 	IF NOT "%VS140COMNTOOLS%"=="" (
 		ECHO Visual Studio 2015

@@ -1,1 +1,4 @@
 # trader
+
+
+Integrate valijson

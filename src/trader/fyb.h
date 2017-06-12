@@ -14,8 +14,7 @@ class Fyb
 {
 public:
     Fyb();
-		/// Creates the Twitter object, using
-		/// the default Twitter API URI (<http://api.twitter.com/1.1/statuses/>).
+
 		
     Fyb(const std::string& URI);
 		/// Creates the Twitter object using the given Twitter API URI.
