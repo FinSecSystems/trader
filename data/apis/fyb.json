@@ -1,0 +1,69 @@
+{
+    "name": "fyb",
+    "uri": "https://www.fybsg.com/api/SGD/",
+    "methods": [
+        {
+            "name": "tickerdetailed",
+            "extension": "json",
+            "description": "Get current bid and ask, last traded price and 24H volume",
+            "type": "get",
+            "parameters": [],
+            "responses": [
+                {
+                    "name": "ask",
+                    "description": "Ask Price",
+                    "type": "double",
+                    "default": 0.0,
+                    "minimum": 0.0
+                },
+                {
+                    "name": "bid",
+                    "description": "Bid Price",
+                    "type": "double",
+                    "default": 0.0,
+                    "minimum": 0.0
+                },
+                {
+                    "name": "last",
+                    "description": "Last Traded Price",
+                    "type": "double",
+                    "default": 0.0,
+                    "minimum": 0.0
+                },
+                {
+                    "name": "vol",
+                    "description": "24H Volume",
+                    "type": "double",
+                    "default": 0.0,
+                    "minimum": 0.0
+                }
+            ]
+        },
+        {
+            "name": "orderbook",
+            "extension": "json",
+            "description": "Get list of pending orders",
+            "type": "get",
+            "parameters": [],
+            "responses": [
+                {
+                    "name": "asks",
+                    "description": "Ask Order",
+                    "type": "array",
+                    "items": {
+                        "type": "double"
+                    }
+                },
+                {
+                    "name": "bids",
+                    "description": "Bid Order",
+                    "type": "array",
+                    "items": {
+                        "type": "double"
+                    }
+                }
+            ]
+        }
+
+    ]
+}

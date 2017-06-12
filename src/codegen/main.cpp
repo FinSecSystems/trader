@@ -217,7 +217,7 @@ protected:
             std::string extension = method->get("extension");
             std::string description = method->get("description");
             std::string type = method->get("type");
-            header << "// " << description endl;
+            header << "// " << description << endl;
             header << "void " << name << "();" << endl;
             header << endl;
 
