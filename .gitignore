@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+/tmp/Win64/debug/trader/trader.tlog/*.lastbuildstate
+/.vs/trader/v15/*.db-shm
+/.vs/trader/v15/*.db-wal
+/.vs
+/tmp
+*.vcxproj*
+*.sln
+./*.db
+/bin
