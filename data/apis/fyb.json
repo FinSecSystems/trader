@@ -1,69 +1,77 @@
 {
-    "name": "fyb",
-    "uri": "https://www.fybsg.com/api/SGD/",
-    "methods": [
-        {
-            "name": "tickerdetailed",
-            "extension": "json",
-            "description": "Get current bid and ask, last traded price and 24H volume",
-            "type": "get",
-            "parameters": [],
-            "responses": [
-                {
-                    "name": "ask",
-                    "description": "Ask Price",
-                    "type": "double",
-                    "default": 0.0,
-                    "minimum": 0.0
-                },
-                {
-                    "name": "bid",
-                    "description": "Bid Price",
-                    "type": "double",
-                    "default": 0.0,
-                    "minimum": 0.0
-                },
-                {
-                    "name": "last",
-                    "description": "Last Traded Price",
-                    "type": "double",
-                    "default": 0.0,
-                    "minimum": 0.0
-                },
-                {
-                    "name": "vol",
-                    "description": "24H Volume",
-                    "type": "double",
-                    "default": 0.0,
-                    "minimum": 0.0
-                }
-            ]
+  "definitions": {
+    "TickerDetailedData": {
+      "properties": {
+        "ask": {
+          "type": "double"
         },
-        {
-            "name": "orderbook",
-            "extension": "json",
-            "description": "Get list of pending orders",
-            "type": "get",
-            "parameters": [],
-            "responses": [
-                {
-                    "name": "asks",
-                    "description": "Ask Order",
-                    "type": "array",
-                    "items": {
-                        "type": "double"
-                    }
-                },
-                {
-                    "name": "bids",
-                    "description": "Bid Order",
-                    "type": "array",
-                    "items": {
-                        "type": "double"
-                    }
-                }
-            ]
+        "bid": {
+          "type": "double"
+        },
+        "last": {
+          "type": "double"
+        },
+        "vol": {
+          "type": "double"
         }
-
-    ]
+      },
+      "required": [ "ask", "bid", "last", "double" ],
+      "type": "object"
+    },
+    "OrderBookData": {
+      "properties": {
+        "asks": {
+          "type": "array",
+          "items": {
+            "type": "double"
+          }
+        },
+        "bids": {
+          "type": "array",
+          "items": {
+            "type": "double"
+          }
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  "properties": {
+    "tickerdetailed": {
+      "$ref": "#/definitions/TickerDetailedData"
+    },
+    "orderbook": {
+      "$ref": "#/definitions/OrderBookData"
+    },
+    "required": [],
+    "type": "object"
+  },
+  "links": [
+    {
+      "href": "tickerdetailed.json",
+      "description": "Get current bid and ask, last traded price and 24H volume",
+      "method": "GET",
+      "title": "tickerdetailed",
+      "rel": "create",
+      "targetSchema": {
+        "$ref": "#/definitions/TickerDetailedData"
+      }
+    },
+    {
+      "href": "orderbook.json",
+      "description": "Get list of pending orders",
+      "method": "GET",
+      "title": "orderbook",
+      "rel": "create",
+      "targetSchema": {
+        "$ref": "#/definitions/OrderBookData"
+      }
+    }
+  ],
+  "config": {
+    "baseurl": "https://www.fybsg.com/api/SGD/"
+  },
+  "required": [],
+  "type": "object"
 }
