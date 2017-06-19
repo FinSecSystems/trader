@@ -24,8 +24,7 @@
 #include "Poco/StreamCopier.h"
 
 
-Api::Api(const std::string& uri) :
-    _uri(uri)
+Api::Api()
 {
 }
 
@@ -44,11 +43,11 @@ void Api::login(const std::string& consumerKey, const std::string& consumerSecre
 }
 
 
-Poco::AutoPtr<Poco::Util::AbstractConfiguration> Api::invoke(const std::string& httpMethod, const std::string& FybMethod, Poco::Net::HTMLForm* form)
+Poco::JSON::Object::Ptr Api::invoke(const std::string& httpMethod, const std::string& ApiMethod, Poco::Net::HTMLForm* form)
 {
 	// Create the request URI.
 	// We use the JSON version of the Fyb API.
-	Poco::URI uri(_uri + FybMethod + "." + _extension);
+	Poco::URI uri(_uri + ApiMethod );
 	
 	Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort());
 	Poco::Net::HTTPRequest req(httpMethod, uri.getPath(), Poco::Net::HTTPMessage::HTTP_1_1);
@@ -72,16 +71,21 @@ Poco::AutoPtr<Poco::Util::AbstractConfiguration> Api::invoke(const std::string& 
 	Poco::Net::HTTPResponse res;
 	std::istream& rs = session.receiveResponse(res);
 	
-	Poco::AutoPtr<Poco::Util::JSONConfiguration> pResult = new Poco::Util::JSONConfiguration(rs);
+	//Poco::AutoPtr<Poco::Util::JSONConfiguration> pResult = new Poco::Util::JSONConfiguration(rs);
+
+	Poco::JSON::Parser parser;
+	parser.parse(rs);
+	Poco::DynamicAny result = parser.result();
+	Poco::JSON::Object::Ptr obj = result.extract<Poco::JSON::Object::Ptr>();
 
 	// If everything went fine, return the JSON document.
 	// Otherwise throw an exception.
 	if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
 	{
-		return pResult;
+		return obj;
 	}
 	else
 	{
-		throw Poco::ApplicationException("Api Error", pResult->getString("errors[0].message", ""));
+		throw Poco::ApplicationException("Api Error", "");
 	}
 }

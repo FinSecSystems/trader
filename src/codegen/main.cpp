@@ -114,6 +114,11 @@ protected:
 		}
 	};
 
+	void newLine(FileOutputStream& stream)
+	{
+		stream << endl;
+	}
+
     class FileOutputStream
     {
     public:
@@ -202,6 +207,16 @@ protected:
         std::ostringstream tempStream;
     };
 
+	struct Config
+	{
+		void read(Poco::SharedPtr<Poco::JSON::Object> obj)
+		{
+			baseUrl = obj->getValue<std::string>("baseurl");
+		}
+
+		std::string baseUrl;
+	};
+
 	struct ObjectSchemaDefinition
 	{
 		void read(Poco::SharedPtr<Poco::JSON::Object> obj)
@@ -211,21 +226,107 @@ protected:
 
 		void writeCpp(FileOutputStream& cpp)
 		{
+			cpp << "void " << name << "::read(Poco::JSON::Object::Ptr val) ";
+			{
+				scopedStream stream(cpp);
+				std::vector<std::string> propertyNames;
+				rootObj->getNames(propertyNames);
+				for (auto& propertyName : propertyNames)
+				{
+					Poco::JSON::Object::Ptr propertyVal = rootObj->getObject(propertyName);
+					std::string type = propertyVal->get("type");
+					const char* cppType = getCppType(type);
+					if (cppType)
+					{
+						cpp << propertyName << " = val->getValue<" << cppType << ">(\"" << propertyName << "\")" << cendl;
+					}
+					else if (isArray(type))
+					{
+						Poco::JSON::Object::Ptr items = propertyVal->getObject("items");
+						std::string type = items->get("type");
+						const char* cppType = getCppType(type);
+						if (cppType)
+						{
+							cpp << "Poco::JSON::Array::Ptr " << propertyName << "Array = val->getArray(\"" << propertyName << "\")" << cendl;
+							cpp << "for (Poco::UInt32 idx = 0; idx < " << propertyName << "Array->size(); ++idx)" << endl;
+							{
+								scopedStream stream(cpp);
+								cpp << propertyName << ".push_back(" << propertyName << "Array->getElement<" << cppType << ">(idx))" << cendl;
+							}
+						}
+						else if (isArray(type))
+						{
+							Poco::JSON::Object::Ptr innerItems = items->getObject("items");
+							std::string type = innerItems->get("type");
+							const char* cppType = getCppType(type);
+							cpp << "Poco::JSON::Array::Ptr " << propertyName << "Array = val->getArray(\"" << propertyName << "\")" << cendl;
+							cpp << "for (Poco::UInt32 idx = 0; idx < " << propertyName << "Array->size(); ++idx)" << endl;
+							{
+								scopedStream stream(cpp);
+								cpp << "Poco::JSON::Array::Ptr inner" << propertyName << "Array = "<< propertyName << "Array->getArray(idx)" << cendl;
+								cpp << "std::vector<" << cppType << "> inner" << propertyName << cendl;
+								cpp << "for (Poco::UInt32 innerIdx = 0; innerIdx < inner" << propertyName << "Array->size(); ++innerIdx)" << endl;
+								{
+									scopedStream stream(cpp);
+									cpp << "inner" << propertyName << ".push_back(inner" << propertyName << "Array->getElement<" << cppType << ">(innerIdx))" << cendl;
+								}
+								cpp << propertyName << ".push_back(inner" << propertyName << ")" << cendl;							}
+						}
+					}
+				}
+			}
+			cpp << endl;
+		}
 
+		const char* getCppType(const std::string& jsonType)
+		{
+			if (jsonType.compare("double") == 0)
+			{
+				return "double";
+			}
+			return nullptr;
+		}
+
+		bool isArray(const std::string& jsonType)
+		{
+			if (jsonType.compare("array") == 0)
+			{
+				return true;
+			}
+			return false;
 		}
 
 		void writeHeader(FileOutputStream& header)
 		{
+			header << "void read(Poco::JSON::Object::Ptr val)" << cendl;
+
 			std::vector<std::string> propertyNames;
 			rootObj->getNames(propertyNames);
 			for (auto& it : propertyNames)
 			{
 				Poco::JSON::Object::Ptr propertyVal = rootObj->getObject(it);
 				std::string type = propertyVal->get("type");
-				if (type.compare("double")==0)
+				const char* cppType = getCppType(type);
+				if (cppType)
 				{
-					header << "double" << tabs(1) << it << cendl;
-					newLine(header);
+					header << cppType << tabs(1) << it << cendl;
+				}
+				else if (isArray(type))
+				{
+					Poco::JSON::Object::Ptr items = propertyVal->getObject("items");
+					std::string type = items->get("type");
+					const char* cppType = getCppType(type);
+					if (cppType)
+					{
+						header << "std::vector<" << cppType << "> " << tabs(1) << it << cendl;
+					}
+					else if (isArray(type))
+					{
+						Poco::JSON::Object::Ptr innerItems = items->getObject("items");
+						std::string type = innerItems->get("type");
+						const char* cppType = getCppType(type);
+						header << "std::vector<std::vector<" << cppType << ">> " << tabs(1) << it << cendl;
+					}
 				}
 			}
 		}
@@ -271,18 +372,19 @@ protected:
 			cpp << "Poco::AutoPtr<" << responseSchemaName << "> " << apiName << "::" << name;
 			if (method == GET)
 			{
-				cpp << "()";
+				cpp << "() ";
 			}
 			{
 				scopedStream stream(cpp);
-				cpp << "Poco::AutoPtr<" << responseSchemaName << "> retVal = new " << responseSchemaName << cendl;
-				cpp << "Poco::AutoPtr<Poco::Util::AbstractConfiguration> pResult = invoke(Poco::Net::HTTPRequest::";
+				cpp << "Poco::AutoPtr<" << responseSchemaName << "> retVal = new " << responseSchemaName << "()" << cendl;
+				cpp << "Poco::JSON::Object::Ptr pResult = invoke(Poco::Net::HTTPRequest::";
 				if (method == GET) cpp << "HTTP_GET"; else cpp << "HTTP_POST";
-				cpp << "\"" << name << "\"";
+				cpp << ", \"" << url << "\")";
 				cpp << cendl;
 				cpp << "retVal->read(pResult)" << cendl;
 				cpp << "return retVal" << cendl;
 			}
+			cpp << endl;
 		}
 
 		void writeHeader(FileOutputStream& header)
@@ -323,11 +425,6 @@ protected:
 		 }
 	}
 
-	void newLine(FileOutputStream& stream)
-	{
-		stream << endl;
-	}
-
 	class scopedStream
 	{
 	public:
@@ -365,7 +462,7 @@ protected:
 		{
 			if (count) stream << ", ";
 			else stream << " : ";
-			stream << " public" << parentClass[count];
+			stream << " public " << parentClass[count];
 			count++;
 		}
 		stream << " {";
@@ -386,6 +483,7 @@ protected:
 		newLine(stream);
 		stream << "// Destructor" << endl;
 		stream << "~" << className << "()" << cendl;
+		stream << endl;
 	}
 
 	void popClass(FileOutputStream& stream, std::string& className)
@@ -404,7 +502,7 @@ protected:
 		Poco::UInt32 count = 0;
 		for (Poco::UInt32 count = 0; count < length; count++)
 		{
-			stream << "#include \"" << headerFile[count] << "\"";
+			stream << "#include \"" << headerFile[count] << "\"" << endl;
 		}
 		newLine(stream);
 	}
@@ -419,6 +517,36 @@ protected:
 		}
 		newLine(stream);
 	}
+
+	void doAPIConstructor(FileOutputStream& cpp, const std::string& apiName, const Config& config)
+	{
+		cpp << apiName << "::" << apiName << "() ";
+		{
+			scopedStream scope(cpp);
+			cpp << "_uri = \"" << config.baseUrl << "\"" << cendl;
+		}
+		cpp << endl;
+	}
+
+	void doConstructor(FileOutputStream& cpp, const std::string& className)
+	{
+		cpp << className << "::" << className << "() ";
+		{
+			scopedStream scope(cpp);
+		}
+		cpp << endl;
+
+	}
+
+	void doDestructor(FileOutputStream& cpp, const std::string& className)
+	{
+		cpp << className << "::~" << className << "() ";
+		{
+			scopedStream scope(cpp);
+		}
+		cpp << endl;
+	}
+
 
     void processTemplate(const std::string& apiFile)
     {
@@ -459,6 +587,10 @@ protected:
 			endPoint.read(it.extract<Poco::JSON::Object::Ptr>());
 		}
 
+		Poco::JSON::Object::Ptr configObj = api->getObject("config");
+		Config config;
+		config.read(configObj);
+
 		//Write
         std::string headerFileName = _outputDir + Path::separator() + apiName + ".h";
 		File headerFile(headerFileName);
@@ -467,17 +599,26 @@ protected:
         std::string cppFileName = _outputDir + Path::separator() + apiName + ".cpp";
         FileOutputStream cpp(cppFileName, std::ios::out);
 
-		startHeader(header, {}, 0);
+		const char* headerFiles[4] = {
+			"Poco/Net/HTMLForm.h",
+			"Poco/Util/AbstractConfiguration.h",
+			"Poco/AutoPtr.h",
+			"trader/Api.h"
+		};
+
+		startHeader(header, headerFiles, 4);
 		newLine(header);
 		pushNameSpace(header, _namespace);
 			for (auto& schemaDefinition : schemaDefinitions)
 			{
 				ObjectSchemaDefinition& def = schemaDefinition.second;
-				pushClass(header, def.name, {}, 0);
+				const char* baseClass[1] = { "Poco::RefCountedObject" };
+				pushClass(header, def.name, baseClass, 1);
 				def.writeHeader(header);
 				popClass(header, def.name);
 			}
-			pushClass(header, apiName, {}, 0);
+			const char* baseClassNames[1] = { "Api" };
+			pushClass(header, apiName, baseClassNames, 1);
 			for (auto& endPoint : endPoints)
 			{
 				endPoint.writeHeader(header);
@@ -485,17 +626,32 @@ protected:
 			popClass(header, apiName);
 		popNameSpace(header, _namespace);
 
-		const char* cppHeaders[1];
+		const char* cppHeaders[9];
 		cppHeaders[0] = headerFileName.c_str();
-		startCpp(cpp, cppHeaders, 1);
+		cppHeaders[1] = "Poco/Net/HTTPSClientSession.h";
+		cppHeaders[2] = "Poco/Net/HTTPRequest.h";
+		cppHeaders[3] = "Poco/Net/HTTPResponse.h";
+		cppHeaders[4] = "Poco/Net/OAuth10Credentials.h";
+		cppHeaders[5] = "Poco/Util/JSONConfiguration.h";
+		cppHeaders[6] = "Poco/URI.h";
+		cppHeaders[7] = "Poco/Format.h";
+		cppHeaders[8] = "Poco/StreamCopier.h";
+		startCpp(cpp, cppHeaders, 9);
 		pushNameSpace(cpp, _namespace);
-		for (auto& endPoint : endPoints)
-		{
-			endPoint.writeCpp(cpp, apiName);
-		}
+			for (auto& schemaDefinition : schemaDefinitions)
+			{
+				ObjectSchemaDefinition& def = schemaDefinition.second;
+				doConstructor(cpp, def.name);
+				doDestructor(cpp, def.name);
+				def.writeCpp(cpp);
+			}
+			doAPIConstructor(cpp, apiName, config);
+			doDestructor(cpp, apiName);
+			for (auto& endPoint : endPoints)
+			{
+				endPoint.writeCpp(cpp, apiName);
+			}
 		popNameSpace(cpp, _namespace);
-    
-
     }
 
     void processTemplates(const std::string& root)

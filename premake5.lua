@@ -134,7 +134,8 @@
         }
         debugargs {
             "/i:$(SolutionDir)data\\apis",
-            "/o:$(SolutionDir)tmp\\codegen"
+            "/o:$(SolutionDir)tmp\\codegen",
+			"/n:trader"
         }
 
 		files
@@ -197,12 +198,12 @@
 		}
 
        buildcommands {
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe -i=$(SolutionDir)data\\apis -o=$(SolutionDir)tmp\\codegen"
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader"
        }
 
        rebuildcommands {
             "{RMDIR} $(SolutionDir)tmp\codegen",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe -i=$(SolutionDir)data\\apis -o=$(SolutionDir)tmp\\codegen"
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader"
        }
 
        cleancommands {
@@ -227,7 +228,8 @@
             "deps/poco/Foundation/include",
             "deps/poco/Util/include",
             "deps/poco/openssl/include",
-            "deps/poco/JSON/include"
+            "deps/poco/JSON/include",
+			"tmp/codegen"
             }
 		pchheader   "stdafx.h"
 		pchsource   "src/trader/stdafx.cpp"

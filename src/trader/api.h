@@ -5,6 +5,9 @@
 #include "Poco/Net/HTMLForm.h"
 #include "Poco/Util/AbstractConfiguration.h"
 #include "Poco/AutoPtr.h"
+#include "Poco/JSON/Parser.h"
+#include "Poco/JSON/ParseHandler.h"
+#include "Poco/JSON/JSONException.h"
 
 
 class Api
@@ -13,7 +16,7 @@ class Api
 	/// 
 {
 public:
-    Api( const std::string& uri);
+    Api();
 
 	~Api();
 		/// Destroys the Twitter object.
@@ -22,7 +25,7 @@ public:
 		/// Specifies the OAuth authentication information used in all API calls.
 		
 
-	virtual Poco::AutoPtr<Poco::Util::AbstractConfiguration> invoke(const std::string& httpMethod, const std::string& method, Poco::Net::HTMLForm* params = nullptr);
+	virtual Poco::JSON::Object::Ptr invoke(const std::string& httpMethod, const std::string& method, Poco::Net::HTMLForm* params = nullptr);
 		/// Invokes the given method of the Twitter API, using the parameters
 		/// given in the Poco::Net::HTMLForm object. httpMethod must be GET or POST,
 		/// according to the Twitter API documentation.
@@ -37,7 +40,6 @@ protected:
     Api& operator = (const Api&);
 	
 	std::string _uri;
-    std::string _extension;
 	std::string _consumerKey;
 	std::string _consumerSecret;
 	std::string _token;

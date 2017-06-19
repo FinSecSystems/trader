@@ -1,6 +1,6 @@
 {
   "definitions": {
-    "TickerDetailedData": {
+    "TickerDetailed": {
       "properties": {
         "ask": {
           "type": "double"
@@ -18,20 +18,49 @@
       "required": [ "ask", "bid", "last", "double" ],
       "type": "object"
     },
-    "OrderBookData": {
+    "OrderBook": {
       "properties": {
         "asks": {
           "type": "array",
           "items": {
-            "type": "double"
+            "type": "array",
+            "items": {
+              "type": "double"
+            }
           }
         },
         "bids": {
           "type": "array",
           "items": {
-            "type": "double"
+            "type": "array",
+            "items": {
+              "type": "double"
+            }
           }
         }
+      },
+      "Trades": {
+        "properties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "amount": {
+              "type": "double"
+            },
+            "date": {
+              "format": "time",
+              "type": "int"
+            },
+            "price": {
+              "type": "double"
+            },
+            "tid": {
+              "type": "int"
+            }
+          }
+        },
+        "required": [ ],
+        "type": "object"
       },
       "required": [],
       "type": "object"
@@ -39,10 +68,13 @@
   },
   "properties": {
     "tickerdetailed": {
-      "$ref": "#/definitions/TickerDetailedData"
+      "$ref": "#/definitions/TickerDetailed"
     },
     "orderbook": {
-      "$ref": "#/definitions/OrderBookData"
+      "$ref": "#/definitions/OrderBook"
+    },
+    "trades": {
+      "$ref": "#/definitions/Trades"
     },
     "required": [],
     "type": "object"
@@ -52,20 +84,30 @@
       "href": "tickerdetailed.json",
       "description": "Get current bid and ask, last traded price and 24H volume",
       "method": "GET",
-      "title": "tickerdetailed",
+      "title": "GetTickerDetailed",
       "rel": "create",
       "targetSchema": {
-        "$ref": "#/definitions/TickerDetailedData"
+        "$ref": "#/definitions/TickerDetailed"
       }
     },
     {
       "href": "orderbook.json",
       "description": "Get list of pending orders",
       "method": "GET",
-      "title": "orderbook",
+      "title": "GetOrderBook",
       "rel": "create",
       "targetSchema": {
-        "$ref": "#/definitions/OrderBookData"
+        "$ref": "#/definitions/OrderBook"
+      }
+    },
+    {
+      "href": "trades.json",
+      "description": "Get list of executed trades",
+      "method": "GET",
+      "title": "GetTrades",
+      "rel": "create",
+      "targetSchema": {
+        "$ref": "#/definitions/Trades"
       }
     }
   ],

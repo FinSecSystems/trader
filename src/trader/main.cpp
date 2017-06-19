@@ -117,41 +117,12 @@ protected:
     {
         try
         {
-           // if (!_message.empty())
-            {
-                /*
-                Poco::Path filePath("config.json");
-
-                std::ostringstream ostr;
-
-                if (filePath.isFile())
-                {
-                    Poco::File inputFile(filePath);
-                    if (inputFile.exists())
-                    {
-                        Poco::FileInputStream fis(filePath.toString());
-                        Poco::StreamCopier::copyStream(fis, ostr);
-                    }
-                    else
-                    {
-                        std::cout << filePath.toString() << " doesn't exist!" << std::endl;
-                        return 1;
-                    }
-                }
-
-                std::string jsonStr = ostr.str();
-                Poco::JSON::Parser sparser(0);
-                sparser.parse(jsonStr);
-                Poco::DynamicAny result = sparser.result();
-                */
-
-
-
-                Fyb fyb;
-                fyb.login(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
-                double ask = fyb.tickerdetailed();
-                std::cout << ask << std::endl;
-            }
+            trader::fyb fyb;
+            fyb.login(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
+            //Poco::AutoPtr<trader::TickerDetailedData> tickerDetailedData = fyb.GetTickerDetailed();
+            //std::cout << tickerDetailedData->ask << std::endl;
+			Poco::AutoPtr<trader::OrderBookData> orderBookData = fyb.GetOrderBook();
+			//std::cout << tickerDetailedData->ask << std::endl;
         }
         catch (Poco::Exception& exc)
         {
