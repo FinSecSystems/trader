@@ -284,6 +284,10 @@ protected:
 			{
 				return "double";
 			}
+			else if (jsonType.compare("int") == 0)
+			{
+				return "Poco::Int32";
+			}
 			return nullptr;
 		}
 
