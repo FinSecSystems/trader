@@ -1,6 +1,7 @@
 {
   "definitions": {
     "TickerDetailed": {
+      "type": "object",
       "properties": {
         "ask": {
           "type": "double"
@@ -15,10 +16,10 @@
           "type": "double"
         }
       },
-      "required": [ "ask", "bid", "last", "double" ],
-      "type": "object"
+      "required": [ "ask", "bid", "last", "double" ]
     },
     "OrderBook": {
+      "type": "object",
       "properties": {
         "asks": {
           "type": "array",
@@ -38,35 +39,32 @@
             }
           }
         }
-      },
-      "Trades": {
+      }
+    },
+    "Trades": {
+      "type": "array",
+      "items": {
+        "type": "object",
         "properties": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "amount": {
-              "type": "double"
-            },
-            "date": {
-              "format": "time",
-              "type": "int"
-            },
-            "price": {
-              "type": "double"
-            },
-            "tid": {
-              "type": "int"
-            }
+          "amount": {
+            "type": "double"
+          },
+          "date": {
+            "format": "time",
+            "type": "int"
+          },
+          "price": {
+            "type": "double"
+          },
+          "tid": {
+            "type": "int"
           }
-        },
-        "required": [ ],
-        "type": "object"
-      },
-      "required": [],
-      "type": "object"
+        }
+      }
     }
   },
   "properties": {
+    "type": "object",
     "tickerdetailed": {
       "$ref": "#/definitions/TickerDetailed"
     },
@@ -76,8 +74,7 @@
     "trades": {
       "$ref": "#/definitions/Trades"
     },
-    "required": [],
-    "type": "object"
+    "required": []
   },
   "links": [
     {
