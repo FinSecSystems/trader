@@ -33,7 +33,7 @@ namespace trader {
 		}
 		else if (jsonType.compare("int") == 0)
 		{
-			return "Int32";
+			return "Poco::Int32";
 		}
 		return nullptr;
 	}
@@ -111,29 +111,46 @@ namespace trader {
 		cpp << endl;
 	}
 
-	void ObjectSchemaDefinition::construct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiFileOutputStream& stream, string depthName)
+	void ObjectSchemaDefinition::construct_properties(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ostringstream& stream, string depthName)
+	{
+		JSON::Object::Ptr properties = obj->getObject("properties");
+		for (auto& property : *properties)
+		{
+			JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
+			++objectCount;
+			construct(toExpand, arrayCount, objectCount, propertyObject, stream, property.first);
+			--objectCount;
+		}
+	}
+
+	void ObjectSchemaDefinition::construct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ostringstream& stream, string depthName, bool newObject)
 	{
 		string type = obj->get("type");
 		if (isObject(type))
 		{
-			JSON::Object::Ptr properties = obj->getObject("properties");
-			for (auto& property : *properties)
+			if (objectCount || arrayCount)
 			{
-				JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
-				if (objectCount || arrayCount)
+				toExpand.emplace_back(depthName, obj);
+				if (arrayCount)
 				{
-					toExpand.emplace_back(property.first, propertyObject);
 					stream << toExpand.back()._name;
-					if (arrayCount == 0)
-					{
-						stream << tabs(1) << property.first << cendl;
-					}
 				}
 				else
 				{
-					++objectCount;
-					construct(toExpand, arrayCount, objectCount, propertyObject, stream, property.first);
-					--objectCount;
+					stream << tabs(1) << depthName << std::cendl;
+				}
+			}
+			else
+			{
+				if (newObject)
+				{
+					stream << "struct " << depthName << "{" << std::endl;
+					construct_properties(toExpand, arrayCount, objectCount, obj, stream, depthName);
+					stream << "};" << std::endl;
+				}
+				else
+				{
+					construct_properties(toExpand, arrayCount, objectCount, obj, stream, depthName);
 				}
 			}
 		}
@@ -142,12 +159,12 @@ namespace trader {
 			JSON::Object::Ptr items = obj->getObject("items");
 			stream << "std::vector<";
 			++arrayCount;
-			construct(toExpand, arrayCount, objectCount, items, stream, "");
+			construct(toExpand, arrayCount, objectCount, items, stream, depthName);
 			--arrayCount;
-			stream << "> ";
+			stream << ">";
 			if (arrayCount == 0)
 			{
-				stream << tabs(1) << depthName << cendl;
+				stream << tabs(1) << depthName << std::cendl;
 			}
 		}
 		else
@@ -159,7 +176,7 @@ namespace trader {
 			}
 			if (arrayCount == 0)
 			{
-				stream << tabs(1) << depthName << cendl;
+				stream << tabs(1) << depthName << std::cendl;
 			}
 		}
 	}
@@ -169,15 +186,17 @@ namespace trader {
 		header << "void read(Poco::Dynamic::Var::Ptr val)" << cendl;
 		header << endl;
 
-		header << "//Test" << endl;
+		ostringstream tempStreamMembers, tempStreamStructs;
 		std::vector<ExpansionPair> toExpand;
-		construct(toExpand, 0, 0, rootObj, header, "");
+		construct(toExpand, 0, 0, rootObj, tempStreamMembers, "data");
 		while (toExpand.size()) {
 			ExpansionPair exPair = toExpand.front();
 			toExpand.erase(toExpand.begin());
-			construct(toExpand, 0, 0, exPair._obj, header, exPair._name);
+			construct(toExpand, 0, 0, exPair._obj, tempStreamStructs, exPair._name, true);
 		};
-		header << "//Test" << endl;
+
+		header << tempStreamStructs.str();
+		header << tempStreamMembers.str();
 		/*
 		vector<string> propertyNames;
 		rootObj->getNames(propertyNames);

@@ -139,13 +139,55 @@ namespace trader {
 		ApiFileOutputStream& _stream;
 		const string& _className;
 	};
+
+	template<size_t N> class ScopedStruct
+	{
+		array<const char*, N> parentClasses;
+	public:
+		template <typename ...T,
+			typename enable_if<sizeof...(T) == N, int>::type = 0>
+			ScopedStruct(ApiFileOutputStream& stream, const string& className, T ...args) :
+			_className(className),
+			_stream(&stream),
+			parentClasses{ args... }
+		{
+			stream << "struct " << className;
+			bool first = true;
+			for (auto& parentClass : parentClasses)
+			{
+				if (!first) stream << ", ";
+				else stream << " : ";
+				stream << " public " << parentClass;
+				first = false;
+			}
+			stream << " {";
+			stream << endl;
+			++stream;
+
+			stream << endl;
+		}
+
+		~ScopedStruct()
+		{
+			if (!_className.empty())
+			{
+				--_stream;
+				_stream << "};" << std::endl;
+				_stream << std::endl;
+			}
+		}
+
+	private:
+		ApiFileOutputStream* _stream;
+		const string& _className;
+	};
 	
 	inline void startHeader(ApiFileOutputStream& stream, Int32 num, ...)
 	{
 		stream << "#pragma once " << endl;
 		va_list arguments;
 		va_start(arguments, num);
-		for (UInt32 cnt = 0; cnt < num; cnt++)
+		for (Int32 cnt = 0; cnt < num; cnt++)
 		{
 			const char* fileName = va_arg(arguments, const char*);
 			stream << "#include \"" << fileName << "\"" << endl;
@@ -160,7 +202,7 @@ namespace trader {
 		stream << "#include \"stdafx.h\" " << endl;
 		va_list arguments;
 		va_start(arguments, num);
-		for (UInt32 cnt = 0; cnt < num; cnt++)
+		for (Int32 cnt = 0; cnt < num; cnt++)
 		{
 			const char* fileName = va_arg(arguments, const char*);
 			stream << "#include \"" << fileName  << "\"" << endl;
@@ -177,7 +219,7 @@ namespace trader {
 			va_list arguments;
 			va_start(arguments, num);
 			poco_assert(num % 2 == 0);
-			for (UInt32 cnt = 0; cnt < num; cnt+=2)
+			for (Int32 cnt = 0; cnt < num; cnt+=2)
 			{
 				const char* str = va_arg(arguments, const char*);
 				cpp << str << " = \"" << va_arg(arguments, const char*) << "\"" << cendl;

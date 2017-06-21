@@ -41,10 +41,12 @@ namespace trader {
 		void read(JSON::Object::Ptr obj);
 		void writeCpp(ApiFileOutputStream& cpp);
 		void writeHeader(ApiFileOutputStream& cpp);
-		void construct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiFileOutputStream& stream, string depthName);
+		void construct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ostringstream& stream, string depthName, bool newObject = false);
+		void construct_properties(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ostringstream& stream, string depthName);
 
 		string name;
 		JSON::Object::Ptr rootObj;
+		vector<ExpansionPair> toExpand;
 	};
 
 }

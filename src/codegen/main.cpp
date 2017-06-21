@@ -138,8 +138,8 @@ namespace trader {
 
 			//Write
 
-			ApiFileOutputStream header(config.headerFileName, ios::out);
-			ApiFileOutputStream cpp(config.cppFileName, ios::out);
+			ApiFileOutputStream header(config.headerFileName);
+			ApiFileOutputStream cpp(config.cppFileName);
 
 			startHeader(header, 4,
 				"Poco/Net/HTMLForm.h",

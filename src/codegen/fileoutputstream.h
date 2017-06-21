@@ -47,7 +47,7 @@ namespace trader {
 			{
 				size_t n = obj.getn();
 				for (size_t i = 0; i < n; ++i)
-					os << "    ";
+					os << "\t";
 				return os;
 			}
 		};
@@ -111,11 +111,25 @@ namespace trader {
 		{
 			size_t n = obj.getn();
 			for (size_t i = 0; i < n; ++i)
-				os.tempStream << "    ";
+				os.tempStream << "\t";
+			return os;
+		}
+		friend std::ostringstream& operator<<(std::ostringstream& os, const tabs& obj)
+		{
+			size_t n = obj.getn();
+			for (size_t i = 0; i < n; ++i)
+				os << "\t";
 			return os;
 		}
 	};
 
 }
 
-
+namespace std {
+	ostringstream & cendl(ostringstream & os)
+	{
+		os << std::endl;
+		os << ";";
+		return os;
+	}
+}
