@@ -16,3 +16,6 @@
 [submodule "tools/src/js2model"]
 	path = tools/src/js2model
 	url = http://github.com/viknash/js2model.git
+[submodule "deps/TaskScheduler"]
+	path = deps/TaskScheduler
+	url = http://github.com/viknash/TaskScheduler.git
