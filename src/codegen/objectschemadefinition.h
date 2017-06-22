@@ -31,7 +31,7 @@ namespace trader {
 			{
 				static UInt32 count = 0;
 				stringstream str;
-				str << name << ++count;
+				str << name;// << ++count;
 				_name = str.str();
 			}
 			JSON::Object::Ptr _obj;
@@ -41,8 +41,9 @@ namespace trader {
 		void read(JSON::Object::Ptr obj);
 		void writeCpp(ApiFileOutputStream& cpp);
 		void writeHeader(ApiFileOutputStream& cpp);
-		void construct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ostringstream& stream, string depthName, bool newObject = false);
-		void construct_properties(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ostringstream& stream, string depthName);
+		void headerConstruct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anoymousName, bool newObject = false);
+		void headerConstructProperties(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anoymousName);
+		void cppConstruct(UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anoymousName);
 
 		string name;
 		JSON::Object::Ptr rootObj;

@@ -56,8 +56,50 @@ namespace trader {
 		return false;
 	}
 
+
+	void ObjectSchemaDefinition::cppConstruct(UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anonymousName)
+	{
+		string type = obj->get("type");
+		if (isObject(type))
+		{
+			JSON::Object::Ptr properties = obj->getObject("properties");
+			for (auto& property : *properties)
+			{
+				JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
+				++objectCount;
+				cppConstruct(arrayCount, objectCount, propertyObject, stream, property.first, anonymousName);
+				--objectCount;
+			}
+		}
+		else if (isArray(type))
+		{
+			JSON::Object::Ptr items = obj->getObject("items");
+			stream << "JSON::Array::Ptr " << depthName << "Array = val->getArray(\"" << depthName << "\")" << cendl;
+			stream << "for (UInt32 idx = 0; idx < " << depthName << "Array->size(); ++idx)" << endl;
+			{
+				ScopedStream<ApiStreamBuffer> scopedStream(stream);
+				++arrayCount;
+				headerConstruct(toExpand, arrayCount, objectCount, items, stream, depthName, anonymousName);
+				--arrayCount;
+				stream << depthName << ".push_back(" << depthName << "Array->getElement<>(idx))" << cendl;
+			}
+		}
+		else
+		{
+			stream << depthName << " = val->getValue<" << getCppType(type) << ">(\"" << depthName << "\")" << cendl;
+		}
+	}
+
+
 	void ObjectSchemaDefinition::writeCpp(ApiFileOutputStream& cpp)
-	{/*
+	{
+		cpp << "void " << name << "::read(Poco::Dynamic::Var::Ptr val) ";
+		{
+			ScopedStream<ApiFileOutputStream> scopedStream(cpp);
+
+		}
+		
+		/*
 		cpp << "void " << name << "::read(Poco::Dynamic::Var::Ptr val) ";
 		{
 			ScopedStream stream(cpp);
@@ -111,60 +153,61 @@ namespace trader {
 		cpp << endl;
 	}
 
-	void ObjectSchemaDefinition::construct_properties(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ostringstream& stream, string depthName)
+	void ObjectSchemaDefinition::headerConstructProperties(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anoymousName )
 	{
 		JSON::Object::Ptr properties = obj->getObject("properties");
 		for (auto& property : *properties)
 		{
 			JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
 			++objectCount;
-			construct(toExpand, arrayCount, objectCount, propertyObject, stream, property.first);
+			headerConstruct(toExpand, arrayCount, objectCount, propertyObject, stream, property.first);
 			--objectCount;
 		}
 	}
 
-	void ObjectSchemaDefinition::construct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ostringstream& stream, string depthName, bool newObject)
+	void ObjectSchemaDefinition::headerConstruct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anonymousName, bool newObject)
 	{
 		string type = obj->get("type");
 		if (isObject(type))
 		{
+			anonymousName += "Object";
 			if (objectCount || arrayCount)
 			{
-				toExpand.emplace_back(depthName, obj);
+				toExpand.emplace_back(anonymousName, obj);
 				if (arrayCount)
 				{
 					stream << toExpand.back()._name;
 				}
 				else
 				{
-					stream << tabs(1) << depthName << std::cendl;
+					stream << tabs(1) << depthName << cendl;
 				}
 			}
 			else
 			{
 				if (newObject)
 				{
-					stream << "struct " << depthName << "{" << std::endl;
-					construct_properties(toExpand, arrayCount, objectCount, obj, stream, depthName);
-					stream << "};" << std::endl;
+					ScopedStruct<0, ApiStreamBuffer> scopedStruct(stream, depthName);
+					headerConstructProperties(toExpand, arrayCount, objectCount, obj, stream, depthName, anonymousName);
 				}
 				else
 				{
-					construct_properties(toExpand, arrayCount, objectCount, obj, stream, depthName);
+					headerConstructProperties(toExpand, arrayCount, objectCount, obj, stream, depthName, anonymousName);
 				}
 			}
 		}
 		else if (isArray(type))
 		{
+			anonymousName += "Array";
 			JSON::Object::Ptr items = obj->getObject("items");
 			stream << "std::vector<";
 			++arrayCount;
-			construct(toExpand, arrayCount, objectCount, items, stream, depthName);
+			headerConstruct(toExpand, arrayCount, objectCount, items, stream, depthName, anonymousName);
 			--arrayCount;
 			stream << ">";
 			if (arrayCount == 0)
 			{
-				stream << tabs(1) << depthName << std::cendl;
+				stream << tabs(1) << depthName << cendl;
 			}
 		}
 		else
@@ -176,7 +219,7 @@ namespace trader {
 			}
 			if (arrayCount == 0)
 			{
-				stream << tabs(1) << depthName << std::cendl;
+				stream << tabs(1) << depthName <<cendl;
 			}
 		}
 	}
@@ -186,48 +229,18 @@ namespace trader {
 		header << "void read(Poco::Dynamic::Var::Ptr val)" << cendl;
 		header << endl;
 
-		ostringstream tempStreamMembers, tempStreamStructs;
+		ApiStreamBuffer tempStreamMembers(header),
+			tempStreamStructs(header);
 		std::vector<ExpansionPair> toExpand;
-		construct(toExpand, 0, 0, rootObj, tempStreamMembers, "data");
+		headerConstruct(toExpand, 0, 0, rootObj, tempStreamMembers, "data", "xyz");
 		while (toExpand.size()) {
 			ExpansionPair exPair = toExpand.front();
 			toExpand.erase(toExpand.begin());
-			construct(toExpand, 0, 0, exPair._obj, tempStreamStructs, exPair._name, true);
+			headerConstruct(toExpand, 0, 0, exPair._obj, tempStreamStructs, exPair._name, "xxx", true);
 		};
 
-		header << tempStreamStructs.str();
-		header << tempStreamMembers.str();
-		/*
-		vector<string> propertyNames;
-		rootObj->getNames(propertyNames);
-		for (auto& it : propertyNames)
-		{
-			JSON::Object::Ptr propertyVal = rootObj->getObject(it);
-			string type = propertyVal->get("type");
-			const char* cppType = getCppType(type);
-			if (cppType)
-			{
-				header << cppType << tabs(1) << it << cendl;
-			}
-			else if (isArray(type))
-			{
-				JSON::Object::Ptr items = propertyVal->getObject("items");
-				string type = items->get("type");
-				const char* cppType = getCppType(type);
-				if (cppType)
-				{
-					header << "std::vector<" << cppType << "> " << tabs(1) << it << cendl;
-				}
-				else if (isArray(type))
-				{
-					JSON::Object::Ptr innerItems = items->getObject("items");
-					string type = innerItems->get("type");
-					const char* cppType = getCppType(type);
-					header << "std::vector<std::vector<" << cppType << ">> " << tabs(1) << it << cendl;
-				}
-			}
-		}
-		*/
+		header << tempStreamStructs.str() << endl;
+		header << tempStreamMembers.str() << endl;
 	}
 
 }

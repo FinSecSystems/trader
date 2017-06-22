@@ -17,7 +17,7 @@ namespace trader {
 	using namespace Poco;
 	using namespace std;
 
-	class Config;
+	struct Config;
 
 	struct EndPoint
 	{

@@ -101,6 +101,91 @@ namespace trader {
 		ostringstream tempStream;
 	};
 
+	class ApiStreamBuffer
+	{
+	public:
+
+		ApiStreamBuffer& operator++()
+		{
+			indentation++;
+			return *this;
+		}
+
+		ApiStreamBuffer& operator--()
+		{
+
+			poco_assert(indentation > 0);
+			indentation--;
+			return *this;
+		}
+
+		ApiStreamBuffer(ApiFileOutputStream& fileStream)
+		{
+			indentation = fileStream.indentation;
+		}
+
+		class tabs
+		{
+			size_t _n;
+		public:
+			explicit tabs(size_t n) : _n(n) {}
+			size_t getn() const { return _n; }
+			friend std::ostream& operator<<(ostream& os, const tabs& obj)
+			{
+				size_t n = obj.getn();
+				for (size_t i = 0; i < n; ++i)
+					os << "\t";
+				return os;
+			}
+		};
+
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const char* text)
+		{
+			os.tempStream << text;
+			return os;
+		}
+
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, string& str)
+		{
+			os.tempStream << str;
+			return os;
+		}
+
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const string& str)
+		{
+			os.tempStream << str;
+			return os;
+		}
+
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, ApiStreamBuffer& (*_Pfn)(ApiStreamBuffer&))
+		{
+			return ((*_Pfn)(os));
+		}
+
+		friend ApiStreamBuffer & endl(ApiStreamBuffer & os)
+		{
+			os.tempStream << std::endl;
+			os.tempStream << tabs(os.indentation);
+			return os;
+		}
+
+		friend ApiStreamBuffer & cendl(ApiStreamBuffer & os)
+		{
+			os.tempStream << ";";
+			os.tempStream << std::endl;
+			os.tempStream << tabs(os.indentation);
+			return os;
+		}
+
+		std::string str()
+		{
+			return tempStream.str();
+		}
+
+		Int32 indentation;
+		ostringstream tempStream;
+	};
+
 	class tabs
 	{
 		size_t _n;
@@ -108,6 +193,13 @@ namespace trader {
 		explicit tabs(size_t n) : _n(n) {}
 		size_t getn() const { return _n; }
 		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const tabs& obj)
+		{
+			size_t n = obj.getn();
+			for (size_t i = 0; i < n; ++i)
+				os.tempStream << "\t";
+			return os;
+		}
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const tabs& obj)
 		{
 			size_t n = obj.getn();
 			for (size_t i = 0; i < n; ++i)
@@ -126,7 +218,7 @@ namespace trader {
 }
 
 namespace std {
-	ostringstream & cendl(ostringstream & os)
+	inline ostringstream & cendl(ostringstream & os)
 	{
 		os << std::endl;
 		os << ";";

@@ -4,7 +4,6 @@
 #include "fileoutputstream.h"
 #include "config.h"
 
-
 namespace trader {
 
 	using Poco::Util::Application;
@@ -55,6 +54,7 @@ namespace trader {
 		ApiFileOutputStream& _stream;
 	};
 
+	template<class StreamType = ApiFileOutputStream>
 	class ScopedStream
 	{
 	public:
@@ -64,7 +64,7 @@ namespace trader {
 			DEC
 		};
 
-		ScopedStream(ApiFileOutputStream& stream, bool brackets = true, IndentType indent = INC)
+		ScopedStream(StreamType& stream, bool brackets = true, IndentType indent = INC)
 			: _stream(stream)
 			, _indent(indent)
 			, _brackets(brackets)
@@ -80,17 +80,17 @@ namespace trader {
 		}
 
 		IndentType _indent;
-		ApiFileOutputStream& _stream;
+		StreamType& _stream;
 		bool _brackets;
 	};
 
-	template<size_t N> class ScopedClass
+	template<size_t N, class StreamType = ApiFileOutputStream> class ScopedClass
 	{
 		array<const char*, N> parentClasses;
 	public:
 		template <typename ...T,
 			typename enable_if<sizeof...(T) == N, int>::type = 0>
-		ScopedClass(ApiFileOutputStream& stream, const string& className, T ...args) :
+		ScopedClass(StreamType& stream, const string& className, T ...args) :
 			_className(className),
 			_stream(stream),
 			parentClasses{args...}
@@ -110,7 +110,7 @@ namespace trader {
 
 			//public section 
 			{
-				ScopedStream scoped(stream, false, ScopedStream::DEC);
+				ScopedStream<StreamType> scoped(stream, false, ScopedStream::DEC);
 				stream << "public:" << endl;
 			}
 			//declare constructor
@@ -136,19 +136,19 @@ namespace trader {
 		}
 
 	private:
-		ApiFileOutputStream& _stream;
+		StreamType& _stream;
 		const string& _className;
 	};
 
-	template<size_t N> class ScopedStruct
+	template<size_t N, class StreamType = ApiFileOutputStream> class ScopedStruct
 	{
 		array<const char*, N> parentClasses;
 	public:
 		template <typename ...T,
 			typename enable_if<sizeof...(T) == N, int>::type = 0>
-			ScopedStruct(ApiFileOutputStream& stream, const string& className, T ...args) :
+			ScopedStruct(StreamType& stream, const string& className, T ...args) :
 			_className(className),
-			_stream(&stream),
+			_stream(stream),
 			parentClasses{ args... }
 		{
 			stream << "struct " << className;
@@ -178,7 +178,7 @@ namespace trader {
 		}
 
 	private:
-		ApiFileOutputStream* _stream;
+		StreamType& _stream;
 		const string& _className;
 	};
 	
@@ -215,7 +215,7 @@ namespace trader {
 	{
 		cpp << className << "::" << className << "() ";
 		{
-			ScopedStream scope(cpp);
+			ScopedStream<ApiFileOutputStream> scope(cpp);
 			va_list arguments;
 			va_start(arguments, num);
 			poco_assert(num % 2 == 0);
@@ -229,7 +229,7 @@ namespace trader {
 		cpp << endl;
 		cpp << className << "::~" << className << "() ";
 		{
-			ScopedStream scope(cpp);
+			ScopedStream<ApiFileOutputStream> scope(cpp);
 		}
 		cpp << endl;
 	}
