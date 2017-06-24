@@ -70,6 +70,12 @@ namespace trader {
 			return os;
 		}
 
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const Int32& num)
+		{
+			os.tempStream << num;
+			return os;
+		}
+
 		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, ApiFileOutputStream& (*_Pfn)(ApiFileOutputStream&))
 		{
 			return ((*_Pfn)(os));

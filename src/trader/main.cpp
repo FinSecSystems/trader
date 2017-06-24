@@ -121,7 +121,7 @@ protected:
             fyb.login(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
             //Poco::AutoPtr<trader::TickerDetailedData> tickerDetailedData = fyb.GetTickerDetailed();
             //std::cout << tickerDetailedData->ask << std::endl;
-			Poco::AutoPtr<trader::OrderBookData> orderBookData = fyb.GetOrderBook();
+			Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
 			//std::cout << tickerDetailedData->ask << std::endl;
         }
         catch (Poco::Exception& exc)
