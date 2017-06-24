@@ -116,7 +116,7 @@
 		kind        "ConsoleApp"
 		includedirs {
             "src/codegen",
-            "deps/task_scheduler/include",
+            "deps/TaskScheduler/include",
             "deps/intel_se_api/ittnotify/include",
             "deps/poco/Net/include",
             "deps/poco/NetSSL_Win/include",
@@ -144,6 +144,7 @@
 			"src/codegen/**.h", "src/codegen/**.cpp",
 			"include/**.h",
 			"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
+			"deps/TaskScheduler/include/**.h",
             "deps/poco/Crypto/include/**.h", "deps/poco/Crypto/src/**.cpp",
             "deps/poco/Foundation/include/**.h", "deps/poco/Foundation/src/**.cpp",
             "deps/poco/JSON/include/**.h", "deps/poco/JSON/src/**.cpp",
@@ -220,7 +221,7 @@
             }
 		includedirs {
             "src",
-            "deps/task_scheduler/include",
+            "deps/TaskScheduler/include",
             "deps/intel_se_api/ittnotify/include",
             "deps/poco/Net/include",
             "deps/poco/NetSSL_Win/include",
@@ -244,6 +245,7 @@
 			"src/trader/**.h", "src/trader/**.cpp",
 			"include/**.h",
 			"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
+			"deps/TaskScheduler/include/**.h",
             "deps/poco/Crypto/include/**.h", "deps/poco/Crypto/src/**.cpp",
             "deps/poco/Foundation/include/**.h", "deps/poco/Foundation/src/**.cpp",
             "deps/poco/JSON/include/**.h", "deps/poco/JSON/src/**.cpp",

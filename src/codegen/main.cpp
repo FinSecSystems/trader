@@ -2,7 +2,7 @@
 
 #include "endpoint.h"
 #include "fileoutputstream.h"
-#include "utils.h"
+#include "helpers.h"
 #include "objectschemadefinition.h"
 #include "config.h"
 
@@ -62,22 +62,26 @@ namespace trader {
 
 		void handleHelp(const string& name, const string& value)
 		{
+			(void)value; (void)name;
 			displayHelp();
 			stopOptionsProcessing();
 		}
 
 		void handleInputDir(const string& name, const string& value)
 		{
+			(void)name;
 			_inputDir = value;
 		}
 
 		void handleOutputDir(const string& name, const string& value)
 		{
+			(void)name;
 			_outputDir = value;
 		}
 
 		void handleNamespace(const string& name, const string& value)
 		{
+			(void)name;
 			_namespace = value;
 		}
 
@@ -95,8 +99,6 @@ namespace trader {
 			ostringstream ostr;
 			FileInputStream fis(apiFile);
 			StreamCopier::copyStream(fis, ostr);
-
-			UInt32 headerIdent = 0;
 
 			JSON::Parser parser;
 			Dynamic::Var result = parser.parse(ostr.str());
@@ -217,6 +219,7 @@ namespace trader {
 
 		int main(const std::vector<string>& args)
 		{
+			(void)args;
 			try
 			{
 				if (_inputDir.empty())

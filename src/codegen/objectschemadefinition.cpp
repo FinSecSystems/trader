@@ -3,7 +3,7 @@
 #include "config.h"
 #include "fileoutputstream.h"
 #include "endpoint.h"
-#include "utils.h"
+#include "helpers.h"
 #include "objectschemadefinition.h"
 
 using Poco::Util::Application;
@@ -57,12 +57,14 @@ namespace trader {
 	}
 
 
-	void ObjectSchemaDefinition::cppConstruct(UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anonymousName)
+	void ObjectSchemaDefinition::cppConstruct(UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiFileOutputStream& stream, string depthName, string anonymousName)
 	{
 		string type = obj->get("type");
 		if (isObject(type))
 		{
+			anonymousName += "Object";
 			JSON::Object::Ptr properties = obj->getObject("properties");
+			stream << "Poco::JSON::Object::Ptr obj = val->extract<Poco::JSON::Object::Ptr>()" << cendl;
 			for (auto& property : *properties)
 			{
 				JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
@@ -73,20 +75,34 @@ namespace trader {
 		}
 		else if (isArray(type))
 		{
+			anonymousName += "Array";
 			JSON::Object::Ptr items = obj->getObject("items");
-			stream << "JSON::Array::Ptr " << depthName << "Array = val->getArray(\"" << depthName << "\")" << cendl;
-			stream << "for (UInt32 idx = 0; idx < " << depthName << "Array->size(); ++idx)" << endl;
+			stream << "Poco::JSON::Array::Ptr obj = val->extract<Poco::JSON::Array::Ptr>()" << cendl;
+			stream << "for (Poco::JSON::Array::Iterator it = obj->begin(); it != obj->end(); ++it)" << endl;
 			{
-				ScopedStream<ApiStreamBuffer> scopedStream(stream);
+				ScopedStream<ApiFileOutputStream> scopedStream(stream);
+				stream << ".emplace_back()";
 				++arrayCount;
-				headerConstruct(toExpand, arrayCount, objectCount, items, stream, depthName, anonymousName);
+				cppConstruct(arrayCount, objectCount, items, stream, depthName, anonymousName);
 				--arrayCount;
 				stream << depthName << ".push_back(" << depthName << "Array->getElement<>(idx))" << cendl;
 			}
+
+			/*		Poco::JSON::Array::Ptr obj = val->extract<Poco::JSON::Array::Ptr>();
+		for (Poco::JSON::Array::Iterator it = obj->begin(); it != obj->end(); ++it)
+		{
+			data.emplace_back();
+			ArrayObject& arrayObject = data.back();
+			Poco::JSON::Object::Ptr obj = it->extract<Poco::JSON::Object::Ptr>();
+			arrayObject.amount = obj->getValue<double>("amount");
+			arrayObject.date = obj->getValue<Poco::Int32>("date");
+			arrayObject.price = obj->getValue<double>("price");
+			arrayObject.tid = obj->getValue<Poco::Int32>("tid");
+		}*/
 		}
 		else
 		{
-			stream << depthName << " = val->getValue<" << getCppType(type) << ">(\"" << depthName << "\")" << cendl;
+			stream << depthName << " = obj->getValue<" << getCppType(type) << ">(\"" << depthName << "\")" << cendl;
 		}
 	}
 
@@ -96,7 +112,7 @@ namespace trader {
 		cpp << "void " << name << "::read(Poco::Dynamic::Var::Ptr val) ";
 		{
 			ScopedStream<ApiFileOutputStream> scopedStream(cpp);
-
+			cppConstruct(0, 0, rootObj, cpp, "data", "");
 		}
 		
 		/*
@@ -160,7 +176,7 @@ namespace trader {
 		{
 			JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
 			++objectCount;
-			headerConstruct(toExpand, arrayCount, objectCount, propertyObject, stream, property.first);
+			headerConstruct(toExpand, arrayCount, objectCount, propertyObject, stream, property.first, anoymousName);
 			--objectCount;
 		}
 	}
@@ -232,7 +248,7 @@ namespace trader {
 		ApiStreamBuffer tempStreamMembers(header),
 			tempStreamStructs(header);
 		std::vector<ExpansionPair> toExpand;
-		headerConstruct(toExpand, 0, 0, rootObj, tempStreamMembers, "data", "xyz");
+		headerConstruct(toExpand, 0, 0, rootObj, tempStreamMembers, "data", "");
 		while (toExpand.size()) {
 			ExpansionPair exPair = toExpand.front();
 			toExpand.erase(toExpand.begin());
