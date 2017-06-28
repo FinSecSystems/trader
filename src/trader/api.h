@@ -25,7 +25,7 @@ public:
 		/// Specifies the OAuth authentication information used in all API calls.
 		
 
-	virtual Poco::Dynamic::Var::Ptr invoke(const std::string& httpMethod, const std::string& method, Poco::Net::HTMLForm* params = nullptr);
+	virtual Poco::Dynamic::Var invoke(const std::string& httpMethod, const std::string& method, Poco::Net::HTMLForm* params = nullptr);
 		/// Invokes the given method of the Twitter API, using the parameters
 		/// given in the Poco::Net::HTMLForm object. httpMethod must be GET or POST,
 		/// according to the Twitter API documentation.

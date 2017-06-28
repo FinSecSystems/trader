@@ -74,7 +74,7 @@ namespace trader {
 				pref.clear();
 				pref << "obj" << objIndex + 1;
 			}
-			stream << "Poco::JSON::Object::Ptr obj" << objIndex+2 << " = obj" << objIndex << "->extract<Poco::JSON::Object::Ptr>()" << cendl;
+			stream << "Poco::JSON::Object::Ptr obj" << objIndex+2 << " = obj" << objIndex << ".extract<Poco::JSON::Object::Ptr>()" << cendl;
 			for (auto& property : *properties)
 			{
 				JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
@@ -83,7 +83,7 @@ namespace trader {
 				{
 					{
 						ScopedStream<ApiFileOutputStream> scopedStream(stream);
-						stream << "Poco::Dynamic::Var::Ptr obj" << objIndex + 3 << " = obj" << objIndex + 2 << "->get(\"" << property.first << "\")" << cendl;
+						stream << "Poco::Dynamic::Var obj" << objIndex + 3 << " = obj" << objIndex + 2 << "->get(\"" << property.first << "\")" << cendl;
 						cppConstruct(arrayCount, objectCount, propertyObject, stream, property.first, anonymousName, objIndex + 3, pref.str(), useTemp);
 					}
 				}
@@ -102,7 +102,7 @@ namespace trader {
 			obj1 << "obj" << objIndex;
 			obj2 << "obj" << objIndex + 1;
 			obj3 << "obj" << objIndex + 2;
-			stream << "Poco::JSON::Array::Ptr " << obj2.str() << " = " << obj1.str() << "->extract<Poco::JSON::Array::Ptr>()" << cendl;
+			stream << "Poco::JSON::Array::Ptr " << obj2.str() << " = " << obj1.str() << ".extract<Poco::JSON::Array::Ptr>()" << cendl;
 			if (arrayCount)
 			{
 				useTemp = true;
@@ -147,7 +147,7 @@ namespace trader {
 
 	void ObjectSchemaDefinition::writeCpp(ApiFileOutputStream& cpp)
 	{
-		cpp << "void " << name << "::read(Poco::Dynamic::Var::Ptr obj0) ";
+		cpp << "void " << name << "::read(Poco::Dynamic::Var obj0) ";
 		{
 			ScopedStream<ApiFileOutputStream> scopedStream(cpp);
 			cppConstruct(0, 0, rootObj, cpp, "data", "", 0, "", false);
@@ -280,7 +280,7 @@ namespace trader {
 
 	void ObjectSchemaDefinition::writeHeader(ApiFileOutputStream& header)
 	{
-		header << "void read(Poco::Dynamic::Var::Ptr val)" << cendl;
+		header << "void read(Poco::Dynamic::Var val)" << cendl;
 		header << endl;
 
 		ApiStreamBuffer tempStreamMembers(header),

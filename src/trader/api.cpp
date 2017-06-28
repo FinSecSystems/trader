@@ -43,7 +43,7 @@ void Api::login(const std::string& consumerKey, const std::string& consumerSecre
 }
 
 
-Poco::Dynamic::Var::Ptr  Api::invoke(const std::string& httpMethod, const std::string& ApiMethod, Poco::Net::HTMLForm* form)
+Poco::Dynamic::Var  Api::invoke(const std::string& httpMethod, const std::string& ApiMethod, Poco::Net::HTMLForm* form)
 {
 	// Create the request URI.
 	// We use the JSON version of the Fyb API.
@@ -75,7 +75,7 @@ Poco::Dynamic::Var::Ptr  Api::invoke(const std::string& httpMethod, const std::s
 
 	Poco::JSON::Parser parser;
 	parser.parse(rs);
-	Poco::Dynamic::Var::Ptr result = parser.result();
+	Poco::Dynamic::Var result = parser.result();
 	//Poco::JSON::Object::Ptr obj = result.extract<Poco::JSON::Object::Ptr>();
 
 	// If everything went fine, return the JSON document.

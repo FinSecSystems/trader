@@ -47,7 +47,7 @@ namespace trader {
 		{
 			ScopedStream<ApiFileOutputStream> stream(cpp);
 			cpp << "Poco::AutoPtr<" << responseSchemaName << "> retVal = new " << responseSchemaName << "()" << cendl;
-			cpp << "Poco::JSON::Object::Ptr pResult = invoke(Poco::Net::HTTPRequest::";
+			cpp << "Poco::Dynamic::Var pResult = invoke(Poco::Net::HTTPRequest::";
 			if (method == GET) cpp << "HTTP_GET"; else cpp << "HTTP_POST";
 			cpp << ", \"" << url << "\")";
 			cpp << cendl;
