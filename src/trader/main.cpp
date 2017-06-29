@@ -75,33 +75,40 @@ protected:
 
     void handleHelp(const std::string& name, const std::string& value)
     {
+		(void)name;
+		(void)value;
         displayHelp();
         stopOptionsProcessing();
     }
 
     void handleConsumerKey(const std::string& name, const std::string& value)
     {
-        _consumerKey = value;
+		(void)name;
+		_consumerKey = value;
     }
 
     void handleConsumerSecret(const std::string& name, const std::string& value)
     {
+		(void)name;
         _consumerSecret = value;
     }
 
     void handleAccessToken(const std::string& name, const std::string& value)
     {
-        _accessToken = value;
+		(void)name;
+		_accessToken = value;
     }
 
     void handleAccessTokenSecret(const std::string& name, const std::string& value)
     {
-        _accessTokenSecret = value;
+		(void)name;
+		_accessTokenSecret = value;
     }
 
     void handleMessage(const std::string& name, const std::string& value)
     {
-        _message = value;
+		(void)name;
+		_message = value;
     }
 
     void displayHelp()
@@ -115,13 +122,14 @@ protected:
 
     int main(const std::vector<std::string>& args)
     {
+		(void)args;
         try
         {
             trader::fyb fyb;
             fyb.login(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
-            //Poco::AutoPtr<trader::TickerDetailedData> tickerDetailedData = fyb.GetTickerDetailed();
+            Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
             //std::cout << tickerDetailedData->ask << std::endl;
-			Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
+			//Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
 			//std::cout << tickerDetailedData->ask << std::endl;
         }
         catch (Poco::Exception& exc)

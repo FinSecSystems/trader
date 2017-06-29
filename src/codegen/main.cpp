@@ -143,10 +143,7 @@ namespace trader {
 			ApiFileOutputStream header(config.headerFileName);
 			ApiFileOutputStream cpp(config.cppFileName);
 
-			startHeader(header, 4,
-				"Poco/Net/HTMLForm.h",
-				"Poco/Util/AbstractConfiguration.h",
-				"Poco/AutoPtr.h",
+			startHeader(header, 1,
 				"trader/Api.h");
 			{
 				ScopedNamespace scopedNamesapce(header, config.nameSpace);
@@ -167,15 +164,7 @@ namespace trader {
 				}
 			}
 
-			startCpp(cpp, 9,
-				"Poco/Net/HTTPSClientSession.h",
-				"Poco/Net/HTTPRequest.h",
-				"Poco/Net/HTTPResponse.h",
-				"Poco/Net/OAuth10Credentials.h",
-				"Poco/Util/JSONConfiguration.h",
-				"Poco/URI.h",
-				"Poco/Format.h",
-				"Poco/StreamCopier.h",
+			startCpp(cpp, 1,
 				config.headerFileName.c_str()
 			);
 			{

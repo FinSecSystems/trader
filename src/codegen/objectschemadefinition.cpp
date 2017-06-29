@@ -75,23 +75,18 @@ namespace trader {
 				pref << "obj" << objIndex + 1;
 			}
 			stream << "Poco::JSON::Object::Ptr obj" << objIndex+2 << " = obj" << objIndex << ".extract<Poco::JSON::Object::Ptr>()" << cendl;
+			UInt32 nextIdx = 3;
 			for (auto& property : *properties)
 			{
 				JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
 				++objectCount;
-				if (isArray(propertyObject->get("type")))
 				{
-					{
-						ScopedStream<ApiFileOutputStream> scopedStream(stream);
-						stream << "Poco::Dynamic::Var obj" << objIndex + 3 << " = obj" << objIndex + 2 << "->get(\"" << property.first << "\")" << cendl;
-						cppConstruct(arrayCount, objectCount, propertyObject, stream, property.first, anonymousName, objIndex + 3, pref.str(), useTemp);
-					}
-				}
-				else
-				{
-					cppConstruct(arrayCount, objectCount, propertyObject, stream, property.first, anonymousName, objIndex + 2, pref.str(), useTemp);
+					ScopedStream<ApiFileOutputStream> scopedStream(stream);
+					stream << "Poco::Dynamic::Var obj" << objIndex + nextIdx << " = obj" << objIndex + 2 << "->get(\"" << property.first << "\")" << cendl;
+					cppConstruct(arrayCount, objectCount, propertyObject, stream, property.first, anonymousName, objIndex + nextIdx, pref.str(), useTemp);
 				}
 				--objectCount;
+				nextIdx++;
 			}
 		}
 		else if (isArray(type))
@@ -102,6 +97,7 @@ namespace trader {
 			obj1 << "obj" << objIndex;
 			obj2 << "obj" << objIndex + 1;
 			obj3 << "obj" << objIndex + 2;
+			obj4 << "obj" << objIndex + 3;
 			stream << "Poco::JSON::Array::Ptr " << obj2.str() << " = " << obj1.str() << ".extract<Poco::JSON::Array::Ptr>()" << cendl;
 			if (arrayCount)
 			{
@@ -111,8 +107,9 @@ namespace trader {
 			stream << "for (Poco::JSON::Array::ConstIterator " << obj3.str() << " = " << obj2.str() << "->begin(); " << obj3.str() << " != " << obj2.str() << "->end(); ++" << obj3.str() << ")" << endl;
 			{
 				ScopedStream<ApiFileOutputStream> scopedStream(stream);
+				stream << "Poco::Dynamic::Var " << obj4.str() << " = *" << obj3.str() << cendl;
 				++arrayCount;
-				cppConstruct(arrayCount, objectCount, items, stream, depthName, anonymousName, objIndex+2, prefix, useTemp);
+				cppConstruct(arrayCount, objectCount, items, stream, depthName, anonymousName, objIndex+3, prefix, useTemp);
 				--arrayCount;
 				if (arrayCount)
 				{
@@ -122,7 +119,7 @@ namespace trader {
 				{
 					if (isArray(items->get("type")))
 					{
-						stream << depthName << ".push_back(obj" << objIndex + 13 << ")" << cendl;
+						stream << depthName << ".push_back(obj" << objIndex + 14 << ")" << cendl;
 					}
 				}
 			}
@@ -135,11 +132,11 @@ namespace trader {
 			}
 			if (useTemp)
 			{
-				stream << getCppType(type) << " tmp = obj" << objIndex << "->extract<" << getCppType(type) << ">()" << cendl;
+				stream << getCppType(type) << " tmp = obj" << objIndex << ".convert<" << getCppType(type) << ">()" << cendl;
 			}
 			else
 			{
-				stream << depthName << " = obj" << objIndex << "->getValue<" << getCppType(type) << ">(\"" << depthName << "\")" << cendl;
+				stream << depthName << " = obj" << objIndex << ".convert<" << getCppType(type) << ">()" << cendl;
 			}
 		}
 	}

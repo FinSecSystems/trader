@@ -1,15 +1,6 @@
 #pragma once
 
 
-#include "Poco/Poco.h"
-#include "Poco/Net/HTMLForm.h"
-#include "Poco/Util/AbstractConfiguration.h"
-#include "Poco/AutoPtr.h"
-#include "Poco/JSON/Parser.h"
-#include "Poco/JSON/ParseHandler.h"
-#include "Poco/JSON/JSONException.h"
-
-
 class Api
 	/// Base class for api
 	/// (see <http://http://docs.fyb.apiary.io/#> for more information).
