@@ -16,3 +16,6 @@
 [submodule "deps/TaskScheduler"]
 	path = deps/TaskScheduler
 	url = http://github.com/viknash/TaskScheduler.git
+[submodule "deps/poco"]
+	path = deps/poco
+	url = http://github.com/viknash/poco.git
