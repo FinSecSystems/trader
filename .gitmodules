@@ -1,6 +1,3 @@
-[submodule "deps/poco"]
-	path = deps/poco
-	url = https://github.com/viknash/poco.git
 [submodule "deps/intel_se_api"]
 	path = deps/intel_se_api
 	url = http://github.com/viknash/IntelSEAPI.git
@@ -19,3 +16,6 @@
 [submodule "deps/TaskScheduler"]
 	path = deps/TaskScheduler
 	url = http://github.com/viknash/TaskScheduler.git
+[submodule "deps/poco"]
+	path = deps/poco
+	url = http://github.com/viknash/poco.git
