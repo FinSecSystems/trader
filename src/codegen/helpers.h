@@ -161,6 +161,7 @@ namespace trader {
 				first = false;
 			}
 			stream << " {";
+			stream << endl;
 			++stream;
 			stream << endl;
 

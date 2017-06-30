@@ -150,57 +150,6 @@ namespace trader {
 			cppConstruct(0, 0, rootObj, cpp, "data", "", 0, "", false);
 		}
 		
-		/*
-		cpp << "void " << name << "::read(Poco::Dynamic::Var::Ptr val) ";
-		{
-			ScopedStream stream(cpp);
-			std::vector<string> propertyNames;
-			rootObj->getNames(propertyNames);
-			for (auto& propertyName : propertyNames)
-			{
-				JSON::Object::Ptr propertyVal = rootObj->getObject(propertyName);
-				string type = propertyVal->get("type");
-				const char* cppType = getCppType(type);
-				if (cppType)
-				{
-					cpp << propertyName << " = val->getValue<" << cppType << ">(\"" << propertyName << "\")" << cendl;
-				}
-				else if (isArray(type))
-				{
-					JSON::Object::Ptr items = propertyVal->getObject("items");
-					string type = items->get("type");
-					const char* cppType = getCppType(type);
-					if (cppType)
-					{
-						cpp << "JSON::Array::Ptr " << propertyName << "Array = val->getArray(\"" << propertyName << "\")" << cendl;
-						cpp << "for (UInt32 idx = 0; idx < " << propertyName << "Array->size(); ++idx)" << endl;
-						{
-							ScopedStream stream(cpp);
-							cpp << propertyName << ".push_back(" << propertyName << "Array->getElement<" << cppType << ">(idx))" << cendl;
-						}
-					}
-					else if (isArray(type))
-					{
-						JSON::Object::Ptr innerItems = items->getObject("items");
-						string type = innerItems->get("type");
-						const char* cppType = getCppType(type);
-						cpp << "JSON::Array::Ptr " << propertyName << "Array = val->getArray(\"" << propertyName << "\")" << cendl;
-						cpp << "for (UInt32 idx = 0; idx < " << propertyName << "Array->size(); ++idx)" << endl;
-						{
-							ScopedStream stream(cpp);
-							cpp << "JSON::Array::Ptr inner" << propertyName << "Array = " << propertyName << "Array->getArray(idx)" << cendl;
-							cpp << "std::vector<" << cppType << "> inner" << propertyName << cendl;
-							cpp << "for (UInt32 innerIdx = 0; innerIdx < inner" << propertyName << "Array->size(); ++innerIdx)" << endl;
-							{
-								ScopedStream stream(cpp);
-								cpp << "inner" << propertyName << ".push_back(inner" << propertyName << "Array->getElement<" << cppType << ">(innerIdx))" << cendl;
-							}
-							cpp << propertyName << ".push_back(inner" << propertyName << ")" << cendl;							}
-					}
-				}
-			}
-		}
-		*/
 		cpp << endl;
 	}
 
@@ -275,8 +224,62 @@ namespace trader {
 		}
 	}
 
+	void ObjectSchemaDefinition::header_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool useAsType)
+	{
+		string type = obj->get("type");
+		if (isObject(type))
+		{
+			expandedName += "Object";
+			JSON::Object::Ptr properties = obj->getObject("properties");
+			{
+				ScopedStruct<0, ApiFileOutputStream> scopedStream(stream, expandedName);
+				for (auto& property : *properties)
+				{
+					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
+					header_construct(propertyObject, stream, expandedName, property.first, false);
+				}
+			}
+			if (useAsType)
+			{
+				stream << "typedef " << expandedName << tabs(1) << type_name(keyName) << cendl;
+			}
+			else
+			{
+				stream << type_name(expandedName) << tabs(1) << var_name(expandedName) << cendl;
+			}
+		}
+		else if (isArray(type))
+		{
+			expandedName += "Array";
+			JSON::Object::Ptr itemObj = obj->getObject("items");
+			header_construct(itemObj, stream, expandedName, expandedName, true);
+			stream << "typedef std::vector<" << expandedName << "> " << type_name(keyName) << cendl;
+			if (!useAsType)
+			{
+				stream << type_name(keyName) << tabs(1) << var_name(keyName) << cendl;
+			}
+		}
+		else
+		{
+			const char* cppType = getCppType(type);
+			if (cppType)
+			{
+				if (useAsType)
+				{
+					stream << "typedef " << getCppType(type) << tabs(1) << type_name(keyName) << cendl;
+				}
+				else
+				{
+					stream << getCppType(type) << tabs(1) << var_name(keyName) << cendl;
+				}
+
+			}
+		}
+	}
+
 	void ObjectSchemaDefinition::writeHeader(ApiFileOutputStream& header)
 	{
+		/*
 		header << "void read(Poco::Dynamic::Var val)" << cendl;
 		header << endl;
 
@@ -292,6 +295,12 @@ namespace trader {
 
 		header << tempStreamStructs.str() << endl;
 		header << tempStreamMembers.str() << endl;
+		*/
+
+		header << "void read(Poco::Dynamic::Var val)" << cendl;
+		header << endl;
+
+		header_construct(rootObj, header, "", "data", false);
 	}
 
 }

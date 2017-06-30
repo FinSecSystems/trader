@@ -221,6 +221,38 @@ namespace trader {
 		}
 	};
 
+	class var_name
+	{
+		std::string& _str;
+	public:
+		explicit var_name(std::string& str) : _str(str) {}
+		string& getstr() const { return _str; }
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const var_name& obj)
+		{
+			string newStr = obj.getstr();
+			if (newStr.length())
+				std::transform(newStr.begin(), newStr.begin()+1, newStr.begin(), ::tolower);
+			os.tempStream << newStr;
+			return os;
+		}
+	};
+
+	class type_name
+	{
+		std::string& _str;
+	public:
+		explicit type_name(std::string& str) : _str(str) {}
+		string& getstr() const { return _str; }
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const type_name& obj)
+		{
+			string newStr = obj.getstr();
+			if (newStr.length())
+				std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::toupper);
+			os.tempStream << newStr;
+			return os;
+		}
+	};
+
 }
 
 namespace std {
