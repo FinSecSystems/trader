@@ -115,7 +115,7 @@ namespace trader {
 			config.cppFileName = _outputDir + Path::separator() + config.apiName + ".cpp";
 		
 			JSON::Object::Ptr definitions = api->getObject("definitions");
-			map<string, ObjectSchemaDefinition> schemaDefinitions;
+			
 			vector<string> definitionNames;
 			definitions->getNames(definitionNames);
 			for (auto& it : definitionNames)
@@ -126,7 +126,7 @@ namespace trader {
 				def.read(definition);
 				def.name = it;
 				string key = "#/definitions/" + it;
-				schemaDefinitions.insert(std::pair<string, ObjectSchemaDefinition>(key, def));
+				config.schemaDefinitions.insert(std::pair<string, ObjectSchemaDefinition>(key, def));
 			}
 
 			JSON::Array::Ptr methods = api->getArray("links");
@@ -147,7 +147,7 @@ namespace trader {
 				"trader/Api.h");
 			{
 				ScopedNamespace scopedNamesapce(header, config.nameSpace);
-				for (auto& schemaDefinition : schemaDefinitions)
+				for (auto& schemaDefinition : config.schemaDefinitions)
 				{
 					ObjectSchemaDefinition& def = schemaDefinition.second;
 					{
@@ -169,7 +169,7 @@ namespace trader {
 			);
 			{
 				ScopedNamespace scopedNamesapce(cpp, config.nameSpace);
-				for (auto& schemaDefinition : schemaDefinitions)
+				for (auto& schemaDefinition : config.schemaDefinitions)
 				{
 					ObjectSchemaDefinition& def = schemaDefinition.second;
 					construct(cpp, def.name, 0);

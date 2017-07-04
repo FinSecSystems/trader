@@ -47,10 +47,10 @@ Poco::Dynamic::Var  Api::invoke(const std::string& httpMethod, const std::string
 {
 	// Create the request URI.
 	// We use the JSON version of the Fyb API.
-	Poco::URI uri(_uri + ApiMethod );
+ 	Poco::URI uri(_uri + ApiMethod );
 	
 	Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort());
-	Poco::Net::HTTPRequest req(httpMethod, uri.getPath(), Poco::Net::HTTPMessage::HTTP_1_1);
+	Poco::Net::HTTPRequest req(httpMethod, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);
 	
 	// Sign request
     if (form)

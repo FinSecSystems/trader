@@ -26,7 +26,7 @@ namespace trader {
 			GET
 		};
 
-		EndPoint(const Config& config)
+		EndPoint(Config& config)
 			:_config(config)
 		{}
 
@@ -39,7 +39,8 @@ namespace trader {
 		string description;
 		string name;
 		string responseSchemaName;
-		const Config& _config;
+		string inputSchemaName;
+		Config& _config;
 	};
 }
 

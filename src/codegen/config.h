@@ -23,6 +23,8 @@ namespace trader {
 		string apiName;
 		string headerFileName;
 		string cppFileName;
+		typedef std::map<string, ObjectSchemaDefinition> SchemaDefMap;
+		SchemaDefMap schemaDefinitions;
 	};
 }
 

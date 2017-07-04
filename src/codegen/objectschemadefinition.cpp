@@ -56,98 +56,12 @@ namespace trader {
 		return false;
 	}
 
-
-	void ObjectSchemaDefinition::cppConstruct(UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiFileOutputStream& stream, string depthName, string anonymousName, UInt32 objIndex, string prefix, bool useTemp)
+	void ObjectSchemaDefinition::cpp_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, expansionstringstream expansionStream, string keyName, UInt32 idx, bool previousArray)
 	{
 		string type = obj->get("type");
 		if (isObject(type))
 		{
-			anonymousName += "Object";
-			JSON::Object::Ptr properties = obj->getObject("properties");
-			stringstream pref;
-			pref << prefix;
-			if (arrayCount)
-			{
-				stream << depthName << ".emplace_back()" << cendl;
-				stream << anonymousName << "& obj" << objIndex+1 << " = " << depthName << ".back()" << cendl;
-				pref.str("");
-				pref.clear();
-				pref << "obj" << objIndex + 1;
-			}
-			stream << "Poco::JSON::Object::Ptr obj" << objIndex+2 << " = obj" << objIndex << ".extract<Poco::JSON::Object::Ptr>()" << cendl;
-			UInt32 nextIdx = 3;
-			for (auto& property : *properties)
-			{
-				JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
-				++objectCount;
-				{
-					ScopedStream<ApiFileOutputStream> scopedStream(stream);
-					stream << "Poco::Dynamic::Var obj" << objIndex + nextIdx << " = obj" << objIndex + 2 << "->get(\"" << property.first << "\")" << cendl;
-					cppConstruct(arrayCount, objectCount, propertyObject, stream, property.first, anonymousName, objIndex + nextIdx, pref.str(), useTemp);
-				}
-				--objectCount;
-				nextIdx++;
-			}
-		}
-		else if (isArray(type))
-		{
-			anonymousName += "Array";
-			JSON::Object::Ptr items = obj->getObject("items");
-			stringstream obj1,obj2,obj3,obj4;
-			obj1 << "obj" << objIndex;
-			obj2 << "obj" << objIndex + 1;
-			obj3 << "obj" << objIndex + 2;
-			obj4 << "obj" << objIndex + 3;
-			stream << "Poco::JSON::Array::Ptr " << obj2.str() << " = " << obj1.str() << ".extract<Poco::JSON::Array::Ptr>()" << cendl;
-			if (arrayCount)
-			{
-				useTemp = true;
-				stream << "std::vector<" << getCppType(items->get("type")) << "> obj" << objIndex + 13 - 2 << cendl;
-			}
-			stream << "for (Poco::JSON::Array::ConstIterator " << obj3.str() << " = " << obj2.str() << "->begin(); " << obj3.str() << " != " << obj2.str() << "->end(); ++" << obj3.str() << ")" << endl;
-			{
-				ScopedStream<ApiFileOutputStream> scopedStream(stream);
-				stream << "Poco::Dynamic::Var " << obj4.str() << " = *" << obj3.str() << cendl;
-				++arrayCount;
-				cppConstruct(arrayCount, objectCount, items, stream, depthName, anonymousName, objIndex+3, prefix, useTemp);
-				--arrayCount;
-				if (arrayCount)
-				{
-					stream << "obj" << objIndex + 13 - 2 << ".push_back(tmp)" << cendl;
-				}
-				else
-				{
-					if (isArray(items->get("type")))
-					{
-						stream << depthName << ".push_back(obj" << objIndex + 14 << ")" << cendl;
-					}
-				}
-			}
-		}
-		else
-		{
-			if (prefix.length())
-			{
-				stream << prefix << ".";
-			}
-			if (useTemp)
-			{
-				stream << getCppType(type) << " tmp = obj" << objIndex << ".convert<" << getCppType(type) << ">()" << cendl;
-			}
-			else
-			{
-				stream << depthName << " = obj" << objIndex << ".convert<" << getCppType(type) << ">()" << cendl;
-			}
-		}
-	}
-
-
-	void ObjectSchemaDefinition::cpp_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, expansionstringstream expansionStream, string keyName, UInt32 idx, bool useAsType)
-	{
-		string type = obj->get("type");
-		if (isObject(type))
-		{
-			if (!useAsType)
+			if (!previousArray)
 			{
 				expansionStream << "Object";
 			}
@@ -168,7 +82,7 @@ namespace trader {
 		else if (isArray(type))
 		{
 			expansionstringstream previousexpansionStream(expansionStream);
-			if (!useAsType)
+			if (!previousArray)
 			{
 				ostringstream temp;
 				temp << "::" << type_name(keyName) << "Array";
@@ -178,24 +92,23 @@ namespace trader {
 			{
 				expansionStream << "Array";
 			}
-
 			JSON::Object::Ptr items = obj->getObject("items");
-			stream << expansionStream.type_name_str() << " " << expansionStream.var_name_str() << cendl;
 			stream << "Poco::JSON::Array::Ptr " << temp_name(idx+1) << " = " << temp_name(idx+0) << ".extract<Poco::JSON::Array::Ptr>()" << cendl;
 			stream << "for (Poco::JSON::Array::ConstIterator " << temp_name(idx+2) << " = " << temp_name(idx+1) << "->begin(); " << temp_name(idx+2) << " != " << temp_name(idx+1) << "->end(); ++" << temp_name(idx+2) << ")" << endl;
 			{
 				ScopedStream<ApiFileOutputStream> scopedStream(stream);
+				stream << expansionStream.type_name_str() << " " << expansionStream.var_name_str() << cendl;
 				stream << "Poco::Dynamic::Var " << temp_name(idx+3) << " = *" << temp_name(idx+2) << cendl;
 				cpp_construct(items, stream, expansionStream, keyName, idx+3, true);
-			}
-			if (useAsType)
-			{
-				stream << previousexpansionStream.var_name_str() << ".push_back(" << expansionStream.var_name_str() << ") " << cendl;
-			}
-			else
-			{
-				previousexpansionStream << keyName;
-				stream << previousexpansionStream.prefix_str() << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
+				if (previousArray)
+				{
+					stream << previousexpansionStream.var_name_str() << ".push_back(" << expansionStream.var_name_str() << ") " << cendl;
+				}
+				else
+				{
+					previousexpansionStream << keyName;
+					stream << previousexpansionStream.prefix_str() << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
+				}
 			}
 		}
 		else
@@ -203,7 +116,7 @@ namespace trader {
 			const char* cppType = getCppType(type);
 			if (cppType)
 			{
-				if (useAsType)
+				if (previousArray)
 				{
 					stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type) << ">()" << cendl;
 				}
@@ -220,22 +133,21 @@ namespace trader {
 		cpp << "void " << name << "::read(Poco::Dynamic::Var obj0) ";
 		{
 			ScopedStream<ApiFileOutputStream> scopedStream(cpp);
-			//cppConstruct(0, 0, rootObj, cpp, "data", "", 0, "", false);
 			expansionstringstream temp;
 			cpp_construct(rootObj, cpp, temp, "data", 0, false);
 		}
-		
+	
 		cpp << endl;
 	}
 
 
 
-	void ObjectSchemaDefinition::header_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool useAsType)
+	void ObjectSchemaDefinition::header_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray)
 	{
 		string type = obj->get("type");
 		if (isObject(type))
 		{
-			if (!useAsType)
+			if (!previousArray)
 			{
 				expandedName += "Object";
 			}
@@ -248,18 +160,14 @@ namespace trader {
 					header_construct(propertyObject, stream, expandedName, property.first, false);
 				}
 			}
-			if (useAsType)
-			{
-				//stream << "typedef " << expandedName << tabs(1) << type_name(keyName) << cendl;
-			}
-			else
+			if (!previousArray)
 			{
 				stream << type_name(expandedName) << tabs(1) << var_name(expandedName) << cendl;
 			}
 		}
 		else if (isArray(type))
 		{
-			if (!useAsType)
+			if (!previousArray)
 			{
 				ostringstream temp;
 				temp << type_name(keyName) << "Array";
@@ -272,7 +180,7 @@ namespace trader {
 			JSON::Object::Ptr itemObj = obj->getObject("items");
 			header_construct(itemObj, stream, expandedName, expandedName, true);
 			stream << "typedef std::vector<" << expandedName << "> " << type_name(keyName) << cendl;
-			if (!useAsType)
+			if (!previousArray)
 			{
 				stream << type_name(keyName) << tabs(1) << var_name(keyName) << cendl;
 			}
@@ -282,7 +190,7 @@ namespace trader {
 			const char* cppType = getCppType(type);
 			if (cppType)
 			{
-				if (useAsType)
+				if (previousArray)
 				{
 					stream << "typedef " << getCppType(type) << tabs(1) << type_name(keyName) << cendl;
 				}
@@ -297,97 +205,32 @@ namespace trader {
 
 	void ObjectSchemaDefinition::writeHeader(ApiFileOutputStream& header)
 	{
-		/*
-		header << "void read(Poco::Dynamic::Var val)" << cendl;
-		header << endl;
-
-		ApiStreamBuffer tempStreamMembers(header),
-			tempStreamStructs(header);
-		std::vector<ExpansionPair> toExpand;
-		headerConstruct(toExpand, 0, 0, rootObj, tempStreamMembers, "data", "");
-		while (toExpand.size()) {
-			ExpansionPair exPair = toExpand.front();
-			toExpand.erase(toExpand.begin());
-			headerConstruct(toExpand, 0, 0, exPair._obj, tempStreamStructs, exPair._name, "xxx", true);
-		};
-
-		header << tempStreamStructs.str() << endl;
-		header << tempStreamMembers.str() << endl;
-		*/
-
 		header << "void read(Poco::Dynamic::Var val)" << cendl;
 		header << endl;
 
 		header_construct(rootObj, header, "", "data", false);
 	}
 
-	void ObjectSchemaDefinition::headerConstructProperties(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anoymousName)
+	void ObjectSchemaDefinition::writeRestEncodedParams(ApiFileOutputStream& stream)
 	{
-		JSON::Object::Ptr properties = obj->getObject("properties");
-		for (auto& property : *properties)
-		{
-			JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
-			++objectCount;
-			headerConstruct(toExpand, arrayCount, objectCount, propertyObject, stream, property.first, anoymousName);
-			--objectCount;
-		}
-	}
-
-	void ObjectSchemaDefinition::headerConstruct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anonymousName, bool newObject)
-	{
-		string type = obj->get("type");
+		stream << "uri << \"?\"" << cendl;
+		string type = rootObj->get("type");
 		if (isObject(type))
 		{
-			anonymousName += "Object";
-			if (objectCount || arrayCount)
+			JSON::Object::Ptr properties = rootObj->getObject("properties");
 			{
-				toExpand.emplace_back(anonymousName, obj);
-				if (arrayCount)
+				bool first = true;
+				for (auto& property : *properties)
 				{
-					stream << toExpand.back()._name;
+					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
+					stream << "uri << ";
+					if (!first)
+					{
+						stream << " \";\" <<";
+					}
+					stream << "\"" << property.first << "=\" << " << var_name(name) << "->object." << property.first << cendl;
+					first = false;
 				}
-				else
-				{
-					stream << tabs(1) << depthName << cendl;
-				}
-			}
-			else
-			{
-				if (newObject)
-				{
-					ScopedStruct<0, ApiStreamBuffer> scopedStruct(stream, depthName);
-					headerConstructProperties(toExpand, arrayCount, objectCount, obj, stream, depthName, anonymousName);
-				}
-				else
-				{
-					headerConstructProperties(toExpand, arrayCount, objectCount, obj, stream, depthName, anonymousName);
-				}
-			}
-		}
-		else if (isArray(type))
-		{
-			anonymousName += "Array";
-			JSON::Object::Ptr items = obj->getObject("items");
-			stream << "std::vector<";
-			++arrayCount;
-			headerConstruct(toExpand, arrayCount, objectCount, items, stream, depthName, anonymousName);
-			--arrayCount;
-			stream << ">";
-			if (arrayCount == 0)
-			{
-				stream << tabs(1) << depthName << cendl;
-			}
-		}
-		else
-		{
-			const char* cppType = getCppType(type);
-			if (cppType)
-			{
-				stream << getCppType(type);
-			}
-			if (arrayCount == 0)
-			{
-				stream << tabs(1) << depthName << cendl;
 			}
 		}
 	}

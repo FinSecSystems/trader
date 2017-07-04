@@ -24,32 +24,16 @@ namespace trader {
 
 	struct ObjectSchemaDefinition
 	{
-		struct ExpansionPair
-		{
-			ExpansionPair(const std::string& name, JSON::Object::Ptr obj)
-				: _obj(obj)
-			{
-				static UInt32 count = 0;
-				stringstream str;
-				str << name;// << ++count;
-				_name = str.str();
-			}
-			JSON::Object::Ptr _obj;
-			std::string _name;
-		};
 
 		void read(JSON::Object::Ptr obj);
 		void writeCpp(ApiFileOutputStream& cpp);
 		void writeHeader(ApiFileOutputStream& cpp);
-		void headerConstruct(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anoymousName, bool newObject = false);
-		void headerConstructProperties(std::vector<ExpansionPair>& toExpand, UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiStreamBuffer& stream, string depthName, string anoymousName);
-		void cppConstruct(UInt32 arrayCount, UInt32 objectCount, JSON::Object::Ptr obj, ApiFileOutputStream& stream, string depthName, string anoymousName, UInt32 objIndex, string prefix, bool useTemp);
-		void header_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool useAsType);
-		void cpp_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, expansionstringstream expandedName, string keyName, UInt32 objIndex, bool useAsType);
+		void header_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray);
+		void cpp_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, expansionstringstream expandedName, string keyName, UInt32 objIndex, bool previousArray);
+		void writeRestEncodedParams(ApiFileOutputStream& cpp);
 
 		string name;
 		JSON::Object::Ptr rootObj;
-		vector<ExpansionPair> nameToObjectMap;
 	};
 
 }

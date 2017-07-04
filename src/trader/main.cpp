@@ -127,11 +127,14 @@ protected:
         {
             trader::fyb fyb;
             fyb.login(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
-            Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
+            //Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
             //std::cout << tickerDetailedData->ask << std::endl;
 			//Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
 			//std::cout << tickerDetailedData->ask << std::endl;
-        }
+			Poco::AutoPtr<trader::TradesInput> tradesInputData = new trader::TradesInput();
+			tradesInputData->object.tid = 2095573;
+			Poco::AutoPtr<trader::Trades> tradesData = fyb.GetTrades(tradesInputData);
+		}
         catch (Poco::Exception& exc)
         {
             std::cerr << exc.displayText() << std::endl;
