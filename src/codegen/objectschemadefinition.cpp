@@ -25,7 +25,7 @@ namespace trader {
 		rootObj = obj;
 	}
 
-	const char* getCppType(const string& jsonType)
+	const char* getCppType(const string& jsonType, JSON::Object::Ptr obj)
 	{
 		if (jsonType.compare("double") == 0)
 		{
@@ -33,7 +33,20 @@ namespace trader {
 		}
 		else if (jsonType.compare("int") == 0)
 		{
+			Poco::Dynamic::Var formatVar = obj->get("format");
+			if (!formatVar.isEmpty())
+			{
+				string format = formatVar.convert<string>();
+				if (format.compare("epochtime") == 0)
+				{
+					return "std::time_t";
+				}
+			}
 			return "Poco::Int32";
+		}
+		else if (jsonType.compare("string") == 0)
+		{
+			return "std::string";
 		}
 		return nullptr;
 	}
@@ -113,16 +126,16 @@ namespace trader {
 		}
 		else
 		{
-			const char* cppType = getCppType(type);
+			const char* cppType = getCppType(type, obj);
 			if (cppType)
 			{
 				if (previousArray)
 				{
-					stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type) << ">()" << cendl;
+					stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 				}
 				else
 				{
-					stream << expansionStream.prefix_str() << "." << keyName << " = " << temp_name(idx) << ".convert<" << getCppType(type) << ">()" << cendl;
+					stream << expansionStream.prefix_str() << "." << keyName << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 				}
 			}
 		}
@@ -187,16 +200,16 @@ namespace trader {
 		}
 		else
 		{
-			const char* cppType = getCppType(type);
+			const char* cppType = getCppType(type, obj);
 			if (cppType)
 			{
 				if (previousArray)
 				{
-					stream << "typedef " << getCppType(type) << tabs(1) << type_name(keyName) << cendl;
+					stream << "typedef " << getCppType(type, obj) << tabs(1) << type_name(keyName) << cendl;
 				}
 				else
 				{
-					stream << getCppType(type) << tabs(1) << var_name(keyName) << cendl;
+					stream << getCppType(type, obj) << tabs(1) << var_name(keyName) << cendl;
 				}
 
 			}
@@ -213,23 +226,19 @@ namespace trader {
 
 	void ObjectSchemaDefinition::writeRestEncodedParams(ApiFileOutputStream& stream)
 	{
-		stream << "uri << \"?\"" << cendl;
 		string type = rootObj->get("type");
 		if (isObject(type))
 		{
 			JSON::Object::Ptr properties = rootObj->getObject("properties");
 			{
-				bool first = true;
+				UInt32 count = 0;
 				for (auto& property : *properties)
 				{
 					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
-					stream << "uri << ";
-					if (!first)
-					{
-						stream << " \";\" <<";
-					}
-					stream << "\"" << property.first << "=\" << " << var_name(name) << "->object." << property.first << cendl;
-					first = false;
+					stream << "std::ostringstream var" << count << cendl;
+					stream << "var" << count << " << " << var_name(name) << "->object." << property.first << cendl;
+					stream << "uri.addQueryParameter(std::string(\"" << property.first << "\"), var" << count << ".str())" << cendl;
+					count++;
 				}
 			}
 		}

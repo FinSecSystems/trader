@@ -43,11 +43,11 @@ void Api::login(const std::string& consumerKey, const std::string& consumerSecre
 }
 
 
-Poco::Dynamic::Var  Api::invoke(const std::string& httpMethod, const std::string& ApiMethod, Poco::Net::HTMLForm* form)
+Poco::Dynamic::Var  Api::invoke(const std::string& httpMethod, const Poco::URI& uri, Poco::Net::HTMLForm* form)
 {
 	// Create the request URI.
 	// We use the JSON version of the Fyb API.
- 	Poco::URI uri(_uri + ApiMethod );
+ 	//Poco::URI uri(_uri + ApiMethod );
 	
 	Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort());
 	Poco::Net::HTTPRequest req(httpMethod, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);

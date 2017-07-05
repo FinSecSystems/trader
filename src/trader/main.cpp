@@ -132,7 +132,7 @@ protected:
 			//Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
 			//std::cout << tickerDetailedData->ask << std::endl;
 			Poco::AutoPtr<trader::TradesInput> tradesInputData = new trader::TradesInput();
-			tradesInputData->object.tid = 2095573;
+			tradesInputData->object.since = 2095573;
 			Poco::AutoPtr<trader::Trades> tradesData = fyb.GetTrades(tradesInputData);
 		}
         catch (Poco::Exception& exc)

@@ -23,7 +23,7 @@ namespace trader {
 		description = obj->getValue<string>("description");
 		url = obj->getValue<string>("href");
 		string methodString = obj->get("method");
-		if (methodString.compare("get") != 0)
+		if (methodString.compare("GET") == 0)
 		{
 			method = GET;
 		}
@@ -47,19 +47,15 @@ namespace trader {
 	void EndPoint::writeCpp(ApiFileOutputStream& cpp)
 	{
 		cpp << "Poco::AutoPtr<" << responseSchemaName << "> " << _config.apiName << "::" << name;
-		if (method == GET)
+		cpp << "(";
+		if (!inputSchemaName.empty())
 		{
-			cpp << "(";
-			if (!inputSchemaName.empty())
-			{
-				cpp << "Poco::AutoPtr<" << inputSchemaName << "> " << var_name(inputSchemaName);
-			}
-			cpp << ")";
+			cpp << "Poco::AutoPtr<" << inputSchemaName << "> " << var_name(inputSchemaName);
 		}
+		cpp << ")";
 		{
 			ScopedStream<ApiFileOutputStream> stream(cpp);
-			cpp << "std::ostringstream uri" << cendl;
-			cpp << "uri << \"" << url << "\"" << cendl;
+			cpp << "Poco::URI uri(_uri + \"" << url << "\" )" << cendl;
 			if (!inputSchemaName.empty())
 			{
 				string inputSchemaRefStr = "#/definitions/" + inputSchemaName;
@@ -73,7 +69,7 @@ namespace trader {
 			cpp << "Poco::AutoPtr<" << responseSchemaName << "> retVal = new " << responseSchemaName << "()" << cendl;
 			cpp << "Poco::Dynamic::Var pResult = invoke(Poco::Net::HTTPRequest::";
 			if (method == GET) cpp << "HTTP_GET"; else cpp << "HTTP_POST";
-			cpp << ", uri.str())" << cendl;
+			cpp << ", uri)" << cendl;
 			cpp << "retVal->read(pResult)" << cendl;
 			cpp << "return retVal" << cendl;
 		}
@@ -85,15 +81,12 @@ namespace trader {
 		header << endl;
 		header << "// " << description << endl;
 		header << "Poco::AutoPtr<" << responseSchemaName << "> " << name;
-		if (method == GET)
+		header << "(";
+		if (!inputSchemaName.empty())
 		{
-			header << "(";
-			if (!inputSchemaName.empty())
-			{
-				header << "Poco::AutoPtr<" << inputSchemaName << "> " << var_name(inputSchemaName);
-			}
-			header << ")";
+			header << "Poco::AutoPtr<" << inputSchemaName << "> " << var_name(inputSchemaName);
 		}
+		header << ")";
 		header << cendl;
 	}
 }

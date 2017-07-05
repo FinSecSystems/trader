@@ -225,6 +225,8 @@ namespace trader {
 				outputDir.createDirectories();
 
 				processHyperSchemas(_inputDir);
+				std::cout << "API generation complete..." << std::endl;
+				OutputDebugStringA("API generation complete...\n");
 			}
 			catch (Exception& exc)
 			{
