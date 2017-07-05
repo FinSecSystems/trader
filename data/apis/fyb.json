@@ -50,7 +50,7 @@
             "type": "double"
           },
           "date": {
-            "format": "time",
+            "format": "epochtime",
             "type": "int"
           },
           "price": {
@@ -61,6 +61,37 @@
           }
         }
       }
+    },
+    "ErrorMessage": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "int"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [ ]
+    },
+    "TradesInput": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "type": "int"
+        }
+      },
+      "required": []
+    },
+    "TimestampInput": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "format": "epochtime",
+          "type": "int"
+        }
+      },
+      "required": []
     }
   },
   "properties": {
@@ -73,6 +104,12 @@
     },
     "trades": {
       "$ref": "#/definitions/Trades"
+    },
+    "tradesinput": {
+      "$ref": "#/definitions/TradesInput"
+    },
+    "timestampinput": {
+      "$ref": "#/definitions/TimestampInput"
     },
     "required": []
   },
@@ -105,6 +142,22 @@
       "rel": "create",
       "targetSchema": {
         "$ref": "#/definitions/Trades"
+      },
+      "schema": {
+        "$ref": "#/definitions/TradesInput"
+      }
+    },
+    {
+      "href": "test",
+      "description": "Test whether your signature is valid",
+      "method": "POST",
+      "title": "Test",
+      "rel": "create",
+      "targetSchema": {
+        "$ref": "#/definitions/ErrorMessage"
+      },
+      "schema": {
+        "$ref": "#/definitions/TimestampInput"
       }
     }
   ],
