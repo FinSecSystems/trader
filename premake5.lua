@@ -191,6 +191,9 @@
 
 	project "apis"
 		targetname  "apis"
+        dependson   { 
+            "codegen"
+            }
         kind "Makefile"
 
 		files
@@ -199,10 +202,12 @@
 		}
 
        buildcommands {
+			"PATH=$(SolutionDir)deps\\poco\\bin64",
             "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader"
        }
 
        rebuildcommands {
+			"PATH=$(SolutionDir)deps\\poco\\bin64",
             "{RMDIR} $(SolutionDir)tmp\codegen",
             "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader"
        }
@@ -217,7 +222,7 @@
 		language    "C++"
 		kind        "ConsoleApp"
         dependson   { 
-            "codegen"
+            "apis"
             }
 		includedirs {
             "src",
