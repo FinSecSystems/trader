@@ -21,7 +21,12 @@ namespace trader {
 	inline void getAPIName(const string& apiFile, string& apiName)
 	{
 		Path p(apiFile);
-		apiName = p.getBaseName();
+		string fileName = p.getBaseName();
+		std::string::size_type pos = fileName.find('.');
+		if (pos != std::string::npos)
+			apiName = fileName.substr(0, pos);
+		else
+			apiName = fileName;
 	}
 
 	class ScopedNamespace

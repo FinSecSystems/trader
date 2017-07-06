@@ -43,24 +43,26 @@ void Api::login(const std::string& consumerKey, const std::string& consumerSecre
 }
 
 
-Poco::Dynamic::Var  Api::invoke(const std::string& httpMethod, const Poco::URI& uri, Poco::Net::HTMLForm* form)
+Poco::Dynamic::Var  Api::invoke(const std::string& httpMethod, const Poco::URI& uri)
 {
 	// Create the request URI.
 	// We use the JSON version of the Fyb API.
- 	//Poco::URI uri(_uri + ApiMethod );
 	
 	Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort());
-	Poco::Net::HTTPRequest req(httpMethod, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);
+	Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);
 	
 	// Sign request
-    if (form)
+    if (httpMethod == Poco::Net::HTTPRequest::HTTP_POST)
     {
+		Poco::Net::HTMLForm form(req);
+		req.setMethod(Poco::Net::HTTPRequest::HTTP_POST);
+		form.setEncoding(Poco::Net::HTMLForm::ENCODING_URL);
         Poco::Net::OAuth10Credentials creds(_consumerKey, _consumerSecret);// , _token, _tokenSecret);
-        creds.authenticate(req, uri, *form);
-        // Send the request.
-        form->prepareSubmit(req);
+        creds.authenticate(req, uri, form);
+        // Send the request.45731
+        form.prepareSubmit(req);
         std::ostream& ostr = session.sendRequest(req);
-        form->write(ostr);
+        form.write(ostr);
     }
     else
     {

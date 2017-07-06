@@ -20,6 +20,17 @@ using namespace std;
 
 namespace trader {
 
+	ObjectSchemaDefinition::ObjectSchemaDefinition(const string& _name)
+		: name(_name)
+	{
+
+	}
+
+	const string& ObjectSchemaDefinition::getName()
+	{
+		return name;
+	}
+
 	void ObjectSchemaDefinition::read(JSON::Object::Ptr obj)
 	{
 		rootObj = obj;
@@ -69,7 +80,7 @@ namespace trader {
 		return false;
 	}
 
-	void ObjectSchemaDefinition::cpp_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, expansionstringstream expansionStream, string keyName, UInt32 idx, bool previousArray)
+	void ObjectSchemaDefinition::cppConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, expansionstringstream expansionStream, string keyName, UInt32 idx, bool previousArray)
 	{
 		string type = obj->get("type");
 		if (isObject(type))
@@ -87,7 +98,7 @@ namespace trader {
 				{
 					ScopedStream<ApiFileOutputStream> scopedStream(stream);
 					stream << "Poco::Dynamic::Var " << temp_name(idx+nextIdx) << " = " << temp_name(idx+1) << "->get(\"" << property.first << "\")" << cendl;
-					cpp_construct(propertyObject, stream, expansionStream, property.first, idx+nextIdx, false);
+					cppConstruct(propertyObject, stream, expansionStream, property.first, idx+nextIdx, false);
 				}
 				nextIdx++;
 			}
@@ -112,7 +123,7 @@ namespace trader {
 				ScopedStream<ApiFileOutputStream> scopedStream(stream);
 				stream << expansionStream.type_name_str() << " " << expansionStream.var_name_str() << cendl;
 				stream << "Poco::Dynamic::Var " << temp_name(idx+3) << " = *" << temp_name(idx+2) << cendl;
-				cpp_construct(items, stream, expansionStream, keyName, idx+3, true);
+				cppConstruct(items, stream, expansionStream, keyName, idx+3, true);
 				if (previousArray)
 				{
 					stream << previousexpansionStream.var_name_str() << ".push_back(" << expansionStream.var_name_str() << ") " << cendl;
@@ -143,19 +154,31 @@ namespace trader {
 
 	void ObjectSchemaDefinition::writeCpp(ApiFileOutputStream& cpp)
 	{
+		cpp << "void " << name << "::readFile(const std::string& _fileName)";
+		{
+			ScopedStream<ApiFileOutputStream> scopedStream(cpp);
+			cpp << "std::ostringstream ostr" << cendl;
+			cpp << "Poco::FileInputStream fis(_fileName)" << cendl;
+			cpp << "Poco::StreamCopier::copyStream(fis, ostr)" << cendl;
+
+			cpp << "Poco::JSON::Parser parser" << cendl;
+			cpp << "Poco::Dynamic::Var result = parser.parse(ostr.str())" << cendl;
+			cpp << "read(result)" << cendl;
+		}
+		cpp << endl;
+
 		cpp << "void " << name << "::read(Poco::Dynamic::Var obj0) ";
 		{
 			ScopedStream<ApiFileOutputStream> scopedStream(cpp);
 			expansionstringstream temp;
-			cpp_construct(rootObj, cpp, temp, "data", 0, false);
+			cppConstruct(rootObj, cpp, temp, "data", 0, false);
 		}
-	
 		cpp << endl;
 	}
 
 
 
-	void ObjectSchemaDefinition::header_construct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray)
+	void ObjectSchemaDefinition::headerConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray)
 	{
 		string type = obj->get("type");
 		if (isObject(type))
@@ -170,7 +193,7 @@ namespace trader {
 				for (auto& property : *properties)
 				{
 					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
-					header_construct(propertyObject, stream, expandedName, property.first, false);
+					headerConstruct(propertyObject, stream, expandedName, property.first, false);
 				}
 			}
 			if (!previousArray)
@@ -191,7 +214,7 @@ namespace trader {
 				expandedName += "Array";
 			}
 			JSON::Object::Ptr itemObj = obj->getObject("items");
-			header_construct(itemObj, stream, expandedName, expandedName, true);
+			headerConstruct(itemObj, stream, expandedName, expandedName, true);
 			stream << "typedef std::vector<" << expandedName << "> " << type_name(keyName) << cendl;
 			if (!previousArray)
 			{
@@ -218,10 +241,12 @@ namespace trader {
 
 	void ObjectSchemaDefinition::writeHeader(ApiFileOutputStream& header)
 	{
+		header << "void readFile(const std::string& _fileName)" << cendl;
+		header << endl;
 		header << "void read(Poco::Dynamic::Var val)" << cendl;
 		header << endl;
 
-		header_construct(rootObj, header, "", "data", false);
+		headerConstruct(rootObj, header, "", "data", false);
 	}
 
 	void ObjectSchemaDefinition::writeRestEncodedParams(ApiFileOutputStream& stream)

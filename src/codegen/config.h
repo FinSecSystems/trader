@@ -17,7 +17,6 @@ namespace trader {
 		}
 
 		string baseUrl;
-		string inputDir;
 		string outputDir;
 		string nameSpace;
 		string apiName;

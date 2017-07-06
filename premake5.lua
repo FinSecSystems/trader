@@ -135,7 +135,8 @@
         debugargs {
             "/i:$(SolutionDir)data\\apis",
             "/o:$(SolutionDir)tmp\\codegen",
-			"/n:trader"
+			"/n:trader",
+			"/t:hyperschema"
         }
 
 		files
@@ -198,24 +199,50 @@
 
 		files
 		{
-            "data/**.json"
+            "data/apis/**.json"
 		}
 
        buildcommands {
 			"PATH=$(SolutionDir)deps\\poco\\bin64",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader"
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
        }
 
        rebuildcommands {
 			"PATH=$(SolutionDir)deps\\poco\\bin64",
             "{RMDIR} $(SolutionDir)tmp\codegen",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader"
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
        }
 
        cleancommands {
             "{RMDIR} $(SolutionDir)tmp\\codegen"
        }
 
+	project "config"
+		targetname  "config"
+        dependson   { 
+            "codegen"
+            }
+        kind "Makefile"
+
+		files
+		{
+            "data/configs/**.json"
+		}
+
+       buildcommands {
+			"PATH=$(SolutionDir)deps\\poco\\bin64",
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\codegen /n:trader /t:jsonschema"
+       }
+
+       rebuildcommands {
+			"PATH=$(SolutionDir)deps\\poco\\bin64",
+            "{RMDIR} $(SolutionDir)tmp\codegen",
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\codegen /n:trader /t:jsonschema"
+       }
+
+       cleancommands {
+            "{RMDIR} $(SolutionDir)tmp\\codegen"
+       }
 
 	project "trader"
 		targetname  "trader"
@@ -258,7 +285,8 @@
             "deps/poco/NetSSL_Win/include/**.h", "deps/poco/NetSSL_Win/src/**.cpp",
             "deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
             "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp",
-            "tmp/codegen/**.h", "tmp/codegen/**.cpp"
+            "tmp/codegen/**.h", "tmp/codegen/**.cpp",
+			"bin/**..json"
 		}
 
         filter "files:deps/**.*"

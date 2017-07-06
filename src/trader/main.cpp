@@ -7,6 +7,7 @@
 #include "Poco/FileStream.h"
 #include "Poco/StreamCopier.h"
 #include "fyb.h"
+#include "fybconfig.h"
 #include <iostream>
 #include <iomanip>
 
@@ -45,14 +46,14 @@ protected:
             .callback(OptionCallback<TraderApp>(this, &TraderApp::handleMessage)));
 
         options.addOption(
-            Option("ckey", "c", "Specify the consumer key.")
+            Option("consumer_key", "c", "Specify the consumer key.")
             .required(false)
             .repeatable(false)
             .argument("consumer key")
             .callback(OptionCallback<TraderApp>(this, &TraderApp::handleConsumerKey)));
 
         options.addOption(
-            Option("csecret", "s", "Specify the consumer secret.")
+            Option("consumer_secret", "s", "Specify the consumer secret.")
             .required(false)
             .repeatable(false)
             .argument("consumer secret")
@@ -66,7 +67,7 @@ protected:
             .callback(OptionCallback<TraderApp>(this, &TraderApp::handleAccessToken)));
 
         options.addOption(
-            Option("tsecret", "S", "Specify the access token secret.")
+            Option("token_secret", "S", "Specify the access token secret.")
             .required(false)
             .repeatable(true)
             .argument("access token secret")
@@ -125,15 +126,32 @@ protected:
 		(void)args;
         try
         {
+			Poco::Path fybConfigFileName("fyb.config.json");
+			if (findFile(fybConfigFileName))
+			{
+				Poco::AutoPtr<trader::fybconfig> fybConfig = new trader::fybconfig();
+				fybConfig->readFile(fybConfigFileName.toString());
+				if (_consumerKey.empty())
+				{
+					_consumerKey = fybConfig->object.consumer_key;
+				}
+				if (_consumerSecret.empty())
+				{
+					_consumerSecret = fybConfig->object.consumer_secret;
+				}
+			}
             trader::fyb fyb;
             fyb.login(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
             //Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
             //std::cout << tickerDetailedData->ask << std::endl;
 			//Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
 			//std::cout << tickerDetailedData->ask << std::endl;
-			Poco::AutoPtr<trader::TradesInput> tradesInputData = new trader::TradesInput();
-			tradesInputData->object.since = 2095573;
-			Poco::AutoPtr<trader::Trades> tradesData = fyb.GetTrades(tradesInputData);
+			//Poco::AutoPtr<trader::TradesInput> tradesInputData = new trader::TradesInput();
+			//tradesInputData->object.since = 2095573;
+			//Poco::AutoPtr<trader::Trades> tradesData = fyb.GetTrades(tradesInputData);
+			Poco::AutoPtr<trader::TimestampInput> timeStampInputData = new trader::TimestampInput();
+			timeStampInputData->object.timestamp = std::time(nullptr);
+			Poco::AutoPtr<trader::ErrorMessage> errorMsg = fyb.Test(timeStampInputData);
 		}
         catch (Poco::Exception& exc)
         {

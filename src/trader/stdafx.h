@@ -18,5 +18,8 @@
 #include "Poco/Util/JSONConfiguration.h"
 #include "Poco/URI.h"
 #include "Poco/Format.h"
+#include "Poco/File.h"
+#include "Poco/FileStream.h"
 #include "Poco/StreamCopier.h"
 #pragma warning(pop)
+#include <ctime>

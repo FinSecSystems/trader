@@ -33,3 +33,4 @@
 #include <sstream>
 #include <array>
 #include <algorithm>
+#include <functional>
