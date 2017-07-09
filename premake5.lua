@@ -249,7 +249,8 @@
 		language    "C++"
 		kind        "ConsoleApp"
         dependson   { 
-            "apis"
+            "apis",
+			"config"
             }
 		includedirs {
             "src",
@@ -286,7 +287,7 @@
             "deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
             "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp",
             "tmp/codegen/**.h", "tmp/codegen/**.cpp",
-			"bin/**..json"
+			"bin/**.json"
 		}
 
         filter "files:deps/**.*"

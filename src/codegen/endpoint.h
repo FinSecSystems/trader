@@ -32,13 +32,14 @@ namespace trader {
 
 		void read(JSON::Object::Ptr obj);
 		void writeHeader(ApiFileOutputStream& header);
+		void writeResponseSchema(ApiFileOutputStream& cpp, UInt32 idx);
 		void writeCpp(ApiFileOutputStream& cpp);
 
 		string url;
 		Method method;
 		string description;
 		string name;
-		string responseSchemaName;
+		vector<string> responseSchemaNames;
 		string inputSchemaName;
 		Config& _config;
 	};

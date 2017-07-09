@@ -1,5 +1,17 @@
 {
   "definitions": {
+    "Ticker": {
+      "type": "object",
+      "properties": {
+        "ask": {
+          "type": "double"
+        },
+        "bid": {
+          "type": "double"
+        }
+      },
+      "required": [ "ask", "bid" ]
+    },
     "TickerDetailed": {
       "type": "object",
       "properties": {
@@ -69,7 +81,32 @@
           "type": "string"
         }
       },
-      "required": [ ]
+      "required": []
+    },
+    "AccountInfo": {
+      "type": "object",
+      "properties": {
+        "accNo": {
+          "type": "int"
+        },
+        "btcBal": {
+          "type": "double"
+        },
+        "btcDeposit": {
+          "type": "double"
+        },
+        "email": {
+          "pattern": "([\\w-\\.]+)@((?:[\\w]+\\.)+)([a-zA-Z]{2,4})",
+          "type": "string"
+        },
+        "error": {
+          "type": "int"
+        },
+        "sgdBal": {
+          "type": "double"
+        }
+      },
+      "required": []
     },
     "TradesInput": {
       "type": "object",
@@ -93,6 +130,9 @@
   },
   "properties": {
     "type": "object",
+    "ticker": {
+      "$ref": "#/definitions/Ticker"
+    },
     "tickerdetailed": {
       "$ref": "#/definitions/TickerDetailed"
     },
@@ -112,14 +152,34 @@
   },
   "links": [
     {
+      "href": "ticker.json",
+      "description": "Get current bid and ask",
+      "method": "GET",
+      "title": "GetTicker",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/Ticker"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ]
+    },
+    {
       "href": "tickerdetailed.json",
       "description": "Get current bid and ask, last traded price and 24H volume",
       "method": "GET",
       "title": "GetTickerDetailed",
       "rel": "create",
-      "targetSchema": {
-        "$ref": "#/definitions/TickerDetailed"
-      }
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/TickerDetailed"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ]
     },
     {
       "href": "orderbook.json",
@@ -127,9 +187,14 @@
       "method": "GET",
       "title": "GetOrderBook",
       "rel": "create",
-      "targetSchema": {
-        "$ref": "#/definitions/OrderBook"
-      }
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/OrderBook"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ]
     },
     {
       "href": "trades.json",
@@ -137,9 +202,14 @@
       "method": "GET",
       "title": "GetTrades",
       "rel": "create",
-      "targetSchema": {
-        "$ref": "#/definitions/Trades"
-      },
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/Trades"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ],
       "schema": {
         "$ref": "#/definitions/TradesInput"
       }
@@ -150,9 +220,29 @@
       "method": "POST",
       "title": "Test",
       "rel": "create",
-      "targetSchema": {
-        "$ref": "#/definitions/ErrorMessage"
-      },
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/TimestampInput"
+      }
+    },
+    {
+      "href": "getaccinfo",
+      "description": "Get account info",
+      "method": "POST",
+      "title": "GetAccountInfo",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/AccountInfo"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ],
       "schema": {
         "$ref": "#/definitions/TimestampInput"
       }

@@ -31,10 +31,14 @@ namespace trader {
 		{
 			method = POST;
 		}
-		JSON::Object::Ptr targetSchema = obj->getObject("targetSchema");
-		string targetSchemaRef = targetSchema->getValue<string>("$ref");
-		StringTokenizer str(targetSchemaRef, "/", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
-		responseSchemaName = str[str.count() - 1];
+		JSON::Array::Ptr targetSchemas = obj->getArray("targetSchemas");
+		for (auto targetSchemaVar : *targetSchemas)
+		{
+			JSON::Object::Ptr targetSchema = targetSchemaVar.extract<JSON::Object::Ptr>();
+			string targetSchemaRef = targetSchema->getValue<string>("$ref");
+			StringTokenizer str(targetSchemaRef, "/", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
+			responseSchemaNames.push_back(str[str.count() - 1]);
+		}
 		JSON::Object::Ptr schema = obj->getObject("schema");
 		if (schema)
 		{
@@ -44,9 +48,31 @@ namespace trader {
 		}
 	}
 
+	void EndPoint::writeResponseSchema(ApiFileOutputStream& cpp, UInt32 idx)
+	{
+		if (idx < responseSchemaNames.size())
+		{
+			cpp << "try" << endl;
+			{
+				ScopedStream<ApiFileOutputStream> stream(cpp);
+				cpp << "Poco::AutoPtr<" << responseSchemaNames[idx] << "> retVal = new " << responseSchemaNames[idx] << "()" << cendl;
+				cpp << "retVal->read(pResult)" << cendl;
+				if (idx == 0)
+				{
+					cpp << "return retVal" << cendl;
+				}
+			}
+			cpp << "catch (Poco::Exception& exc)" << endl;
+			{
+				ScopedStream<ApiFileOutputStream> stream(cpp);
+				writeResponseSchema(cpp, idx + 1);
+			}
+		}
+	}
+
 	void EndPoint::writeCpp(ApiFileOutputStream& cpp)
 	{
-		cpp << "Poco::AutoPtr<" << responseSchemaName << "> " << _config.apiName << "::" << name;
+		cpp << "Poco::AutoPtr<" << responseSchemaNames[0] << "> " << _config.apiName << "::" << name;
 		cpp << "(";
 		if (!inputSchemaName.empty())
 		{
@@ -66,11 +92,11 @@ namespace trader {
 					obj.writeRestEncodedParams(cpp);
 				}
 			}
-			cpp << "Poco::AutoPtr<" << responseSchemaName << "> retVal = new " << responseSchemaName << "()" << cendl;
 			cpp << "Poco::Dynamic::Var pResult = invoke(Poco::Net::HTTPRequest::";
 			if (method == GET) cpp << "HTTP_GET"; else cpp << "HTTP_POST";
 			cpp << ", uri)" << cendl;
-			cpp << "retVal->read(pResult)" << cendl;
+			writeResponseSchema(cpp, 0);
+			cpp << "Poco::AutoPtr<" << responseSchemaNames[0] << "> retVal = new " << responseSchemaNames[0] << "()" << cendl;
 			cpp << "return retVal" << cendl;
 		}
 		cpp << endl;
@@ -80,7 +106,7 @@ namespace trader {
 	{
 		header << endl;
 		header << "// " << description << endl;
-		header << "Poco::AutoPtr<" << responseSchemaName << "> " << name;
+		header << "Poco::AutoPtr<" << responseSchemaNames[0] << "> " << name;
 		header << "(";
 		if (!inputSchemaName.empty())
 		{
