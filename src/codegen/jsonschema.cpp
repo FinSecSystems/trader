@@ -34,12 +34,13 @@ namespace trader {
 		Config config;
 		config.outputDir = outputdirectory;
 		config.nameSpace = namespacename;
-		getAPIName(filename, config.apiName);
-		config.headerFileName = outputdirectory + Path::separator() + config.apiName + "config.h";
-		config.cppFileName = outputdirectory + Path::separator() + config.apiName + "config.cpp";
+		getAPIName("config", filename, config.apiName);
+		string apiName = config.apiName;
+		std::transform(apiName.begin(), apiName.end(), apiName.begin(), ::tolower);
+		config.headerFileName = outputdirectory + Path::separator() + apiName + ".h";
+		config.cppFileName = outputdirectory + Path::separator() + apiName + ".cpp";
 
-		string configName = config.apiName + "config";
-		ObjectSchemaDefinition def(configName);
+		ObjectSchemaDefinition def(config.apiName);
 		def.read(api);
 
 		//Write

@@ -6,7 +6,7 @@
 #include "Poco/File.h"
 #include "Poco/FileStream.h"
 #include "Poco/StreamCopier.h"
-#include "fyb.h"
+#include "fybapi.h"
 #include "fybconfig.h"
 #include <iostream>
 #include <iomanip>
@@ -129,7 +129,7 @@ protected:
 			Poco::Path fybConfigFileName("fyb.config.json");
 			if (findFile(fybConfigFileName))
 			{
-				Poco::AutoPtr<trader::fybconfig> fybConfig = new trader::fybconfig();
+				Poco::AutoPtr<trader::FybConfig> fybConfig = new trader::FybConfig();
 				fybConfig->readFile(fybConfigFileName.toString());
 				if (_consumerKey.empty())
 				{
@@ -140,8 +140,8 @@ protected:
 					_consumerSecret = fybConfig->object.consumer_secret;
 				}
 			}
-            trader::fyb fyb;
-            fyb.login(_consumerKey, _consumerSecret, _accessToken, _accessTokenSecret);
+            trader::FybApi fyb;
+            fyb.login(_consumerKey, _consumerSecret);
             //Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
             //std::cout << tickerDetailedData->ask << std::endl;
 			//Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();

@@ -21,5 +21,8 @@
 #include "Poco/File.h"
 #include "Poco/FileStream.h"
 #include "Poco/StreamCopier.h"
+#include "Poco/SHA1Engine.h"
+#include "Poco/HMACEngine.h"
+#include "Poco/Base64Encoder.h"
 #pragma warning(pop)
 #include <ctime>

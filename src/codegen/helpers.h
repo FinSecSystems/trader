@@ -18,15 +18,19 @@ namespace trader {
 	using namespace Poco;
 	using namespace std;
 
-	inline void getAPIName(const string& apiFile, string& apiName)
+	inline void getAPIName(string name, const string& apiFile, string& apiName)
 	{
+		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+		if (name.length())
+			std::transform(name.begin(), name.begin() + 1, name.begin(), ::toupper);
 		Path p(apiFile);
 		string fileName = p.getBaseName();
 		std::string::size_type pos = fileName.find('.');
 		if (pos != std::string::npos)
-			apiName = fileName.substr(0, pos);
+			apiName = fileName.substr(0, pos) + name;
 		else
-			apiName = fileName;
+			apiName = fileName + name;
+		std::transform(apiName.begin(), apiName.begin() + 1, apiName.begin(), ::toupper);
 	}
 
 	class ScopedNamespace

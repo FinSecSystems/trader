@@ -1,18 +1,18 @@
 #pragma once
 
 
-class Api
+class Fyb
 	/// Base class for api
 	/// (see <http://http://docs.fyb.apiary.io/#> for more information).
 	/// 
 {
 public:
-    Api();
+	Fyb();
 
-	~Api();
+	~Fyb();
 		/// Destroys the Twitter object.
 		
-	virtual void login(const std::string& consumerKey, const std::string& consumerSecret, const std::string& token, const std::string& tokenSecret);
+	virtual void login(const std::string& consumerKey, const std::string& consumerSecret);
 		/// Specifies the OAuth authentication information used in all API calls.
 		
 
@@ -27,12 +27,10 @@ public:
 	
 
 protected:
-    Api(const Api&);
-    Api& operator = (const Api&);
+	Fyb(const Fyb&);
+	Fyb& operator = (const Fyb&);
 	
 	std::string _uri;
 	std::string _consumerKey;
 	std::string _consumerSecret;
-	std::string _token;
-	std::string _tokenSecret;
 };

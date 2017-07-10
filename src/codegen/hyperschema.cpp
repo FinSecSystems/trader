@@ -36,9 +36,13 @@ namespace trader {
 		config.read(configObj);
 		config.outputDir = outputdirectory;
 		config.nameSpace = namespacename;
-		getAPIName(filename, config.apiName);
-		config.headerFileName = outputdirectory + Path::separator() + config.apiName + ".h";
-		config.cppFileName = outputdirectory + Path::separator() + config.apiName + ".cpp";
+		getAPIName("api", filename, config.apiName);
+		string apiName = config.apiName;
+		std::transform(apiName.begin(), apiName.end(), apiName.begin(), ::tolower);
+		config.headerFileName = outputdirectory + Path::separator() + apiName + ".h";
+		config.cppFileName = outputdirectory + Path::separator() + apiName + ".cpp";
+		string name;
+		getAPIName("", filename, name);
 
 		JSON::Object::Ptr definitions = api->getObject("definitions");
 
@@ -68,8 +72,13 @@ namespace trader {
 		ApiFileOutputStream header(config.headerFileName);
 		ApiFileOutputStream cpp(config.cppFileName);
 
+		ostringstream baseHeaderName;
+		string headerName = name;
+		std::transform(headerName.begin(), headerName.end(), headerName.begin(), ::tolower);
+		baseHeaderName << "trader/" << headerName << ".h";
+		
 		startHeader(header, 1,
-			"trader/Api.h");
+			baseHeaderName.str().c_str());
 		{
 			ScopedNamespace scopedNamesapce(header, config.nameSpace);
 			for (auto& schemaDefinition : config.schemaDefinitions)
@@ -81,7 +90,7 @@ namespace trader {
 				}
 			}
 			{
-				ScopedClass<1> scopedClass(header, config.apiName, "Api");
+				ScopedClass<1> scopedClass(header, config.apiName, name.c_str());
 				for (auto& endPoint : endPoints)
 				{
 					endPoint.writeHeader(header);
