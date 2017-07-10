@@ -81,12 +81,12 @@ Poco::Dynamic::Var Fyb::invoke(const std::string& httpMethod, const Poco::URI& u
 		Poco::HMACEngine<Poco::SHA1Engine> hmacEngine(signingKey);
 		hmacEngine.update(signatureBase);
 		Poco::DigestEngine::Digest digest = hmacEngine.digest();
-		std::ostringstream digestBase64;
-		Poco::Base64Encoder base64Encoder(digestBase64);
+		std::ostringstream digestBase32;
+		Poco::Base32Encoder base64Encoder(digestBase32);
 		base64Encoder.write(reinterpret_cast<char*>(&digest[0]), digest.size());
 		base64Encoder.close();
 
-		req.set("sig", digestBase64.str());
+		req.set("sig", digestBase32.str());
 
         form.prepareSubmit(req);
         std::ostream& ostr = session.sendRequest(req);

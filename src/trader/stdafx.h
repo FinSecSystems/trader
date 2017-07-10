@@ -24,5 +24,6 @@
 #include "Poco/SHA1Engine.h"
 #include "Poco/HMACEngine.h"
 #include "Poco/Base64Encoder.h"
+#include "Poco/Base32Encoder.h"
 #pragma warning(pop)
 #include <ctime>
