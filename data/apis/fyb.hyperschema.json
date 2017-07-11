@@ -93,7 +93,8 @@
           "type": "double"
         },
         "btcDeposit": {
-          "type": "double"
+          "pattern": "^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$",
+          "type": "string"
         },
         "email": {
           "pattern": "([\\w-\\.]+)@((?:[\\w]+\\.)+)([a-zA-Z]{2,4})",
@@ -107,6 +108,38 @@
         }
       },
       "required": []
+    },
+    "PendingOrders": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "int"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "format": "epochtime",
+                "type": "int"
+              },
+              "price": {
+                "type": "double"
+              },
+              "qty": {
+                "type": "double"
+              },
+              "ticket": {
+                "type": "int"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     },
     "TradesInput": {
       "type": "object",
@@ -141,6 +174,9 @@
     },
     "trades": {
       "$ref": "#/definitions/Trades"
+    },
+    "pendingorders": {
+      "$ref": "#/definitions/PendingOrders"
     },
     "tradesinput": {
       "$ref": "#/definitions/TradesInput"
@@ -238,6 +274,24 @@
       "targetSchemas": [
         {
           "$ref": "#/definitions/AccountInfo"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/TimestampInput"
+      }
+    },
+    {
+      "href": "getpendingorders",
+      "description": "Get Pending Orders",
+      "method": "POST",
+      "title": "GetPendingOrders",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/PendingOrders"
         },
         {
           "$ref": "#/definitions/ErrorMessage"

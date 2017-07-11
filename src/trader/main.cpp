@@ -152,7 +152,8 @@ protected:
 			Poco::AutoPtr<trader::TimestampInput> timeStampInputData = new trader::TimestampInput();
 			timeStampInputData->object.timestamp = std::time(nullptr);
 			//Poco::AutoPtr<trader::ErrorMessage> errorMsg = fyb.Test(timeStampInputData);
-			Poco::AutoPtr<trader::AccountInfo> accountInfo = fyb.GetAccountInfo(timeStampInputData);
+			//Poco::AutoPtr<trader::AccountInfo> accountInfo = fyb.GetAccountInfo(timeStampInputData);
+			Poco::AutoPtr<trader::PendingOrders> pendingOrders = fyb.GetPendingOrders(timeStampInputData);
 		}
         catch (Poco::Exception& exc)
         {

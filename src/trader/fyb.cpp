@@ -1,30 +1,13 @@
-//
-// Fyb.cpp
-//
-// $Id: //poco/1.4/Net/samples/FybClient/src/Fyb.cpp#2 $
-//
-// A C++ implementation of a Fyb client based on the POCO Net library.
-//
-// Copyright (c) 2009-2013, Applied Informatics Software Engineering GmbH.
-// and Contributors.
-//
-// SPDX-License-Identifier:	BSL-1.0
-//
-
-
 #include "stdafx.h"
 #include "fyb.h"
-
 
 Fyb::Fyb()
 {
 }
-
 	
 Fyb::~Fyb()
 {
 }
-
 
 void Fyb::login(const std::string& consumerKey, const std::string& consumerSecret)
 {
@@ -34,60 +17,44 @@ void Fyb::login(const std::string& consumerKey, const std::string& consumerSecre
 
 std::string percentEncode(const std::string& str)
 {
-	std::string encoded = str;
-	//Poco::URI::encode(str, "!?#/'\",;:$&()[]*+=@", encoded);
+	std::string encoded;
+	Poco::URI::encode(str, "!?#/'\",;:$&()[]*+=@", encoded);
 	return encoded;
 }
 
 Poco::Dynamic::Var Fyb::invoke(const std::string& httpMethod, const Poco::URI& uri)
 {
 	// Create the request URI.
-	// We use the JSON version of the Fyb API.
-	
 	Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort());
 	Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);
 	
 	// Sign request
     if (httpMethod == Poco::Net::HTTPRequest::HTTP_POST)
     {
+		//Convert to POST
 		Poco::Net::HTMLForm form(req);
 		req.setMethod(Poco::Net::HTTPRequest::HTTP_POST);
+		req.setURI(uri.getPath());
 		form.setEncoding(Poco::Net::HTMLForm::ENCODING_URL);
-        //Poco::Net::OAuth10Credentials creds(_consumerKey, _consumerSecret);// , _token, _tokenSecret);
-        //creds.authenticate(req, uri, form);
-        // Send the request.45731
 
+		//Key
 		req.set("key", _consumerKey);
-#if 0
-		std::map<std::string, std::string> paramsMap;
-		for (Poco::Net::HTMLForm::ConstIterator it = form.begin(); it != form.end(); ++it)
-		{
-			paramsMap[percentEncode(it->first)] = percentEncode(it->second);
-		}
-		std::string paramsString;
-		for (std::map<std::string, std::string>::const_iterator it = paramsMap.begin(); it != paramsMap.end(); ++it)
-		{
-			if (it != paramsMap.begin()) paramsString += '&';
-			paramsString += it->first;
-			paramsString += "=";
-			paramsString += it->second;
-		}
-#endif
+
+		//Sign
 		std::ostringstream paramStream;
 		form.write(paramStream);
-		std::string paramsString = paramStream.str();
-		std::string signatureBase = percentEncode(paramsString);
-		std::string signingKey = percentEncode(_consumerSecret);
+		std::string signatureBase = paramStream.str();
+		std::string signingKey = _consumerSecret;
 		Poco::HMACEngine<Poco::SHA1Engine> hmacEngine(signingKey);
 		hmacEngine.update(signatureBase);
 		Poco::DigestEngine::Digest digest = hmacEngine.digest();
-		std::ostringstream digestBase32;
-		Poco::Base32Encoder base64Encoder(digestBase32);
-		base64Encoder.write(reinterpret_cast<char*>(&digest[0]), digest.size());
-		base64Encoder.close();
+		std::ostringstream digestHexBin;
+		Poco::HexBinaryEncoder hexBinEncoder(digestHexBin);
+		hexBinEncoder.write(reinterpret_cast<char*>(&digest[0]), digest.size());
+		hexBinEncoder.close();
+		req.set("sig", digestHexBin.str());
 
-		req.set("sig", digestBase32.str());
-
+		//Submit
         form.prepareSubmit(req);
         std::ostream& ostr = session.sendRequest(req);
         form.write(ostr);
@@ -101,6 +68,7 @@ Poco::Dynamic::Var Fyb::invoke(const std::string& httpMethod, const Poco::URI& u
 	Poco::Net::HTTPResponse res;
 	std::istream& rs = session.receiveResponse(res);
 	
+	// Parse the JSON
 	Poco::JSON::Parser parser;
 	parser.parse(rs);
 	Poco::Dynamic::Var result = parser.result();

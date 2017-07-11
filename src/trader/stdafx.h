@@ -25,5 +25,6 @@
 #include "Poco/HMACEngine.h"
 #include "Poco/Base64Encoder.h"
 #include "Poco/Base32Encoder.h"
+#include "Poco/HexBinaryEncoder.h"
 #pragma warning(pop)
 #include <ctime>
