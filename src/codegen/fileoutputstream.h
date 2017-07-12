@@ -361,6 +361,7 @@ namespace trader {
 		std::string _str;
 	public:
 		explicit type_name(std::string& str) : _str(str) {}
+		explicit type_name(const std::string& str) : _str(str) {}
 		explicit type_name(const char* str) : _str(str) {}
 		string getstr() const { return _str; }
 		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const type_name& obj)

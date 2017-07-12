@@ -26,5 +26,8 @@
 #include "Poco/Base64Encoder.h"
 #include "Poco/Base32Encoder.h"
 #include "Poco/HexBinaryEncoder.h"
+#include "Poco/Exception.h"
 #pragma warning(pop)
 #include <ctime>
+#include <regex>
+#include <limits>

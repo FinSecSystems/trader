@@ -52,7 +52,7 @@ namespace trader {
 	{
 		if (idx < responseSchemaNames.size())
 		{
-			cpp << "try" << endl;
+			cpp << "try " ;
 			{
 				ScopedStream<ApiFileOutputStream> stream(cpp);
 				cpp << "Poco::AutoPtr<" << responseSchemaNames[idx] << "> retVal = new " << responseSchemaNames[idx] << "()" << cendl;
@@ -62,7 +62,7 @@ namespace trader {
 					cpp << "return retVal" << cendl;
 				}
 			}
-			cpp << "catch (Poco::Exception& exc)" << endl;
+			cpp << "catch (Poco::Exception& exc) ";
 			{
 				ScopedStream<ApiFileOutputStream> stream(cpp);
 				writeResponseSchema(cpp, idx + 1);
@@ -78,7 +78,7 @@ namespace trader {
 		{
 			cpp << "Poco::AutoPtr<" << inputSchemaName << "> " << var_name(inputSchemaName);
 		}
-		cpp << ")";
+		cpp << ") ";
 		{
 			ScopedStream<ApiFileOutputStream> stream(cpp);
 			cpp << "Poco::URI uri(_uri + \"" << url << "\" )" << cendl;

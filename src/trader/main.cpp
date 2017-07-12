@@ -149,11 +149,16 @@ protected:
 			//Poco::AutoPtr<trader::TradesInput> tradesInputData = new trader::TradesInput();
 			//tradesInputData->object.since = 2095573;
 			//Poco::AutoPtr<trader::Trades> tradesData = fyb.GetTrades(tradesInputData);
-			Poco::AutoPtr<trader::TimestampInput> timeStampInputData = new trader::TimestampInput();
-			timeStampInputData->object.timestamp = std::time(nullptr);
+			//Poco::AutoPtr<trader::TimestampInput> timeStampInputData = new trader::TimestampInput();
+			//timeStampInputData->object.timestamp = std::time(nullptr);
 			//Poco::AutoPtr<trader::ErrorMessage> errorMsg = fyb.Test(timeStampInputData);
 			//Poco::AutoPtr<trader::AccountInfo> accountInfo = fyb.GetAccountInfo(timeStampInputData);
-			Poco::AutoPtr<trader::PendingOrders> pendingOrders = fyb.GetPendingOrders(timeStampInputData);
+			//Poco::AutoPtr<trader::PendingOrders> pendingOrders = fyb.GetPendingOrders(timeStampInputData);
+			Poco::AutoPtr<trader::OrderHistoryParams> orderHistoryInputData = new trader::OrderHistoryParams();
+			orderHistoryInputData->object.timestamp = std::time(nullptr);
+			orderHistoryInputData->object.limit = 10;
+			Poco::AutoPtr<trader::OrderHistory> orderHistory = fyb.GetOrderHistory(orderHistoryInputData);
+
 		}
         catch (Poco::Exception& exc)
         {

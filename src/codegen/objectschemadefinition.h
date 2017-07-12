@@ -33,6 +33,7 @@ namespace trader {
 
 	private:
 		void headerConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray);
+		void headerConstructorConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray, bool first);
 		void cppConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, expansionstringstream expandedName, string keyName, UInt32 objIndex, bool previousArray);
 		string name;
 		JSON::Object::Ptr rootObj;

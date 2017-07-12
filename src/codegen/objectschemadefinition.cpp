@@ -38,11 +38,7 @@ namespace trader {
 
 	const char* getCppType(const string& jsonType, JSON::Object::Ptr obj)
 	{
-		if (jsonType.compare("double") == 0)
-		{
-			return "double";
-		}
-		else if (jsonType.compare("int") == 0)
+		if (jsonType.compare("number") == 0)
 		{
 			Poco::Dynamic::Var formatVar = obj->get("format");
 			if (!formatVar.isEmpty())
@@ -52,12 +48,60 @@ namespace trader {
 				{
 					return "std::time_t";
 				}
+				else if (format.compare("double") == 0)
+				{
+					return "double";
+				}
 			}
 			return "Poco::Int32";
 		}
 		else if (jsonType.compare("string") == 0)
 		{
+			Poco::Dynamic::Var formatVar = obj->get("format");
+			if (!formatVar.isEmpty())
+			{
+				string format = formatVar.convert<string>();
+				if (format.compare("char") == 0)
+				{
+					return "char";
+				}
+			}
 			return "std::string";
+		}
+		return nullptr;
+	}
+
+	const char* getCppDefaultVal (const string& jsonType, JSON::Object::Ptr obj)
+	{
+		if (jsonType.compare("number") == 0)
+		{
+			Poco::Dynamic::Var formatVar = obj->get("format");
+			if (!formatVar.isEmpty())
+			{
+				string format = formatVar.convert<string>();
+				if (format.compare("epochtime") == 0)
+				{
+					return "std::numeric_limits<time_t>::max()";
+				}
+				else if (format.compare("double") == 0)
+				{
+					return "std::numeric_limits<double>::max()";
+				}
+			}
+			return "std::numeric_limits<Poco::Int32>::max()";
+		}
+		else if (jsonType.compare("string") == 0)
+		{
+			Poco::Dynamic::Var formatVar = obj->get("format");
+			if (!formatVar.isEmpty())
+			{
+				string format = formatVar.convert<string>();
+				if (format.compare("char") == 0)
+				{
+					return "0x255";
+				}
+			}
+			return "\"Empty\"";
 		}
 		return nullptr;
 	}
@@ -184,6 +228,22 @@ namespace trader {
 	}
 
 
+	void ObjectSchemaDefinition::headerConstructorConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray, bool first)
+	{
+		string type = obj->get("type");
+		if (!isObject(type) && !isArray(type) && !previousArray)
+		{
+			if (first)
+			{
+				stream << ": ";
+			}
+			else
+			{
+				stream << ", ";
+			}
+			stream << var_name(keyName) << "(" << getCppDefaultVal(type, obj) << ")" << endl;
+		}
+	}
 
 	void ObjectSchemaDefinition::headerConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray)
 	{
@@ -201,6 +261,17 @@ namespace trader {
 				{
 					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
 					headerConstruct(propertyObject, stream, expandedName, property.first, false);
+				}
+				stream << type_name(expandedName) << "()" << endl;
+				bool first = true;
+				for (auto& property : *properties)
+				{
+					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
+					headerConstructorConstruct(propertyObject, stream, expandedName, property.first, false, first);
+					first = false;
+				}
+				{
+					ScopedStream<ApiFileOutputStream> scopedStream(stream);
 				}
 			}
 			if (!previousArray)
@@ -239,9 +310,48 @@ namespace trader {
 				}
 				else
 				{
+					Poco::Dynamic::Var formatVar = obj->get("description");
+					if (!formatVar.isEmpty())
+					{
+						string description = formatVar.convert<string>();
+						stream << "// " << description << endl;
+					}
+					stream << "void Set" << type_name(keyName) << "(" << getCppType(type, obj) << " val)" << endl;
+					{
+						ScopedStream<ApiFileOutputStream> scopedStream(stream);
+						Poco::Dynamic::Var patternVar = obj->get("pattern");
+						if (!patternVar.isEmpty())
+						{
+							string pattern = patternVar.convert<string>();
+							stream << "std::regex valRegex(\"" << pattern <<"\")" << cendl;
+							if (strcmp(getCppType(type, obj), "char") == 0)
+							{
+								stream << "std::string valMatch(1, val)" << cendl;
+							}
+							else
+							{
+								stream << "std::string valMatch(val)" << cendl;
+							}
+							stream << "if (std::regex_match(valMatch, valRegex))" << endl;
+							{
+								ScopedStream<ApiFileOutputStream> scopedStream(stream);
+								stream << var_name(keyName) << " = val" << cendl;
+							}
+							stream << "else" << endl;
+							{
+								ScopedStream<ApiFileOutputStream> scopedStream(stream);
+								stream << "throw Poco::RegularExpressionException(\"" << var_name(keyName) << " invalid.\")" << cendl;
+							}
+						}
+						else
+						{
+							stream << var_name(keyName) << " = val" << cendl;
+						}
+					}
+					stream << endl;
 					stream << getCppType(type, obj) << tabs(1) << var_name(keyName) << cendl;
 				}
-
+				stream << endl;
 			}
 		}
 	}
@@ -261,15 +371,47 @@ namespace trader {
 		string type = rootObj->get("type");
 		if (isObject(type))
 		{
+			JSON::Array::Ptr required;
+			Dynamic::Var requiredVar = rootObj->get("required");
+			if (!requiredVar.isEmpty())
+			{
+				required = requiredVar.extract<JSON::Array::Ptr>();
+			}
 			JSON::Object::Ptr properties = rootObj->getObject("properties");
 			{
 				UInt32 count = 0;
 				for (auto& property : *properties)
 				{
+					bool isRequired = false;
+					if (required)
+					{
+						for (auto requiredProperty : *required)
+						{
+							string reqPropStr = requiredProperty.convert<string>();
+							if (reqPropStr.compare(property.first) == 0)
+							{
+								isRequired = true;
+								break;
+							}
+						}
+					}
 					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
-					stream << "std::ostringstream var" << count << cendl;
-					stream << "var" << count << " << " << var_name(name) << "->object." << property.first << cendl;
-					stream << "uri.addQueryParameter(std::string(\"" << property.first << "\"), var" << count << ".str())" << cendl;
+					stream << "if (" << var_name(name) << "->object." << property.first << " != " << getCppDefaultVal(propertyObject->get("type"), propertyObject) << ") ";
+					{
+						ScopedStream<ApiFileOutputStream> scopedStream(stream);
+						stream << var_name(name) << "->object.Set" << type_name(property.first) << "(" << var_name(name) << "->object." << property.first << ")" << cendl;
+						stream << "std::ostringstream var" << count << cendl;
+						stream << "var" << count << " << " << var_name(name) << "->object." << property.first << cendl;
+						stream << "uri.addQueryParameter(std::string(\"" << property.first << "\"), var" << count << ".str())" << cendl;
+					}
+					if (isRequired)
+					{
+						stream << "else ";
+						{
+							ScopedStream<ApiFileOutputStream> scopedStream(stream);
+							stream <<  "throw Poco::NullValueException(\"" << property.first << " must be set.\")" << cendl;
+						}
+					}
 					count++;
 				}
 			}

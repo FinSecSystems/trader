@@ -4,10 +4,12 @@
       "type": "object",
       "properties": {
         "ask": {
-          "type": "double"
+          "format": "double",
+          "type": "number"
         },
         "bid": {
-          "type": "double"
+          "format": "double",
+          "type": "number"
         }
       },
       "required": [ "ask", "bid" ]
@@ -16,16 +18,20 @@
       "type": "object",
       "properties": {
         "ask": {
-          "type": "double"
+          "format": "double",
+          "type": "number"
         },
         "bid": {
-          "type": "double"
+          "format": "double",
+          "type": "number"
         },
         "last": {
-          "type": "double"
+          "format": "double",
+          "type": "number"
         },
         "vol": {
-          "type": "double"
+          "format": "double",
+          "type": "number"
         }
       },
       "required": [ "ask", "bid", "last", "double" ]
@@ -38,7 +44,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "double"
+              "format": "double",
+              "type": "number"
             }
           }
         },
@@ -47,7 +54,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "double"
+              "format": "double",
+              "type": "number"
             }
           }
         }
@@ -59,17 +67,19 @@
         "type": "object",
         "properties": {
           "amount": {
-            "type": "double"
+            "format": "double",
+            "type": "number"
           },
           "date": {
             "format": "epochtime",
-            "type": "int"
+            "type": "number"
           },
           "price": {
-            "type": "double"
+            "format": "double",
+            "type": "number"
           },
           "tid": {
-            "type": "int"
+            "type": "number"
           }
         }
       }
@@ -87,10 +97,11 @@
       "type": "object",
       "properties": {
         "accNo": {
-          "type": "int"
+          "type": "number"
         },
         "btcBal": {
-          "type": "double"
+          "format": "double",
+          "type": "number"
         },
         "btcDeposit": {
           "pattern": "^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$",
@@ -101,10 +112,11 @@
           "type": "string"
         },
         "error": {
-          "type": "int"
+          "type": "number"
         },
         "sgdBal": {
-          "type": "double"
+          "format": "double",
+          "type": "number"
         }
       },
       "required": []
@@ -113,7 +125,7 @@
       "type": "object",
       "properties": {
         "error": {
-          "type": "int"
+          "type": "number"
         },
         "orders": {
           "type": "array",
@@ -122,16 +134,18 @@
             "properties": {
               "date": {
                 "format": "epochtime",
-                "type": "int"
+                "type": "number"
               },
               "price": {
-                "type": "double"
+                "format": "double",
+                "type": "number"
               },
               "qty": {
-                "type": "double"
+                "format": "double",
+                "type": "number"
               },
               "ticket": {
-                "type": "int"
+                "type": "number"
               },
               "type": {
                 "type": "string"
@@ -141,24 +155,183 @@
         }
       }
     },
-    "TradesInput": {
+    "OrderHistory": {
       "type": "object",
       "properties": {
-        "since": {
-          "type": "int"
+        "error": {
+          "type": "number"
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date_created": {
+                "format": "epochtime",
+                "type": "number"
+              },
+              "date_executed": {
+                "format": "epochtime",
+                "type": "number"
+              },
+              "price": {
+                "type": "string"
+              },
+              "qty": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "ticket": {
+                "type": "number"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "OrderStatus": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "number"
+        },
+        "msg": {
+          "type": "string"
+        },
+        "pending_oid": {
+          "type": "string"
         }
       },
       "required": []
     },
-    "TimestampInput": {
+    "ErrorNumber": {
       "type": "object",
       "properties": {
-        "timestamp": {
-          "format": "epochtime",
-          "type": "int"
+        "error": {
+          "type": "number"
         }
       },
       "required": []
+    },
+    "ErrorNumberAndMessage": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "number"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "TradesParams": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "Trade ID to begin trade history from. You should cache trade history and query only new trades by passing in last known trade id",
+          "type": "number"
+        }
+      },
+      "required": []
+    },
+    "TimestampParams": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "Current Unix timestamp",
+          "format": "epochtime",
+          "type": "number"
+        }
+      },
+      "required": [ "timestamp" ]
+    },
+    "OrderHistoryParams": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "Current Unix timestamp",
+          "format": "epochtime",
+          "type": "number"
+        },
+        "limit": {
+          "type": "number"
+        }
+      },
+      "required": [ "timestamp", "limit" ]
+    },
+    "OrderParams": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "Current Unix timestamp",
+          "format": "epochtime",
+          "type": "number"
+        },
+        "qty": {
+          "description": "Quantity of bitcoins",
+          "format": "double",
+          "type": "number"
+        },
+        "price": {
+          "description": "Price to place order at",
+          "format": "double",
+          "type": "number"
+        },
+        "type": {
+          "pattern": "B|S",
+          "format": "char",
+          "description": "Whether it is a buy or sell order. Must be either 'B' or 'S' only.",
+          "type": "string"
+        }
+      },
+      "required": [ "timestamp", "qty", "price", "type" ]
+    },
+    "CancelOrderParams": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "Current Unix timestamp",
+          "format": "epochtime",
+          "type": "number"
+        },
+        "orderNo": {
+          "description": "Ticket Number of Pending Order to cancel",
+          "type": "number"
+        }
+      },
+      "required": [ "timestamp", "orderNo" ]
+    },
+    "WithdrawParams": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "Current Unix timestamp",
+          "format": "epochtime",
+          "type": "number"
+        },
+        "amount": {
+          "description": "Amount of bitcoins/dollars to withdraw",
+          "format": "double",
+          "type": "number"
+        },
+        "destination": {
+          "description": "Bitcoin address to withdraw to, leave blank for XFERS",
+          "pattern": "^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$",
+          "type": "string"
+        },
+        "type": {
+          "pattern": "BTC|XFERS",
+          "description": "BTC/XFERS (XFERS only for FYB-SG)",
+          "type": "string"
+        }
+      },
+      "required": [ "timestamp", "amount", "type" ]
     }
   },
   "properties": {
@@ -178,11 +351,35 @@
     "pendingorders": {
       "$ref": "#/definitions/PendingOrders"
     },
-    "tradesinput": {
-      "$ref": "#/definitions/TradesInput"
+    "orderhistory": {
+      "$ref": "#/definitions/OrderHistory"
     },
-    "timestampinput": {
-      "$ref": "#/definitions/TimestampInput"
+    "tradesparams": {
+      "$ref": "#/definitions/TradesParams"
+    },
+    "timestampparams": {
+      "$ref": "#/definitions/TimestampParams"
+    },
+    "orderhistoryparams": {
+      "$ref": "#/definitions/OrderHistoryParams"
+    },
+    "orderparams": {
+      "$ref": "#/definitions/OrderParams"
+    },
+    "orderstatus": {
+      "$ref": "#/definitions/OrderStatus"
+    },
+    "cancelorderparams": {
+      "$ref": "#/definitions/CancelOrderParams"
+    },
+    "errornumber": {
+      "$ref": "#/definitions/ErrorNumber"
+    },
+    "withdrawparams": {
+      "$ref": "#/definitions/WithdrawParams"
+    },
+    "errornumberandmessage": {
+      "$ref": "#/definitions/ErrorNumberAndMessage"
     },
     "required": []
   },
@@ -247,7 +444,7 @@
         }
       ],
       "schema": {
-        "$ref": "#/definitions/TradesInput"
+        "$ref": "#/definitions/TradesParams"
       }
     },
     {
@@ -262,7 +459,7 @@
         }
       ],
       "schema": {
-        "$ref": "#/definitions/TimestampInput"
+        "$ref": "#/definitions/TimestampParams"
       }
     },
     {
@@ -280,7 +477,7 @@
         }
       ],
       "schema": {
-        "$ref": "#/definitions/TimestampInput"
+        "$ref": "#/definitions/TimestampParams"
       }
     },
     {
@@ -298,7 +495,79 @@
         }
       ],
       "schema": {
-        "$ref": "#/definitions/TimestampInput"
+        "$ref": "#/definitions/TimestampParams"
+      }
+    },
+    {
+      "href": "getorderhistory",
+      "description": "Return executed order history",
+      "method": "POST",
+      "title": "GetOrderHistory",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/OrderHistory"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/OrderHistoryParams"
+      }
+    },
+    {
+      "href": "placeorder",
+      "description": "Place an order. Works similar to placing an order on Trade Page",
+      "method": "POST",
+      "title": "PlaceOrder",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/OrderStatus"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/OrderParams"
+      }
+    },
+    {
+      "href": "cancelpendingorder",
+      "description": "Cancel a Pending Order",
+      "method": "POST",
+      "title": "CancelOrder",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/ErrorNumber"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/CancelOrderParams"
+      }
+    },
+    {
+      "href": "withdraw",
+      "description": "Make a withdrawal (Does not require email confirmation)",
+      "method": "POST",
+      "title": "Withdraw",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/ErrorNumberAndMessage"
+        },
+        {
+          "$ref": "#/definitions/ErrorMessage"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/WithdrawParams"
       }
     }
   ],
