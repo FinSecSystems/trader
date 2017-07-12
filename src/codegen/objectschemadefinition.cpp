@@ -85,9 +85,9 @@ namespace trader {
 		string type = obj->get("type");
 		if (isObject(type))
 		{
-			if (!previousArray)
+			//if (!previousArray)
 			{
-				expansionStream << "Object";
+				expansionStream << expansionstringstream::OBJECT;
 			}
 			JSON::Object::Ptr properties = obj->getObject("properties");
 			stream << "Poco::JSON::Object::Ptr " << temp_name(idx+1) << " = " << temp_name(idx+0) << ".extract<Poco::JSON::Object::Ptr>()" << cendl;
@@ -109,12 +109,12 @@ namespace trader {
 			if (!previousArray)
 			{
 				ostringstream temp;
-				temp << "::" << type_name(keyName) << "Array";
+				temp << "::" << type_name(keyName) << expansionStream.getTypeString(expansionstringstream::ARRAY);
 				expansionStream << temp.str();
 			}
 			else
 			{
-				expansionStream << "Array";
+				expansionStream << expansionstringstream::ARRAY;
 			}
 			JSON::Object::Ptr items = obj->getObject("items");
 			stream << "Poco::JSON::Array::Ptr " << temp_name(idx+1) << " = " << temp_name(idx+0) << ".extract<Poco::JSON::Array::Ptr>()" << cendl;
@@ -140,9 +140,16 @@ namespace trader {
 			const char* cppType = getCppType(type, obj);
 			if (cppType)
 			{
-				if (previousArray)
+				if (expansionStream.has(expansionstringstream::ARRAY))
 				{
-					stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+					if (expansionStream.wasPrevious(expansionstringstream::ARRAY))
+					{
+						stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+					}
+					else
+					{
+						stream << expansionStream.var_name_str() << "." << keyName << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+					}
 				}
 				else
 				{

@@ -408,6 +408,14 @@ namespace trader {
 	class expansionstringstream
 	{
 	public:
+
+		enum Type
+		{
+			ARRAY = 0,
+			OBJECT,
+			NUM_TYPES
+		};
+
 		expansionstringstream() {}
 
 		expansionstringstream(const expansionstringstream& other)
@@ -415,33 +423,65 @@ namespace trader {
 			varNameStream << other.varNameStream.str();
 			typeNameStream << other.typeNameStream.str();
 			prefixStream << other.prefixStream.str();
+			typeStack = other.typeStack;
+		}
+
+		const char* getTypeString(Type type)
+		{
+			static const char* TypeString[] =
+			{
+				"Array",
+				"Object"
+			};
+			return TypeString[(Int32)type];
+		}
+
+		void updateStack(const char* text)
+		{
+			string str(text);
+			for (UInt32 typeIdx = 0; typeIdx < NUM_TYPES; typeIdx++)
+			{
+				const char* testString = getTypeString((Type)typeIdx);
+				std::size_t found = str.find(testString);
+				if (found != std::string::npos)
+				{
+					typeStack.push_back((Type)typeIdx);
+					break;
+				}
+			}
 		}
 
 		friend expansionstringstream& operator<<(expansionstringstream& os, const char* text)
 		{
-			if (!os.varNameStream.str().length())
+			bool previousWasArray = os.wasPrevious(expansionstringstream::ARRAY);
+			os.updateStack(text);
+			bool newIsObject = os.wasPrevious(expansionstringstream::OBJECT);
+			if (!previousWasArray || !newIsObject)
 			{
-				os.varNameStream << var_name(text);
-			}
-			else
-			{
-				os.varNameStream << clean_name(text);
-			}
-			if (!os.typeNameStream.str().length())
-			{
-				os.typeNameStream << type_name(text);
-			}
-			else
-			{
-				os.typeNameStream << text;
-			}
-			if (!os.prefixStream.str().length())
-			{
-				os.prefixStream << var_name(text);
-			}
-			else
-			{
-				os.prefixStream << std::dot << var_name(text);
+				if (!os.varNameStream.str().length())
+				{
+					os.varNameStream << var_name(text);
+				}
+				else
+				{
+					os.varNameStream << clean_name(text);
+				}
+				if (!os.typeNameStream.str().length())
+				{
+					os.typeNameStream << type_name(text);
+				}
+				else
+				{
+					os.typeNameStream << text;
+				}
+				if (!os.prefixStream.str().length())
+				{
+					os.prefixStream << var_name(text);
+				}
+				else
+				{
+					os.prefixStream << std::dot << var_name(text);
+				}
 			}
 			return os;
 		}
@@ -467,6 +507,12 @@ namespace trader {
 			return os;
 		}
 
+		friend expansionstringstream& operator<<(expansionstringstream& os, expansionstringstream::Type type)
+		{
+			os << os.getTypeString(type);
+			return os;
+		}
+
 		friend expansionstringstream& operator<<(expansionstringstream& os, expansionstringstream& (*_Pfn)(expansionstringstream&))
 		{
 			return ((*_Pfn)(os));
@@ -487,9 +533,26 @@ namespace trader {
 			return typeNameStream.str();
 		}
 
+		bool wasPrevious(Type type)
+		{
+			if (typeStack.size())
+			{
+				auto& lastType = typeStack.back();
+				return (lastType == type ? true : false);
+			}
+			return false;
+		}
+
+		bool has(Type type)
+		{
+			std::vector<Type>::iterator it = find(typeStack.begin(), typeStack.end(), type);
+			return (it != typeStack.end() ? true : false);
+		}
+
 		ostringstream varNameStream;
 		ostringstream typeNameStream;
 		ostringstream prefixStream;
+		vector<Type>   typeStack;
 	};
 
 }
