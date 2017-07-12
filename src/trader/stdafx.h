@@ -27,6 +27,7 @@
 #include "Poco/Base32Encoder.h"
 #include "Poco/HexBinaryEncoder.h"
 #include "Poco/Exception.h"
+#include "Poco/InflatingStream.h"
 #pragma warning(pop)
 #include <ctime>
 #include <regex>

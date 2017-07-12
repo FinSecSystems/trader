@@ -27,7 +27,8 @@ Poco::Dynamic::Var Fyb::invoke(const std::string& httpMethod, const Poco::URI& u
 	// Create the request URI.
 	Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort());
 	Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);
-	
+	req.add("Accept-Encoding", "gzip");
+
 	// Sign request
     if (httpMethod == Poco::Net::HTTPRequest::HTTP_POST)
     {
@@ -68,9 +69,10 @@ Poco::Dynamic::Var Fyb::invoke(const std::string& httpMethod, const Poco::URI& u
 	Poco::Net::HTTPResponse res;
 	std::istream& rs = session.receiveResponse(res);
 	
+	Poco::InflatingInputStream inflater(rs, Poco::InflatingStreamBuf::STREAM_GZIP);
 	// Parse the JSON
 	Poco::JSON::Parser parser;
-	parser.parse(rs);
+	parser.parse(inflater);
 	Poco::Dynamic::Var result = parser.result();
 
 	// If everything went fine, return the JSON document.

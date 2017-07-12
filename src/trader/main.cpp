@@ -142,7 +142,7 @@ protected:
 			}
             trader::FybApi fyb;
             fyb.login(_consumerKey, _consumerSecret);
-            //Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
+            Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
             //std::cout << tickerDetailedData->ask << std::endl;
 			//Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
 			//std::cout << tickerDetailedData->ask << std::endl;
@@ -154,11 +154,20 @@ protected:
 			//Poco::AutoPtr<trader::ErrorMessage> errorMsg = fyb.Test(timeStampInputData);
 			//Poco::AutoPtr<trader::AccountInfo> accountInfo = fyb.GetAccountInfo(timeStampInputData);
 			//Poco::AutoPtr<trader::PendingOrders> pendingOrders = fyb.GetPendingOrders(timeStampInputData);
-			Poco::AutoPtr<trader::OrderHistoryParams> orderHistoryInputData = new trader::OrderHistoryParams();
-			orderHistoryInputData->object.timestamp = std::time(nullptr);
-			orderHistoryInputData->object.limit = 10;
-			Poco::AutoPtr<trader::OrderHistory> orderHistory = fyb.GetOrderHistory(orderHistoryInputData);
-
+			//Poco::AutoPtr<trader::OrderHistoryParams> orderHistoryInputData = new trader::OrderHistoryParams();
+			//orderHistoryInputData->object.timestamp = std::time(nullptr);
+			//orderHistoryInputData->object.limit = 10;
+			//Poco::AutoPtr<trader::OrderHistory> orderHistory = fyb.GetOrderHistory(orderHistoryInputData);
+			//Poco::AutoPtr<trader::OrderParams> orderParams = new trader::OrderParams();
+			//orderParams->object.SetPrice(.1);
+			//orderParams->object.SetQty(.2);
+			//orderParams->object.SetTimestamp(std::time(nullptr));
+			//orderParams->object.SetType('B');
+			//Poco::AutoPtr<trader::OrderStatus> orderStatus = fyb.PlaceOrder(orderParams);
+			Poco::AutoPtr<trader::CancelOrderParams> cancelOrderParams = new trader::CancelOrderParams();
+			cancelOrderParams->object.SetOrderNo(2129260);
+			cancelOrderParams->object.SetTimestamp(std::time(nullptr));
+			Poco::AutoPtr<trader::ErrorNumber> errorNumber = fyb.CancelOrder(cancelOrderParams);
 		}
         catch (Poco::Exception& exc)
         {
