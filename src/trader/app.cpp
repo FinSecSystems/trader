@@ -111,7 +111,12 @@ namespace trader {
 
 			trader::ExchangeratelabApi exchangeRateLab(this);
 			trader::FybApi fyb(this);
+			fyb.run();
 			//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.GetUSDToSGD();
+
+			do {
+				Poco::Thread::sleep(10000);
+			} while (1);
 		}
         catch (Poco::Exception& exc)
         {

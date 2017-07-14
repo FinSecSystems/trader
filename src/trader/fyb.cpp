@@ -15,26 +15,49 @@ namespace trader {
 
 	Fyb::Fyb()
 		: fybApi(*((trader::FybApi*)this))
-		, db(*fybApi._app->dbSession)
+		, executeTickerDetailedTimer(0,5000)
+		, executeAccountInfoTimer(500, 5000)
 	{
-		Timer timer(0, 500);
-		timer.start(TimerCallback<Fyb>(*this, &Fyb::executeTickerDetailed));
+	}
+
+	void Fyb::run()
+	{
+		db = fybApi._app->dbSession;
+
+		// Create table
+		*db << "CREATE TABLE IF NOT EXISTS FybTickerDetailed (TimeStamp INTEGER, Ask REAL, Bid REAL, Last REAL, Vol REAL)", now;
+		*db << "CREATE UNIQUE INDEX IF NOT EXISTS FybTickerDetailedIndex on FybTickerDetailed(TimeStamp)", now;
+		executeTickerDetailedTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTickerDetailed));
+		executeAccountInfoTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeAccountInfo));
 	}
 
 	void Fyb::executeTickerDetailed(Timer& timer)
 	{
 		(void)timer;
 		Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fybApi.GetTickerDetailed();
-		// (re)create table
-		db << "CREATE TABLE FybTickerDetailed (Ask REAL, Bid REAL, Last REAL, Vol REAL)", now;
 
-		Statement insert(db);
-		insert << "INSERT INTO FybTickerDetailed VALUES(?, ?, ?, ?)",
+		Statement insert(*db);
+		insert << "INSERT INTO FybTickerDetailed VALUES(?, ?, ?, ?, ?)",
+			bind(std::time(nullptr)),
 			use(tickerDetailedData->dataObject.ask),
 			use(tickerDetailedData->dataObject.bid),
 			use(tickerDetailedData->dataObject.last),
 			use(tickerDetailedData->dataObject.vol);
+		insert.execute();
+	}
 
+	void Fyb::executeAccountInfo(Timer& timer)
+	{
+		(void)timer;
+		Poco::AutoPtr<trader::AccountInfo> tickerDetailedData = fybApi.GetAccountInfo();
+
+		Statement insert(*db);
+		insert << "INSERT INTO FybTickerDetailed VALUES(?, ?, ?, ?, ?)",
+			bind(std::time(nullptr)),
+			use(tickerDetailedData->dataObject.ask),
+			use(tickerDetailedData->dataObject.bid),
+			use(tickerDetailedData->dataObject.last),
+			use(tickerDetailedData->dataObject.vol);
 		insert.execute();
 	}
 

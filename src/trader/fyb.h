@@ -14,7 +14,10 @@ namespace trader {
 
 		virtual Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
 
+		void run();
+
 		void executeTickerDetailed(Poco::Timer& timer);
+		void executeAccountInfo(Poco::Timer& timer);
 
 	protected:
 		Fyb(const Fyb&);
@@ -26,7 +29,9 @@ namespace trader {
 
 	private:
 		FybApi& fybApi;
-		Poco::Data::Session& db;
+		Poco::Data::Session* db;
+		Poco::Timer executeTickerDetailedTimer;
+		Poco::Timer executeAccountInfoTimer;
 	};
 
 }
