@@ -53,6 +53,7 @@ namespace trader {
 			ScopedNamespace scopedNamesapce(header, config.nameSpace);
 			{
 				ScopedClass<1> scopedClass(header, def.getName(), "Poco::RefCountedObject");
+				construct_header(header, def.getName(), 0);
 				def.writeHeader(header);
 			}
 		}

@@ -263,6 +263,8 @@
             "deps/poco/Util/include",
             "deps/poco/openssl/include",
             "deps/poco/JSON/include",
+            "deps/poco/Data/include",
+            "deps/poco/Data/SQLite/include",
 			"tmp/codegen"
             }
 		pchheader   "stdafx.h"
@@ -274,7 +276,7 @@
 
 		files
 		{
-			"*.txt", "**.md",
+			"*.txt", "*.md",
 			"src/trader/**.h", "src/trader/**.cpp",
 			"include/**.h",
 			"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
@@ -286,6 +288,7 @@
             "deps/poco/NetSSL_Win/include/**.h", "deps/poco/NetSSL_Win/src/**.cpp",
             "deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
             "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp",
+            "deps/poco/Data/**.h", "deps/poco/Data/**.cpp",
             "tmp/codegen/**.h", "tmp/codegen/**.cpp",
 			"bin/**.json"
 		}
@@ -308,7 +311,9 @@
                 "deps/poco/lib64/PocoCryptod.lib",
                 "deps/poco/lib64/ssleay64MDd.lib",
                 "deps/poco/lib64/libeay64MDd.lib",
-                "deps/poco/lib64/PocoJSONd.lib"
+                "deps/poco/lib64/PocoJSONd.lib",
+                "deps/poco/lib64/PocoDatad.lib",
+                "deps/poco/lib64/PocoDataSQLited.lib"
                 }
 
 		filter "configurations:release"
@@ -322,7 +327,9 @@
                 "deps/poco/lib64/PocoCrypto.lib",
                 "deps/poco/lib64/ssleay64MD.lib",
                 "deps/poco/lib64/libeay64MD.lib",
-                "deps/poco/lib64/PocoJSON.lib"
+                "deps/poco/lib64/PocoJSON.lib",
+                "deps/poco/lib64/PocoData.lib",
+                "deps/poco/lib64/PocoDataSQLite.lib"
                 }
 
 		filter "system:windows"

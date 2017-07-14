@@ -43,6 +43,8 @@ namespace trader {
 		config.cppFileName = outputdirectory + Path::separator() + apiName + ".cpp";
 		string name;
 		getAPIName("", filename, name);
+		string configClassName;
+		getAPIName("config", filename, configClassName);
 
 		JSON::Object::Ptr definitions = api->getObject("definitions");
 
@@ -76,9 +78,23 @@ namespace trader {
 		string headerName = name;
 		std::transform(headerName.begin(), headerName.end(), headerName.begin(), ::tolower);
 		baseHeaderName << "trader/" << headerName << ".h";
-		
-		startHeader(header, 1,
-			baseHeaderName.str().c_str());
+
+		ostringstream configHeaderName;
+		string configHeaderStr = configClassName;
+		std::transform(configHeaderStr.begin(), configHeaderStr.end(), configHeaderStr.begin(), ::tolower);
+		configHeaderName << configHeaderStr << ".h";
+
+		ostringstream appPtrStream;
+		appPtrStream << "Poco::AutoPtr<" << namespacename << "::App>";
+
+		ostringstream baseUrlStream;
+		baseUrlStream << "\"" << config.baseUrl << "\"";
+
+		startHeader(header, 3,
+			baseHeaderName.str().c_str(),
+			configHeaderName.str().c_str(),
+			"trader/app.h"
+			);
 		{
 			ScopedNamespace scopedNamesapce(header, config.nameSpace);
 			for (auto& schemaDefinition : config.schemaDefinitions)
@@ -86,20 +102,32 @@ namespace trader {
 				ObjectSchemaDefinition& def = schemaDefinition.second;
 				{
 					ScopedClass<1> scopedClass(header, def.getName(), "Poco::RefCountedObject");
+					construct_header(header, def.getName(), 0);
 					def.writeHeader(header);
 				}
 			}
 			{
 				ScopedClass<1> scopedClass(header, config.apiName, name.c_str());
+				construct_header(header, config.apiName, 2
+					, appPtrStream.str().c_str(), "app"
+				);
 				for (auto& endPoint : endPoints)
 				{
 					endPoint.writeHeader(header);
 				}
+				if (config.useConfig)
+				{
+					header << endl;
+					header << configClassName << tabs(1) << "config" << cendl;
+				}
+				header << endl;
+				header << "Poco::AutoPtr<" << namespacename << "::App>" << tabs(1) << "_app" << cendl;
 			}
 		}
 
-		startCpp(cpp, 1,
-			config.headerFileName.c_str()
+		startCpp(cpp, 2,
+			config.headerFileName.c_str(),
+			"trader/app.h"
 		);
 		{
 			ScopedNamespace scopedNamesapce(cpp, config.nameSpace);
@@ -109,7 +137,33 @@ namespace trader {
 				construct(cpp, def.getName(), 0);
 				def.writeCpp(cpp);
 			}
-			construct(cpp, config.apiName, 2, "_uri", config.baseUrl.c_str());
+
+			if (config.useConfig)
+			{
+				ostringstream pathStatement;
+				string nameStr = name;
+				std::transform(nameStr.begin(), nameStr.end(), nameStr.begin(), ::tolower);
+				pathStatement << "Poco::Path filePath(\"" << nameStr << ".config.json\");";
+
+				construct_ex(cpp, config.apiName, 2, 4, 4
+					, appPtrStream.str().c_str(), "app"
+					, "_uri", baseUrlStream.str().c_str()
+					, "_app", "app"
+					, pathStatement.str().c_str()
+					, "if (app->findFile(filePath)) {"
+					, "\tconfig.readFile(filePath.toString());"
+					, "}"
+				);
+			}
+			else
+			{
+				construct_ex(cpp, config.apiName, 2, 4, 0
+					, appPtrStream.str().c_str(), "app"
+					, "_uri", baseUrlStream.str().c_str()
+					, "_app", "app"
+				);
+			}
+
 			for (auto& endPoint : endPoints)
 			{
 				endPoint.writeCpp(cpp);

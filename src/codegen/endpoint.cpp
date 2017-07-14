@@ -65,8 +65,13 @@ namespace trader {
 			cpp << "catch (Poco::Exception& exc) ";
 			{
 				ScopedStream<ApiFileOutputStream> stream(cpp);
+				cpp << "(void)exc" << cendl;
 				writeResponseSchema(cpp, idx + 1);
 			}
+		}
+		else
+		{
+			cpp << "Poco::Logger::get(\"Logs\").information(\"Response Parsing Error: %s\", exc.displayText())" << cendl;
 		}
 	}
 

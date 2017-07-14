@@ -1,0 +1,60 @@
+{
+  "definitions": {
+    "SingleExchangeRate": {
+      "type": "object",
+      "properties": {
+        "rate": {
+          "type": "object",
+          "properties": {
+            "rate": {
+              "format": "double",
+              "type": "number"
+            },
+            "to": {
+              "type": "string"
+            }
+          }
+        },
+        "baseCurrency": {
+          "type": "string"
+        },
+        "timeStamp": {
+          "description": "Current Unix timestamp",
+          "format": "epochtime",
+          "type": "number"
+        },
+        "executionTime": {
+          "type": "number"
+        },
+        "licenseMessage": {
+          "type": "string"
+        }
+      },
+      "required": [ "timestamp", "limit" ]
+    }
+  },
+  "properties": {
+    "type": "object",
+    "required": []
+  },
+  "links": [
+    {
+      "href": "SGD",
+      "description": "Get current bid and ask",
+      "method": "GET",
+      "title": "GetUSDToSGD",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/SingleExchangeRate"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseurl": "http://api.exchangeratelab.com/api/single/",
+    "useConfig":  true
+  },
+  "required": [],
+  "type": "object"
+}

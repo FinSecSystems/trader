@@ -98,7 +98,7 @@ namespace trader {
 				string format = formatVar.convert<string>();
 				if (format.compare("char") == 0)
 				{
-					return "0x255";
+					return "std::numeric_limits<char>::max()";
 				}
 			}
 			return "\"Empty\"";
@@ -130,6 +130,17 @@ namespace trader {
 		if (isObject(type))
 		{
 			//if (!previousArray)
+			{
+			//	expansionStream << expansionstringstream::OBJECT;
+			}
+
+			if (!previousArray)
+			{
+				ostringstream temp;
+				temp << "::" << type_name(keyName) << expansionStream.getTypeString(expansionstringstream::OBJECT);
+				expansionStream << temp.str();
+			}
+			else
 			{
 				expansionStream << expansionstringstream::OBJECT;
 			}
@@ -252,11 +263,17 @@ namespace trader {
 		{
 			if (!previousArray)
 			{
-				expandedName += "Object";
+				ostringstream temp;
+				temp << type_name(keyName) << "Object";
+				expandedName = temp.str();
+			}
+			else
+			{
+				//expandedName += "Object";
 			}
 			JSON::Object::Ptr properties = obj->getObject("properties");
 			{
-				ScopedStruct<0, ApiFileOutputStream> scopedStream(stream, expandedName);
+				ScopedStruct<0, ApiFileOutputStream> scopedStruct(stream, expandedName);
 				for (auto& property : *properties)
 				{
 					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
@@ -323,6 +340,7 @@ namespace trader {
 						if (!patternVar.isEmpty())
 						{
 							string pattern = patternVar.convert<string>();
+							trader::replace(pattern, "\\", "\\\\");
 							stream << "std::regex valRegex(\"" << pattern <<"\")" << cendl;
 							if (strcmp(getCppType(type, obj), "char") == 0)
 							{
@@ -334,12 +352,12 @@ namespace trader {
 							}
 							stream << "if (std::regex_match(valMatch, valRegex))" << endl;
 							{
-								ScopedStream<ApiFileOutputStream> scopedStream(stream);
+								ScopedStream<ApiFileOutputStream> scopedStreamRegex(stream);
 								stream << var_name(keyName) << " = val" << cendl;
 							}
 							stream << "else" << endl;
 							{
-								ScopedStream<ApiFileOutputStream> scopedStream(stream);
+								ScopedStream<ApiFileOutputStream> scopedStreamRegex(stream);
 								stream << "throw Poco::RegularExpressionException(\"" << var_name(keyName) << " invalid.\")" << cendl;
 							}
 						}
@@ -396,12 +414,12 @@ namespace trader {
 						}
 					}
 					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
-					stream << "if (" << var_name(name) << "->object." << property.first << " != " << getCppDefaultVal(propertyObject->get("type"), propertyObject) << ") ";
+					stream << "if (" << var_name(name) << "->dataObject." << property.first << " != " << getCppDefaultVal(propertyObject->get("type"), propertyObject) << ") ";
 					{
 						ScopedStream<ApiFileOutputStream> scopedStream(stream);
-						stream << var_name(name) << "->object.Set" << type_name(property.first) << "(" << var_name(name) << "->object." << property.first << ")" << cendl;
+						stream << var_name(name) << "->dataObject.Set" << type_name(property.first) << "(" << var_name(name) << "->dataObject." << property.first << ")" << cendl;
 						stream << "std::ostringstream var" << count << cendl;
-						stream << "var" << count << " << " << var_name(name) << "->object." << property.first << cendl;
+						stream << "var" << count << " << " << var_name(name) << "->dataObject." << property.first << cendl;
 						stream << "uri.addQueryParameter(std::string(\"" << property.first << "\"), var" << count << ".str())" << cendl;
 					}
 					if (isRequired)

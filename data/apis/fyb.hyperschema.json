@@ -240,25 +240,9 @@
       },
       "required": []
     },
-    "TimestampParams": {
-      "type": "object",
-      "properties": {
-        "timestamp": {
-          "description": "Current Unix timestamp",
-          "format": "epochtime",
-          "type": "number"
-        }
-      },
-      "required": [ "timestamp" ]
-    },
     "OrderHistoryParams": {
       "type": "object",
       "properties": {
-        "timestamp": {
-          "description": "Current Unix timestamp",
-          "format": "epochtime",
-          "type": "number"
-        },
         "limit": {
           "type": "number"
         }
@@ -268,11 +252,6 @@
     "OrderParams": {
       "type": "object",
       "properties": {
-        "timestamp": {
-          "description": "Current Unix timestamp",
-          "format": "epochtime",
-          "type": "number"
-        },
         "qty": {
           "description": "Quantity of bitcoins",
           "format": "double",
@@ -295,11 +274,6 @@
     "CancelOrderParams": {
       "type": "object",
       "properties": {
-        "timestamp": {
-          "description": "Current Unix timestamp",
-          "format": "epochtime",
-          "type": "number"
-        },
         "orderNo": {
           "description": "Ticket Number of Pending Order to cancel",
           "type": "number"
@@ -310,11 +284,6 @@
     "WithdrawParams": {
       "type": "object",
       "properties": {
-        "timestamp": {
-          "description": "Current Unix timestamp",
-          "format": "epochtime",
-          "type": "number"
-        },
         "amount": {
           "description": "Amount of bitcoins/dollars to withdraw",
           "format": "double",
@@ -457,10 +426,7 @@
         {
           "$ref": "#/definitions/ErrorMessage"
         }
-      ],
-      "schema": {
-        "$ref": "#/definitions/TimestampParams"
-      }
+      ]
     },
     {
       "href": "getaccinfo",
@@ -475,10 +441,7 @@
         {
           "$ref": "#/definitions/ErrorMessage"
         }
-      ],
-      "schema": {
-        "$ref": "#/definitions/TimestampParams"
-      }
+      ]
     },
     {
       "href": "getpendingorders",
@@ -493,10 +456,7 @@
         {
           "$ref": "#/definitions/ErrorMessage"
         }
-      ],
-      "schema": {
-        "$ref": "#/definitions/TimestampParams"
-      }
+      ]
     },
     {
       "href": "getorderhistory",
@@ -572,7 +532,8 @@
     }
   ],
   "config": {
-    "baseurl": "https://www.fybsg.com/api/SGD/"
+    "baseurl": "https://www.fybsg.com/api/SGD/",
+    "useConfig": true 
   },
   "required": [],
   "type": "object"

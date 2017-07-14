@@ -124,14 +124,14 @@ namespace trader {
 			}
 			//declare constructor
 			stream << endl;
-			stream << "// Constructor" << endl;
-			stream << className << "()" << cendl;
+			//stream << "// Constructor" << endl;
+			//stream << className << "()" << cendl;
 
 			//declare destructor
-			stream << endl;
-			stream << "// Destructor" << endl;
-			stream << "~" << className << "()" << cendl;
-			stream << endl;
+			//stream << endl;
+			//stream << "// Destructor" << endl;
+			//stream << "~" << className << "()" << cendl;
+			//stream << endl;
 		}
 
 		~ScopedClass()
@@ -244,5 +244,69 @@ namespace trader {
 		cpp << endl;
 	}
 
+	inline void construct_header(ApiFileOutputStream& stream, const string& className, Int32 num, ...)
+	{
+		stream << className << "(";
+		va_list arguments;
+		va_start(arguments, num);
+		poco_assert(num % 2 == 0);
+		for (Int32 cnt = 0; cnt < num; cnt += 2)
+		{
+			if (cnt > 0)
+				stream << ", ";
+			const char* str = va_arg(arguments, const char*);
+			stream << str << " " << va_arg(arguments, const char*);
+		}
+		stream << ")" << cendl;
+		va_end(arguments);
+		stream << endl;
+		stream << "~" << className << "()" << cendl;
+		stream << endl;
+	}
+
+	inline void construct_ex(ApiFileOutputStream& cpp, const string& className, Int32 numParams, Int32 numInitializer, Int32 numStatements, ...)
+	{
+		cpp << className << "::" << className << "(";
+		va_list arguments;
+		va_start(arguments, numStatements);
+		poco_assert(numParams % 2 == 0);
+		for (Int32 cnt = 0; cnt < numParams; cnt += 2)
+		{
+			if (cnt > 0)
+				cpp << ", ";
+			const char* str = va_arg(arguments, const char*);
+			cpp << str << " " << va_arg(arguments, const char*);
+		}
+		cpp << ") ";
+		{
+			ScopedStream<ApiFileOutputStream> scope(cpp);
+			poco_assert(numInitializer % 2 == 0);
+			for (Int32 cnt = 0; cnt < numInitializer; cnt += 2)
+			{
+				const char* str = va_arg(arguments, const char*);
+				cpp << str << " = " << va_arg(arguments, const char*) << cendl;
+			}
+			for (Int32 cnt = 0; cnt < numStatements; cnt ++)
+			{
+				cpp << va_arg(arguments, const char*) << endl;
+			}
+		}
+		va_end(arguments);
+		cpp << endl;
+		cpp << className << "::~" << className << "() ";
+		{
+			ScopedStream<ApiFileOutputStream> scope(cpp);
+		}
+		cpp << endl;
+	}
+
+	inline std::string& replace(std::string& str, const char* from, const char* to) {
+		size_t start_pos = 0;
+		while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+			str.replace(start_pos, strlen(from), to);
+			start_pos += strlen(to); // Handles case where 'to' is a substring of 'from'
+		}
+		return str;
+	}
 }
 
