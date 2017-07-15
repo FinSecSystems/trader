@@ -25,8 +25,14 @@ namespace trader {
 		db = fybApi._app->dbSession;
 
 		// Create table
-		*db << "CREATE TABLE IF NOT EXISTS FybTickerDetailed (TimeStamp INTEGER, Ask REAL, Bid REAL, Last REAL, Vol REAL)", now;
-		*db << "CREATE UNIQUE INDEX IF NOT EXISTS FybTickerDetailedIndex on FybTickerDetailed(TimeStamp)", now;
+		*db << "CREATE TABLE IF NOT EXISTS Fyb_Ticker_Detailed (TimeStamp INTEGER, Ask REAL, Bid REAL, Last REAL, Vol REAL)", now;
+		*db << "CREATE UNIQUE INDEX IF NOT EXISTS Fyb_Ticker_Detailed_Index on Fyb_Ticker_Detailed(TimeStamp)", now;
+
+		*db << "CREATE TABLE IF NOT EXISTS Fyb_Account_Balance (TimeStamp INTEGER, BTC REAL, SGD REAL)", now;
+		*db << "CREATE UNIQUE INDEX IF NOT EXISTS Fyb_Account_Balance_Index on Fyb_Account_Balance(TimeStamp)", now;
+
+		*db << "CREATE TABLE IF NOT EXISTS Fyb_Account_Info (Account_Number TEXT, BTC_Address TEXT, Email TEXT)", now;
+		
 		executeTickerDetailedTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTickerDetailed));
 		executeAccountInfoTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeAccountInfo));
 	}
@@ -37,7 +43,7 @@ namespace trader {
 		Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fybApi.GetTickerDetailed();
 
 		Statement insert(*db);
-		insert << "INSERT INTO FybTickerDetailed VALUES(?, ?, ?, ?, ?)",
+		insert << "INSERT INTO Fyb_Ticker_Detailed VALUES(?, ?, ?, ?, ?)",
 			bind(std::time(nullptr)),
 			use(tickerDetailedData->dataObject.ask),
 			use(tickerDetailedData->dataObject.bid),
@@ -49,16 +55,31 @@ namespace trader {
 	void Fyb::executeAccountInfo(Timer& timer)
 	{
 		(void)timer;
-		Poco::AutoPtr<trader::AccountInfo> tickerDetailedData = fybApi.GetAccountInfo();
+		Poco::AutoPtr<trader::AccountInfo> accountInfo = fybApi.GetAccountInfo();
 
 		Statement insert(*db);
-		insert << "INSERT INTO FybTickerDetailed VALUES(?, ?, ?, ?, ?)",
+		insert << "INSERT INTO Fyb_Account_Balance VALUES(?, ?, ?)",
 			bind(std::time(nullptr)),
-			use(tickerDetailedData->dataObject.ask),
-			use(tickerDetailedData->dataObject.bid),
-			use(tickerDetailedData->dataObject.last),
-			use(tickerDetailedData->dataObject.vol);
+			use(accountInfo->dataObject.btcBal),
+			use(accountInfo->dataObject.sgdBal);
 		insert.execute();
+
+		Poco::Int32 count;
+		*db << "SELECT count(*) FROM Fyb_Account_Info",
+			into(count),
+			now;
+
+		if (!count)
+		{
+			std::ostringstream accountInfoStream;
+			accountInfoStream << "FYB" << accountInfo->dataObject.accNo;
+			Statement insertAccountInfo(*db);
+			insertAccountInfo << "INSERT INTO Fyb_Account_Info VALUES(?, ?, ?)",
+				use(accountInfoStream.str()),
+				use(accountInfo->dataObject.btcDeposit),
+				use(accountInfo->dataObject.email);
+			insertAccountInfo.execute();
+		}
 	}
 
 	Fyb::~Fyb()
