@@ -10,6 +10,50 @@ using Poco::Timer;
 using Poco::TimerCallback;
 using Poco::Thread;
 using Poco::Stopwatch;
+using Poco::Data::TypeHandler;
+using Poco::Data::AbstractBinder;
+using Poco::Data::AbstractExtractor;
+using Poco::Data::AbstractPreparator;
+
+struct AccountBalance
+{
+	Poco::UInt32  timeStamp;
+	double BTC;
+	double SGD;
+};
+
+template <>
+class TypeHandler<AccountBalance>
+	/// Defining a specialization of TypeHandler for Person allows us
+	/// to use the Person struct in use and into clauses.
+{
+public:
+	static std::size_t size()
+	{
+		return 4;
+	}
+
+	static void bind(std::size_t pos, const AccountBalance& accBal, AbstractBinder::Ptr pBinder, AbstractBinder::Direction dir)
+	{
+		TypeHandler<Poco::UInt32>::bind(pos++, accBal.timeStamp, pBinder, dir);
+		TypeHandler<double>::bind(pos++, accBal.BTC, pBinder, dir);
+		TypeHandler<double>::bind(pos++, accBal.SGD, pBinder, dir);
+	}
+
+	static void extract(std::size_t pos, AccountBalance& accBal, const AccountBalance& deflt, AbstractExtractor::Ptr pExtr)
+	{
+		TypeHandler<Poco::UInt32>::extract(pos++, accBal.timeStamp, deflt.timeStamp, pExtr);
+		TypeHandler<double>::extract(pos++, accBal.BTC, deflt.BTC, pExtr);
+		TypeHandler<double>::extract(pos++, accBal.SGD, deflt.SGD, pExtr);
+	}
+
+	static void prepare(std::size_t pos, const AccountBalance& accBal, AbstractPreparator::Ptr pPrep)
+	{
+		TypeHandler<Poco::UInt32>::prepare(pos++, accBal.timeStamp, pPrep);
+		TypeHandler<double>::prepare(pos++, accBal.BTC, pPrep);
+		TypeHandler<double>::prepare(pos++, accBal.SGD, pPrep);
+	}
+};
 
 namespace trader {
 
@@ -52,10 +96,29 @@ namespace trader {
 		insert.execute();
 	}
 
+	bool almostEqual(double a, double b) {
+		return std::fabs(a - b) < std::numeric_limits<double>::epsilon();
+	}
+
 	void Fyb::executeAccountInfo(Timer& timer)
 	{
 		(void)timer;
 		Poco::AutoPtr<trader::AccountInfo> accountInfo = fybApi.GetAccountInfo();
+		
+		std::vector<AccountBalance> accBal;
+		*db << "SELECT * FROM Fyb_Account_Balance ORDER BY TimeStamp DESC LIMIT 1",
+			into(accBal),
+			now;
+
+		if (!accBal.empty())
+		{
+			if (almostEqual(accBal[0].BTC, accountInfo->dataObject.btcBal) && almostEqual(accBal[0].SGD, accountInfo->dataObject.sgdBal))
+			{
+				*db << "DELETE FROM Fyb_Account_Balance WHERE TimeStamp = ?",
+					use(accBal[0].timeStamp),
+					now;
+			}
+		}
 
 		Statement insert(*db);
 		insert << "INSERT INTO Fyb_Account_Balance VALUES(?, ?, ?)",
@@ -64,7 +127,7 @@ namespace trader {
 			use(accountInfo->dataObject.sgdBal);
 		insert.execute();
 
-		Poco::Int32 count;
+		Poco::UInt32 count;
 		*db << "SELECT count(*) FROM Fyb_Account_Info",
 			into(count),
 			now;
@@ -75,7 +138,7 @@ namespace trader {
 			accountInfoStream << "FYB" << accountInfo->dataObject.accNo;
 			Statement insertAccountInfo(*db);
 			insertAccountInfo << "INSERT INTO Fyb_Account_Info VALUES(?, ?, ?)",
-				use(accountInfoStream.str()),
+				bind(accountInfoStream.str().c_str()),
 				use(accountInfo->dataObject.btcDeposit),
 				use(accountInfo->dataObject.email);
 			insertAccountInfo.execute();
