@@ -1,0 +1,197 @@
+{
+  "tables": [
+    {
+      "name": "Ticker_Detailed",
+      "fields": [
+        {
+          "name": "TimeStamp",
+          "title": "Time Stamp",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Current Unix Timestamp",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "Ask",
+          "title": "Ask Price",
+          "type": "REAL",
+          "format": "",
+          "description": "Snapshot of Ask Price",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Bid",
+          "title": "Bid Price",
+          "type": "REAL",
+          "format": "",
+          "description": "Snapshot of Bid Price",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Last",
+          "title": "Last Price",
+          "type": "REAL",
+          "format": "",
+          "description": "Snapshot of Last Price",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Vol",
+          "title": "Volume of Trades",
+          "type": "REAL",
+          "format": "",
+          "description": "Trading Volume",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+        "TimeStamp"
+      ],
+      "foreignKeys": []
+    },
+    {
+      "name": "Account_Balance",
+      "fields": [
+        {
+          "name": "TimeStamp",
+          "title": "Time Stamp",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Current Unix Timestamp",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "BtcBal",
+          "title": "BTC Balance",
+          "type": "REAL",
+          "format": "",
+          "description": "BTC remaining in Account",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "SgdBal",
+          "title": "SGD Balance",
+          "type": "REAL",
+          "format": "",
+          "description": "SGD available in Account",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+        "TimeStamp"
+      ],
+      "foreignKeys": []
+    },
+    {
+      "name": "Account_Info",
+      "fields": [
+        {
+          "name": "AccNum",
+          "title": "Account Number",
+          "type": "TEXT",
+          "format": "",
+          "description": "FYB Account Number for SGD Deposits",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "BtcAddress",
+          "title": "BTC Wallet Address",
+          "type": "TEXT",
+          "format": "",
+          "description": "BTC Address to Deposit Funds",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Email",
+          "title": "Email Address",
+          "type": "TEXT",
+          "format": "",
+          "description": "Registered Email Address",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+      ],
+      "foreignKeys": []
+    },
+    {
+      "name": "Trade_History",
+      "fields": [
+        {
+          "name": "Tid",
+          "title": "Transaction ID",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Unique Id for each trade",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "Amt",
+          "title": "Trade Amount",
+          "type": "REAL",
+          "format": "",
+          "description": "Amount traded in this transaction",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Price",
+          "title": "Price Traded at",
+          "type": "REAL",
+          "format": "",
+          "description": "Price at which trade was made",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Date",
+          "title": "Date of Trade",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Date and Time when trade occured",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+        "Tid"
+      ],
+      "foreignKeys": []
+    }
+  ],
+  "name": "Fyb"
+}

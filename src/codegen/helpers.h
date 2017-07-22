@@ -122,16 +122,8 @@ namespace trader {
 				ScopedStream<StreamType> scoped(stream, false, ScopedStream<StreamType>::DEC);
 				stream << "public:" << endl;
 			}
-			//declare constructor
-			stream << endl;
-			//stream << "// Constructor" << endl;
-			//stream << className << "()" << cendl;
 
-			//declare destructor
-			//stream << endl;
-			//stream << "// Destructor" << endl;
-			//stream << "~" << className << "()" << cendl;
-			//stream << endl;
+			stream << endl;
 		}
 
 		~ScopedClass()
@@ -146,7 +138,7 @@ namespace trader {
 
 	private:
 		StreamType& _stream;
-		const string& _className;
+		string _className;
 	};
 
 	template<size_t N, class StreamType = ApiFileOutputStream> class ScopedStruct
@@ -189,7 +181,7 @@ namespace trader {
 
 	private:
 		StreamType& _stream;
-		const string& _className;
+		string _className;
 	};
 	
 	inline void startHeader(ApiFileOutputStream& stream, Int32 num, ...)

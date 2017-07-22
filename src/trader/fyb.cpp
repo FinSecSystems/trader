@@ -2,6 +2,7 @@
 #include "fyb.h"
 #include "fybapi.h"
 #include "fybconfig.h"
+#include "fybdatabase.h"
 
 using namespace Poco::Data::Keywords;
 using Poco::Data::Session;
@@ -14,53 +15,16 @@ using Poco::Data::TypeHandler;
 using Poco::Data::AbstractBinder;
 using Poco::Data::AbstractExtractor;
 using Poco::Data::AbstractPreparator;
-
-struct AccountBalance
-{
-	Poco::UInt32  timeStamp;
-	double BTC;
-	double SGD;
-};
-
-template <>
-class TypeHandler<AccountBalance>
-	/// Defining a specialization of TypeHandler for Person allows us
-	/// to use the Person struct in use and into clauses.
-{
-public:
-	static std::size_t size()
-	{
-		return 4;
-	}
-
-	static void bind(std::size_t pos, const AccountBalance& accBal, AbstractBinder::Ptr pBinder, AbstractBinder::Direction dir)
-	{
-		TypeHandler<Poco::UInt32>::bind(pos++, accBal.timeStamp, pBinder, dir);
-		TypeHandler<double>::bind(pos++, accBal.BTC, pBinder, dir);
-		TypeHandler<double>::bind(pos++, accBal.SGD, pBinder, dir);
-	}
-
-	static void extract(std::size_t pos, AccountBalance& accBal, const AccountBalance& deflt, AbstractExtractor::Ptr pExtr)
-	{
-		TypeHandler<Poco::UInt32>::extract(pos++, accBal.timeStamp, deflt.timeStamp, pExtr);
-		TypeHandler<double>::extract(pos++, accBal.BTC, deflt.BTC, pExtr);
-		TypeHandler<double>::extract(pos++, accBal.SGD, deflt.SGD, pExtr);
-	}
-
-	static void prepare(std::size_t pos, const AccountBalance& accBal, AbstractPreparator::Ptr pPrep)
-	{
-		TypeHandler<Poco::UInt32>::prepare(pos++, accBal.timeStamp, pPrep);
-		TypeHandler<double>::prepare(pos++, accBal.BTC, pPrep);
-		TypeHandler<double>::prepare(pos++, accBal.SGD, pPrep);
-	}
-};
+using Poco::AutoPtr;
+using namespace std;
 
 namespace trader {
 
 	Fyb::Fyb()
-		: fybApi(*((trader::FybApi*)this))
+		: fybApi(*((FybApi*)this))
 		, executeTickerDetailedTimer(0,5000)
 		, executeAccountInfoTimer(500, 5000)
+		, executeTradeHistoryTimer(1000, 5000)
 	{
 	}
 
@@ -68,81 +32,79 @@ namespace trader {
 	{
 		db = fybApi._app->dbSession;
 
-		// Create table
-		*db << "CREATE TABLE IF NOT EXISTS Fyb_Ticker_Detailed (TimeStamp INTEGER, Ask REAL, Bid REAL, Last REAL, Vol REAL)", now;
-		*db << "CREATE UNIQUE INDEX IF NOT EXISTS Fyb_Ticker_Detailed_Index on Fyb_Ticker_Detailed(TimeStamp)", now;
-
-		*db << "CREATE TABLE IF NOT EXISTS Fyb_Account_Balance (TimeStamp INTEGER, BTC REAL, SGD REAL)", now;
-		*db << "CREATE UNIQUE INDEX IF NOT EXISTS Fyb_Account_Balance_Index on Fyb_Account_Balance(TimeStamp)", now;
-
-		*db << "CREATE TABLE IF NOT EXISTS Fyb_Account_Info (Account_Number TEXT, BTC_Address TEXT, Email TEXT)", now;
-		
+		dataBase = new FybDatabase(db);
+		dataBase->init();
+	
 		executeTickerDetailedTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTickerDetailed));
 		executeAccountInfoTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeAccountInfo));
+		executeTradeHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTradeHistory));
 	}
 
 	void Fyb::executeTickerDetailed(Timer& timer)
 	{
 		(void)timer;
-		Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fybApi.GetTickerDetailed();
+		Poco::AutoPtr<TickerDetailed> tickerDetailedData = fybApi.GetTickerDetailed();
 
-		Statement insert(*db);
-		insert << "INSERT INTO Fyb_Ticker_Detailed VALUES(?, ?, ?, ?, ?)",
-			bind(std::time(nullptr)),
-			use(tickerDetailedData->dataObject.ask),
-			use(tickerDetailedData->dataObject.bid),
-			use(tickerDetailedData->dataObject.last),
-			use(tickerDetailedData->dataObject.vol);
-		insert.execute();
-	}
+		Ticker_Detailed::Record rec;
+		rec.timeStamp = (Poco::Int32)std::time(nullptr);
+		rec.ask = tickerDetailedData->dataObject.ask;
+		rec.bid = tickerDetailedData->dataObject.bid;
+		rec.last = tickerDetailedData->dataObject.last;
+		rec.vol = tickerDetailedData->dataObject.vol;
 
-	bool almostEqual(double a, double b) {
-		return std::fabs(a - b) < std::numeric_limits<double>::epsilon();
+		dataBase->ticker_DetailedTable->insertAndDeleteUnchanged(rec);
 	}
 
 	void Fyb::executeAccountInfo(Timer& timer)
 	{
 		(void)timer;
-		Poco::AutoPtr<trader::AccountInfo> accountInfo = fybApi.GetAccountInfo();
+		Poco::AutoPtr<AccountInfo> accountInfo = fybApi.GetAccountInfo();
 		
-		std::vector<AccountBalance> accBal;
-		*db << "SELECT * FROM Fyb_Account_Balance ORDER BY TimeStamp DESC LIMIT 1",
-			into(accBal),
-			now;
+		Account_Balance::Record rec;
+		rec.timeStamp = (Poco::Int32)std::time(nullptr);
+		rec.sgdBal = accountInfo->dataObject.sgdBal;
+		rec.btcBal = accountInfo->dataObject.btcBal;
 
-		if (!accBal.empty())
+		dataBase->account_BalanceTable->insertAndDeleteUnchanged(rec);
+
+		std::ostringstream accountInfoStream;
+		accountInfoStream << "FYB" << accountInfo->dataObject.accNo;
+		Statement insertAccountInfo(*db);
+
+		Account_Info::Record recInfo;
+		recInfo.accNum = accountInfoStream.str();
+		recInfo.btcAddress = accountInfo->dataObject.btcDeposit;
+		recInfo.email = accountInfo->dataObject.email;
+
+		dataBase->account_InfoTable->insertOnce(recInfo);
+	}
+
+	void Fyb::executeTradeHistory(Timer& timer)
+	{
+		(void)timer;
+
+		Trade_History::Record currentRec;
+		dataBase->trade_HistoryTable->getLatest(currentRec);
+
+		AutoPtr<TradesParams> tradesParams = new TradesParams();
+		if (currentRec.tid != 0)
 		{
-			if (almostEqual(accBal[0].BTC, accountInfo->dataObject.btcBal) && almostEqual(accBal[0].SGD, accountInfo->dataObject.sgdBal))
-			{
-				*db << "DELETE FROM Fyb_Account_Balance WHERE TimeStamp = ?",
-					use(accBal[0].timeStamp),
-					now;
-			}
+			tradesParams->dataObject.SetSince(currentRec.tid);
 		}
 
-		Statement insert(*db);
-		insert << "INSERT INTO Fyb_Account_Balance VALUES(?, ?, ?)",
-			bind(std::time(nullptr)),
-			use(accountInfo->dataObject.btcBal),
-			use(accountInfo->dataObject.sgdBal);
-		insert.execute();
+		AutoPtr<Trades> trades = fybApi.GetTrades(tradesParams);
 
-		Poco::UInt32 count;
-		*db << "SELECT count(*) FROM Fyb_Account_Info",
-			into(count),
-			now;
-
-		if (!count)
+		std::vector<Trade_History::Record> tradeHistoryRecord;
+		for (auto& trade : trades->data)
 		{
-			std::ostringstream accountInfoStream;
-			accountInfoStream << "FYB" << accountInfo->dataObject.accNo;
-			Statement insertAccountInfo(*db);
-			insertAccountInfo << "INSERT INTO Fyb_Account_Info VALUES(?, ?, ?)",
-				bind(accountInfoStream.str().c_str()),
-				use(accountInfo->dataObject.btcDeposit),
-				use(accountInfo->dataObject.email);
-			insertAccountInfo.execute();
+			Trade_History::Record rec;
+			rec.amt = trade.amount;
+			rec.date = (Poco::Int32)trade.date;
+			rec.price = trade.price;
+			rec.tid = trade.tid;
+			tradeHistoryRecord.push_back(rec);
 		}
+		dataBase->trade_HistoryTable->insertMultiple(tradeHistoryRecord);
 	}
 
 	Fyb::~Fyb()

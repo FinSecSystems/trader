@@ -8,6 +8,7 @@
 #include "hyperschema.h"
 #include "app.h"
 #include "jsonschema.h"
+#include "databaseschema.h"
 
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -153,6 +154,10 @@ namespace trader {
 			else if (_type.compare("jsonschema") == 0)
 			{
 				processDirectory(_inputDir, std::bind(&JsonSchema::process, JsonSchema::instance.get(), _namespace, _1, _outputDir));
+			}
+			else if (_type.compare("databaseschema") == 0)
+			{
+				processDirectory(_inputDir, std::bind(&DatabaseSchema::process, DatabaseSchema::instance.get(), _namespace, _1, _outputDir));
 			}
 
 			ostringstream message;

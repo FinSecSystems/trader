@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fybdatabase.h"
 
 namespace trader {
 
@@ -18,6 +19,7 @@ namespace trader {
 
 		void executeTickerDetailed(Poco::Timer& timer);
 		void executeAccountInfo(Poco::Timer& timer);
+		void executeTradeHistory(Poco::Timer& timer);
 
 	protected:
 		Fyb(const Fyb&);
@@ -32,6 +34,8 @@ namespace trader {
 		Poco::Data::Session* db;
 		Poco::Timer executeTickerDetailedTimer;
 		Poco::Timer executeAccountInfoTimer;
+		Poco::Timer executeTradeHistoryTimer;
+		Poco::AutoPtr<FybDatabase> dataBase;
 	};
 
 }

@@ -217,8 +217,8 @@
             "{RMDIR} $(SolutionDir)tmp\\codegen"
        }
 
-	project "config"
-		targetname  "config"
+	project "configs"
+		targetname  "configs"
         dependson   { 
             "codegen"
             }
@@ -244,13 +244,41 @@
             "{RMDIR} $(SolutionDir)tmp\\codegen"
        }
 
+	project "databases"
+		targetname  "databases"
+        dependson   { 
+            "codegen"
+            }
+        kind "Makefile"
+
+		files
+		{
+            "data/databases/**.json"
+		}
+
+       buildcommands {
+			"PATH=$(SolutionDir)deps\\poco\\bin64",
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\codegen /n:trader /t:databaseschema"
+       }
+
+       rebuildcommands {
+			"PATH=$(SolutionDir)deps\\poco\\bin64",
+            "{RMDIR} $(SolutionDir)tmp\codegen",
+            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\codegen /n:trader /t:databaseschema"
+       }
+
+       cleancommands {
+            "{RMDIR} $(SolutionDir)tmp\\codegen"
+       }
+
 	project "trader"
 		targetname  "trader"
 		language    "C++"
 		kind        "ConsoleApp"
         dependson   { 
             "apis",
-			"config"
+			"configs",
+			"databases"
             }
 		includedirs {
             "src",
