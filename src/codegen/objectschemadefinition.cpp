@@ -367,6 +367,12 @@ namespace trader {
 						}
 					}
 					stream << endl;
+					stream << "bool isSet" << type_name(keyName) << "() ";
+					{
+						ScopedStream<ApiFileOutputStream> isSetScope(stream);
+						stream << "return (" << var_name(keyName) << " != " << getCppDefaultVal(type, obj) << ")" << cendl;
+					}
+					stream << endl;
 					stream << getCppType(type, obj) << tabs(1) << var_name(keyName) << cendl;
 				}
 				stream << endl;

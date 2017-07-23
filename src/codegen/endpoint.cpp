@@ -97,10 +97,19 @@ namespace trader {
 					obj.writeRestEncodedParams(cpp);
 				}
 			}
-			cpp << "Poco::Dynamic::Var pResult = invoke(Poco::Net::HTTPRequest::";
-			if (method == GET) cpp << "HTTP_GET"; else cpp << "HTTP_POST";
-			cpp << ", uri)" << cendl;
-			writeResponseSchema(cpp, 0);
+			cpp << "try ";
+			{
+				ScopedStream<ApiFileOutputStream> tryStream(cpp);
+				cpp << "Poco::Dynamic::Var pResult = invoke(Poco::Net::HTTPRequest::";
+				if (method == GET) cpp << "HTTP_GET"; else cpp << "HTTP_POST";
+				cpp << ", uri)" << cendl;
+				writeResponseSchema(cpp, 0);
+			}
+			cpp << "catch (Poco::Exception& exc) ";
+			{
+				ScopedStream<ApiFileOutputStream> catchStream(cpp);
+				cpp << "Poco::Logger::get(\"Logs\").information(\"Response Receiving Error: %s\", exc.displayText())" << cendl;
+			}
 			cpp << "Poco::AutoPtr<" << responseSchemaNames[0] << "> retVal = new " << responseSchemaNames[0] << "()" << cendl;
 			cpp << "return retVal" << cendl;
 		}

@@ -3,6 +3,7 @@
 #include "fybapi.h"
 #include "fybconfig.h"
 #include "fybdatabase.h"
+#include "helper.h"
 
 using namespace Poco::Data::Keywords;
 using Poco::Data::Session;
@@ -17,14 +18,18 @@ using Poco::Data::AbstractExtractor;
 using Poco::Data::AbstractPreparator;
 using Poco::AutoPtr;
 using namespace std;
+using namespace Poco;
 
 namespace trader {
 
 	Fyb::Fyb()
 		: fybApi(*((FybApi*)this))
-		, executeTickerDetailedTimer(0,5000)
-		, executeAccountInfoTimer(500, 5000)
-		, executeTradeHistoryTimer(1000, 5000)
+		, executeTickerDetailedTimer(0, 6006)
+		, executeAccountInfoTimer(1001, 6006)
+		, executeTradeHistoryTimer(2002, 6006)
+		, executeOrderBookTimer(3003, 6006)
+		, executePendingOrderTimer(4004, 6006)
+		, executeOrderHistoryTimer(5005, 6006)
 	{
 	}
 
@@ -34,10 +39,14 @@ namespace trader {
 
 		dataBase = new FybDatabase(db);
 		dataBase->init();
+		dataBase->clear();
 	
-		executeTickerDetailedTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTickerDetailed));
-		executeAccountInfoTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeAccountInfo));
-		executeTradeHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTradeHistory));
+		//executeTickerDetailedTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTickerDetailed));
+		//executeAccountInfoTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeAccountInfo));
+		//executeTradeHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTradeHistory));
+		executeOrderBookTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeOrderBook));
+		//executePendingOrderTimer.start(TimerCallback<Fyb>(*this, &Fyb::executePendingOrders));
+		//executeOrderHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeOrderHistory));
 	}
 
 	void Fyb::executeTickerDetailed(Timer& timer)
@@ -87,7 +96,7 @@ namespace trader {
 		dataBase->trade_HistoryTable->getLatest(currentRec);
 
 		AutoPtr<TradesParams> tradesParams = new TradesParams();
-		if (currentRec.tid != 0)
+		if (currentRec.isSetTid())
 		{
 			tradesParams->dataObject.SetSince(currentRec.tid);
 		}
@@ -104,8 +113,110 @@ namespace trader {
 			rec.tid = trade.tid;
 			tradeHistoryRecord.push_back(rec);
 		}
-		dataBase->trade_HistoryTable->insertMultiple(tradeHistoryRecord);
+		dataBase->trade_HistoryTable->insertMultipleUnique(tradeHistoryRecord);
 	}
+
+	void Fyb::executeOrderBook(Timer& timer)
+	{
+		(void)timer;
+		Poco::AutoPtr<OrderBook> orderBook = fybApi.GetOrderBook();
+		time_t currentDateTime = std::time(nullptr);
+
+		if (orderBook->dataObject.asks.empty())
+			return;
+
+		Order_Book_Asks::Record latestAsk;
+		dataBase->order_Book_AsksTable->getLatest(latestAsk);
+		if (!latestAsk.isSetPrice()
+			|| !latestAsk.isSetVolume()
+			|| !equal<double>(orderBook->dataObject.asks[0][0], latestAsk.price)
+			|| !equal<double>(orderBook->dataObject.asks[0][1], latestAsk.volume))
+		{
+			std::vector<Order_Book_Asks::Record> askRecords;
+			for (auto& ask : orderBook->dataObject.asks)
+			{
+				Order_Book_Asks::Record askRecord;
+				askRecord.price = ask[0];
+				askRecord.volume = ask[1];
+				askRecords.push_back(askRecord);
+			}
+			dataBase->order_Book_AsksTable->clear();
+			dataBase->order_Book_AsksTable->insertMultiple(askRecords);
+		}
+
+		if (orderBook->dataObject.bids.empty())
+			return;
+
+		Order_Book_Bids::Record latestBid;
+		dataBase->order_Book_BidsTable->getLatest(latestBid);
+		if (!latestBid.isSetPrice() 
+			|| !latestBid.isSetVolume()
+			|| !equal<double>(orderBook->dataObject.bids[0][0], latestBid.price)
+			|| !equal<double>(orderBook->dataObject.bids[0][1], latestBid.volume))
+		{
+			std::vector<Order_Book_Bids::Record> bidRecords;
+			for (auto& bid : orderBook->dataObject.bids)
+			{
+				Order_Book_Bids::Record bidRecord;
+				bidRecord.price = bid[0];
+				bidRecord.volume = bid[1];
+				bidRecords.push_back(bidRecord);
+			}
+			dataBase->order_Book_BidsTable->clear();
+ 			dataBase->order_Book_BidsTable->insertMultiple(bidRecords);
+		}
+
+	}
+
+	void Fyb::executePendingOrders(Poco::Timer& timer)
+	{
+		(void)timer;
+		Poco::AutoPtr<PendingOrders> orderBook = fybApi.GetPendingOrders();
+
+		if (orderBook->dataObject.isSetError() && orderBook->dataObject.error != 0)
+		{
+			return;
+		}
+
+		std::vector<My_Pending_Buy_Orders::Record> buyRecords;
+		std::vector<My_Pending_Sell_Orders::Record> sellRecords;
+		for (auto& order : orderBook->dataObject.orders)
+		{
+			if (order.type == 'B')
+			{
+				My_Pending_Buy_Orders::Record rec;
+				rec.amt = order.qty;
+				rec.date = (Int32)order.date;
+				rec.price = order.price;
+				rec.ticket = order.ticket;
+				buyRecords.push_back(rec);
+			}
+			else if (order.type == 'S')
+			{
+				My_Pending_Sell_Orders::Record rec;
+				rec.amt = order.qty;
+				rec.date = (Int32)order.date;
+				rec.price = order.price;
+				rec.ticket = order.ticket;
+				sellRecords.push_back(rec);
+			}
+		}
+
+		dataBase->my_Pending_Buy_OrdersTable->clear();
+		dataBase->my_Pending_Sell_OrdersTable->clear();
+
+		if (!buyRecords.empty())
+			dataBase->my_Pending_Buy_OrdersTable->insertMultipleUnique(buyRecords);
+
+		if (!sellRecords.empty())
+			dataBase->my_Pending_Sell_OrdersTable->insertMultipleUnique(sellRecords);
+	}
+
+	void Fyb::executeOrderHistory(Poco::Timer& timer)
+	{
+		(void)timer;
+	}
+
 
 	Fyb::~Fyb()
 	{
@@ -113,9 +224,17 @@ namespace trader {
 
 	Poco::Dynamic::Var Fyb::invoke(const std::string& httpMethod, Poco::URI& uri)
 	{
+		static time_t lastTimeStamp = 0;
+		time_t currentTimeStamp = std::time(nullptr);
+		if (lastTimeStamp == currentTimeStamp)
+		{
+			throw TimeoutException("Fyb Error : API executed too fast", "");
+		}
+		lastTimeStamp = currentTimeStamp;
+
 		//Add timestamp
 		std::ostringstream timeString;
-		timeString << std::time(nullptr);
+		timeString << currentTimeStamp;
 		uri.addQueryParameter(std::string("timestamp"), timeString.str());
 
 		// Create the request URI.
@@ -181,7 +300,7 @@ namespace trader {
 		}
 		else
 		{
-			throw Poco::ApplicationException("Fyb Error", "");
+			throw ApplicationException("Fyb Error", "");
 		}
 	}
 }

@@ -148,6 +148,9 @@
                 "type": "number"
               },
               "type": {
+                "pattern": "B|S",
+                "format": "char",
+                "description": "Whether it is a buy or sell order. Must be either 'B' or 'S' only.",
                 "type": "string"
               }
             }
@@ -187,6 +190,9 @@
                 "type": "number"
               },
               "type": {
+                "pattern": "B|S",
+                "format": "char",
+                "description": "Whether it is a buy or sell order. Must be either 'B' or 'S' only.",
                 "type": "string"
               }
             }
@@ -445,7 +451,7 @@
     },
     {
       "href": "getpendingorders",
-      "description": "Get Pending Orders",
+      "description": "Get My Pending Orders",
       "method": "POST",
       "title": "GetPendingOrders",
       "rel": "create",
@@ -460,7 +466,7 @@
     },
     {
       "href": "getorderhistory",
-      "description": "Return executed order history",
+      "description": "Return my executed order history",
       "method": "POST",
       "title": "GetOrderHistory",
       "rel": "create",
@@ -496,7 +502,7 @@
     },
     {
       "href": "cancelpendingorder",
-      "description": "Cancel a Pending Order",
+      "description": "Cancel my Pending Order",
       "method": "POST",
       "title": "CancelOrder",
       "rel": "create",

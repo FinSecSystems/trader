@@ -149,7 +149,7 @@
           "title": "Transaction ID",
           "type": "INTEGER",
           "format": "",
-          "description": "Unique Id for each trade",
+          "description": "Id for each trade",
           "constraints": {
             "unique": true,
             "required": true
@@ -189,6 +189,208 @@
       "missingValues": [],
       "primaryKey": [
         "Tid"
+      ],
+      "foreignKeys": []
+    },
+    {
+      "name": "Order_Book_Asks",
+      "fields": [
+        {
+          "name": "DateCreated",
+          "title": "Time Stamp",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Current Unix Timestamp",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "DateRemoved",
+          "title": "Time Stamp",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Current Unix Timestamp",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Price",
+          "title": "Sell/Taker/Ask Price",
+          "type": "REAL",
+          "format": "",
+          "description": "Price offered",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Volume",
+          "title": "Volume of trade",
+          "type": "REAL",
+          "format": "",
+          "description": "Volume at that price",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+      ],
+      "foreignKeys": []
+    },
+    {
+      "name": "Order_Book_Bids",
+      "fields": [
+        {
+          "name": "DateCreated",
+          "title": "Time Stamp",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Current Unix Timestamp",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "DateRemoved",
+          "title": "Time Stamp",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Current Unix Timestamp",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "Price",
+          "title": "Buy/Maker/Bid Price",
+          "type": "REAL",
+          "format": "",
+          "description": "Price offered",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Volume",
+          "title": "Volume of trade",
+          "type": "REAL",
+          "format": "",
+          "description": "Volume at that price",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+      ],
+      "foreignKeys": []
+    },
+    {
+      "name": "My_Pending_Sell_Orders",
+      "fields": [
+        {
+          "name": "Ticket",
+          "title": "Order Ticket Id",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Unique ticket id for each pending sell order",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "Amt",
+          "title": "Trade Amount",
+          "type": "REAL",
+          "format": "",
+          "description": "Amount traded in this transaction",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Price",
+          "title": "Price Traded at",
+          "type": "REAL",
+          "format": "",
+          "description": "Price at which trade was made",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Date",
+          "title": "Date of Trade",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Date and Time order was created",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+        "Ticket"
+      ],
+      "foreignKeys": []
+    },
+    {
+      "name": "My_Pending_Buy_Orders",
+      "fields": [
+        {
+          "name": "Ticket",
+          "title": "Order Ticket Id",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Unique ticket id for each pending buy order",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "Amt",
+          "title": "Trade Amount",
+          "type": "REAL",
+          "format": "",
+          "description": "Amount to trade in this transaction",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Price",
+          "title": "Price Traded at",
+          "type": "REAL",
+          "format": "",
+          "description": "Price at which trade should be made",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Date",
+          "title": "Date of Trade",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Date and Time order was created",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+        "Ticket"
       ],
       "foreignKeys": []
     }
