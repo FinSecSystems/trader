@@ -92,7 +92,7 @@ namespace trader {
 	{
 		(void)timer;
 
-		Trade_History::Record currentRec;
+		Trade_History::RecordWithId currentRec;
 		dataBase->trade_HistoryTable->getLatest(currentRec);
 
 		AutoPtr<TradesParams> tradesParams = new TradesParams();
@@ -116,6 +116,33 @@ namespace trader {
 		dataBase->trade_HistoryTable->insertMultipleUnique(tradeHistoryRecord);
 	}
 
+	template <typename RECORDTYPE> void findMissing(std::vector<RECORDTYPE>& orders, std::vector<RECORDTYPE>& records, std::vector<RECORDTYPE>& missingRecords)
+	{
+		Int32 lastDatabaseSearchIdx = 0;
+		for (auto& order : orders)
+		{
+			bool add = true;
+			for (Int32 i = lastDatabaseSearchIdx; i < records.size(); i++)
+			{
+				auto& record = records[i];
+				if (record.price == order.price && record.volume == order.volume)
+				{
+					add = false;
+					break;
+				}
+				if (record.price > order.price)
+					break;
+			}
+			if (add)
+			{
+				RECORDTYPE missingRecord;
+				missingRecord.price = order.price;
+				missingRecord.volume = order.volume;
+				missingRecords.push_back(missingRecord);
+			}
+		}
+	}
+
 	void Fyb::executeOrderBook(Timer& timer)
 	{
 		(void)timer;
@@ -125,47 +152,69 @@ namespace trader {
 		if (orderBook->dataObject.asks.empty())
 			return;
 
-		Order_Book_Asks::Record latestAsk;
-		dataBase->order_Book_AsksTable->getLatest(latestAsk);
-		if (!latestAsk.isSetPrice()
-			|| !latestAsk.isSetVolume()
-			|| !equal<double>(orderBook->dataObject.asks[0][0], latestAsk.price)
-			|| !equal<double>(orderBook->dataObject.asks[0][1], latestAsk.volume))
+		std::vector<Order_Book_Asks::RecordWithId> latestAsks;
+		dataBase->order_Book_AsksTable->getAll(latestAsks, "DateRemoved = 0");
+		if (!latestAsks.size()
+			|| !latestAsks[0].isSetPrice()
+			|| !latestAsks[0].isSetVolume()
+			|| !equal<double>(orderBook->dataObject.asks[0][0], latestAsks[0].price)
+			|| !equal<double>(orderBook->dataObject.asks[0][1], latestAsks[0].volume))
 		{
-			std::vector<Order_Book_Asks::Record> askRecords;
+			std::vector<Order_Book_Asks::RecordWithId> newAsks;
 			for (auto& ask : orderBook->dataObject.asks)
 			{
-				Order_Book_Asks::Record askRecord;
+				Order_Book_Asks::RecordWithId askRecord;
 				askRecord.price = ask[0];
 				askRecord.volume = ask[1];
-				askRecords.push_back(askRecord);
+				newAsks.push_back(askRecord);
 			}
-			dataBase->order_Book_AsksTable->clear();
-			dataBase->order_Book_AsksTable->insertMultiple(askRecords);
+
+			//Find ask prices in exchange that is not available in records and add it
+			std::vector<Order_Book_Asks::RecordWithId> missingRecords;
+			findMissing<Order_Book_Asks::RecordWithId>(newAsks, latestAsks, missingRecords);
+			for (auto& record : missingRecords) { record.dateCreated = (Int32)currentDateTime; record.dateRemoved = 0; }
+			dataBase->order_Book_AsksTable->insertMultiple(missingRecords);
+
+			missingRecords.clear();
+			findMissing<Order_Book_Asks::RecordWithId>(latestAsks, newAsks, missingRecords);
+			dataBase->order_Book_AsksTable->deleteMultiple(missingRecords);
+			for (auto& record : missingRecords) { record.dateRemoved = (Int32)currentDateTime; }
+			dataBase->order_Book_AsksTable->insertMultiple(missingRecords);
 		}
 
 		if (orderBook->dataObject.bids.empty())
 			return;
 
-		Order_Book_Bids::Record latestBid;
-		dataBase->order_Book_BidsTable->getLatest(latestBid);
-		if (!latestBid.isSetPrice() 
-			|| !latestBid.isSetVolume()
-			|| !equal<double>(orderBook->dataObject.bids[0][0], latestBid.price)
-			|| !equal<double>(orderBook->dataObject.bids[0][1], latestBid.volume))
+		std::vector<Order_Book_Bids::RecordWithId> latestBids;
+		dataBase->order_Book_BidsTable->getAll(latestBids, "DateRemoved = 0");
+		if (!latestBids.size()
+			|| !latestBids[0].isSetPrice()
+			|| !latestBids[0].isSetVolume()
+			|| !equal<double>(orderBook->dataObject.bids[0][0], latestBids[0].price)
+			|| !equal<double>(orderBook->dataObject.bids[0][1], latestBids[0].volume))
 		{
-			std::vector<Order_Book_Bids::Record> bidRecords;
+			std::vector<Order_Book_Bids::RecordWithId> newBids;
 			for (auto& bid : orderBook->dataObject.bids)
 			{
-				Order_Book_Bids::Record bidRecord;
+				Order_Book_Bids::RecordWithId bidRecord;
 				bidRecord.price = bid[0];
 				bidRecord.volume = bid[1];
-				bidRecords.push_back(bidRecord);
+				newBids.push_back(bidRecord);
 			}
-			dataBase->order_Book_BidsTable->clear();
- 			dataBase->order_Book_BidsTable->insertMultiple(bidRecords);
-		}
 
+			//Find ask prices in exchange that is not available in records and add it
+			std::vector<Order_Book_Bids::RecordWithId> missingRecords;
+			findMissing<Order_Book_Bids::RecordWithId>(newBids, latestBids, missingRecords);
+			for (auto& record : missingRecords) { record.dateCreated = (Int32)currentDateTime; record.dateRemoved = 0; }
+			dataBase->order_Book_BidsTable->insertMultiple(missingRecords);
+
+			missingRecords.clear();
+			findMissing<Order_Book_Bids::RecordWithId>(latestBids, newBids, missingRecords);
+			dataBase->order_Book_BidsTable->deleteMultiple(missingRecords);
+			for (auto& record : missingRecords) { record.dateRemoved = (Int32)currentDateTime; }
+			dataBase->order_Book_BidsTable->insertMultiple(missingRecords);
+		}
+		
 	}
 
 	void Fyb::executePendingOrders(Poco::Timer& timer)
@@ -224,13 +273,23 @@ namespace trader {
 
 	Poco::Dynamic::Var Fyb::invoke(const std::string& httpMethod, Poco::URI& uri)
 	{
+		static Poco::FastMutex lock;
 		static time_t lastTimeStamp = 0;
-		time_t currentTimeStamp = std::time(nullptr);
-		if (lastTimeStamp == currentTimeStamp)
+		time_t currentTimeStamp;
+		if (lock.tryLock())
+		{
+			currentTimeStamp = std::time(nullptr);
+			if (lastTimeStamp == currentTimeStamp)
+			{
+				throw TimeoutException("Fyb Error : API executed too fast", "");
+			}
+			lastTimeStamp = currentTimeStamp;
+			lock.unlock();
+		}
+		else
 		{
 			throw TimeoutException("Fyb Error : API executed too fast", "");
 		}
-		lastTimeStamp = currentTimeStamp;
 
 		//Add timestamp
 		std::ostringstream timeString;

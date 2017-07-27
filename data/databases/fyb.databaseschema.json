@@ -251,7 +251,6 @@
           "format": "",
           "description": "Current Unix Timestamp",
           "constraints": {
-            "unique": true,
             "required": true
           }
         },
@@ -262,7 +261,6 @@
           "format": "",
           "description": "Current Unix Timestamp",
           "constraints": {
-            "unique": true,
             "required": true
           }
         },
