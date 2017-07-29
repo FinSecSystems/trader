@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "fybapi.h"
-#include "exchangeratelabapi.h"
+#include "fyb.h"
+#include "exchangeratelab.h"
 #include "app.h"
 
 using Poco::Util::Application;
@@ -109,8 +109,8 @@ namespace trader {
 			dbNameStream << commandName() << ".db";
 			dbSession = new Poco::Data::Session("SQLite", dbNameStream.str());
 
-			trader::ExchangeratelabApi exchangeRateLab(this);
-			trader::FybApi fyb(this);
+			trader::Exchangeratelab exchangeRateLab(this);
+			trader::Fyb fyb(this);
 			fyb.run();
 			//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.GetUSDToSGD();
 
@@ -126,6 +126,11 @@ namespace trader {
         }
         return Application::EXIT_OK;
     }
+
+	bool App::findFile(Poco::Path& path) const
+	{
+		return Poco::Util::Application::findFile(path);
+	}
 
 }
 

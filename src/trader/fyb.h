@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fybapi.h"
 #include "fybdatabase.h"
 
 namespace trader {
@@ -9,7 +10,7 @@ namespace trader {
 	class Fyb
 	{
 	public:
-		Fyb();
+		Fyb(Poco::AutoPtr<trader::App> _app);
 
 		~Fyb();
 
@@ -29,12 +30,9 @@ namespace trader {
 		Fyb& operator = (const Fyb&);
 
 		std::string _uri;
-		std::string _consumerKey;
-		std::string _consumerSecret;
 
 	private:
-		FybApi& fybApi;
-		Poco::Data::Session* db;
+		FybApi fybApi;
 		Poco::Timer executeTickerDetailedTimer;
 		Poco::Timer executeAccountInfoTimer;
 		Poco::Timer executeTradeHistoryTimer;
@@ -42,6 +40,7 @@ namespace trader {
 		Poco::Timer executePendingOrderTimer;
 		Poco::Timer executeOrderHistoryTimer;
 		Poco::AutoPtr<FybDatabase> dataBase;
+		Poco::AutoPtr<trader::App> app;
 	};
 
 }

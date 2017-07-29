@@ -22,8 +22,9 @@ using namespace Poco;
 
 namespace trader {
 
-	Fyb::Fyb()
-		: fybApi(*((FybApi*)this))
+	Fyb::Fyb(Poco::AutoPtr<trader::App> _app)
+		: fybApi(app, this)
+		, app(_app)
 		, executeTickerDetailedTimer(0, 6006)
 		, executeAccountInfoTimer(1001, 6006)
 		, executeTradeHistoryTimer(2002, 6006)
@@ -35,9 +36,7 @@ namespace trader {
 
 	void Fyb::run()
 	{
-		db = fybApi._app->dbSession;
-
-		dataBase = new FybDatabase(db);
+		dataBase = new FybDatabase(app->dbSession);
 		dataBase->init();
 		dataBase->clear();
 	
@@ -78,7 +77,6 @@ namespace trader {
 
 		std::ostringstream accountInfoStream;
 		accountInfoStream << "FYB" << accountInfo->dataObject.accNo;
-		Statement insertAccountInfo(*db);
 
 		Account_Info::Record recInfo;
 		recInfo.accNum = accountInfoStream.str();
@@ -294,8 +292,8 @@ namespace trader {
 			if (order.ticket > latestRecord.ticket)
 			{
 				My_Trade_History::Record record;
-				record.dateCreated = (time_t)order.date_created;
-				record.dateExecuted = (time_t)order.date_executed;
+				record.dateCreated = (Int32)order.date_created;
+				record.dateExecuted = (Int32)order.date_executed;
 				string priceStr = remove_non_digits(order.price);
 				record.price = stod(priceStr);
 				string qtyStr = remove_non_digits(order.qty);

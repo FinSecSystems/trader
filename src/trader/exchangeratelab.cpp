@@ -1,11 +1,12 @@
 #include "stdafx.h"
+#include "exchangeratelab.h"
 #include "exchangeratelabapi.h"
 #include "exchangeratelabconfig.h"
-#include "exchangeratelab.h"
 
 namespace trader {
 
-	Exchangeratelab::Exchangeratelab()
+	Exchangeratelab::Exchangeratelab(Poco::AutoPtr<trader::App> _app)
+		: exchangeratelabApi(_app, this)
 	{
 	}
 
@@ -16,7 +17,6 @@ namespace trader {
 	Poco::Dynamic::Var Exchangeratelab::invoke(const std::string& httpMethod, Poco::URI& uri)
 	{
 		(void)httpMethod;
-		trader::ExchangeratelabApi& exchangeratelabApi = *((trader::ExchangeratelabApi*)this);
 
 		//Add API key
 		std::ostringstream apiKeyString;

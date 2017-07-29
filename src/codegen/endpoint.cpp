@@ -100,7 +100,7 @@ namespace trader {
 			cpp << "try ";
 			{
 				ScopedStream<ApiFileOutputStream> tryStream(cpp);
-				cpp << "Poco::Dynamic::Var pResult = invoke(Poco::Net::HTTPRequest::";
+				cpp << "Poco::Dynamic::Var pResult = _api->invoke(Poco::Net::HTTPRequest::";
 				if (method == GET) cpp << "HTTP_GET"; else cpp << "HTTP_POST";
 				cpp << ", uri)" << cendl;
 				writeResponseSchema(cpp, 0);

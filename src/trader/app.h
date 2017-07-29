@@ -18,6 +18,8 @@ namespace trader {
 			}
 		}
 
+		bool findFile(Poco::Path& path) const;
+
 		friend class Fyb;
 		friend class Exchangeratelab;
 	protected:

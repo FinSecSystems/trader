@@ -39,3 +39,8 @@
 *.sln
 ./*.db
 /bin
+/deps/IntelSEAPI.dir/Release/IntelSEAPI.log
+/deps/x64/Release/ALL_BUILD/ALL_BUILD.log
+/deps/x64/Release/ZERO_CHECK/ZERO_CHECK.log
+/tools/src/obj/Debug/Premake5.log
+/tools/src/obj/Release/Premake5.log

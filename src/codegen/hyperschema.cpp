@@ -90,10 +90,13 @@ namespace trader {
 		ostringstream baseUrlStream;
 		baseUrlStream << "\"" << config.baseUrl << "\"";
 
-		startHeader(header, 3,
-			baseHeaderName.str().c_str(),
-			configHeaderName.str().c_str(),
-			"trader/app.h"
+		ostringstream apiStream;
+		apiStream << type_name(name) << "*";
+
+		startHeader(header, 2,
+			"trader/app.h",
+			//baseHeaderName.str().c_str(),
+			configHeaderName.str().c_str()
 			);
 		{
 			ScopedNamespace scopedNamesapce(header, config.nameSpace);
@@ -107,9 +110,10 @@ namespace trader {
 				}
 			}
 			{
-				ScopedClass<1> scopedClass(header, config.apiName, name.c_str());
-				construct_header(header, config.apiName, 2
+				ScopedClass<0> scopedClass(header, config.apiName);
+				construct_header(header, config.apiName, 4
 					, appPtrStream.str().c_str(), "app"
+					, apiStream.str().c_str(), "api"
 				);
 				for (auto& endPoint : endPoints)
 				{
@@ -122,11 +126,14 @@ namespace trader {
 				}
 				header << endl;
 				header << "Poco::AutoPtr<" << namespacename << "::App>" << tabs(1) << "_app" << cendl;
+				header << type_name(name) << "*" << tabs(1) << "_api" << cendl;
+				header << "std::string _uri" << cendl;
 			}
 		}
 
-		startCpp(cpp, 2,
+		startCpp(cpp, 3,
 			config.headerFileName.c_str(),
+			baseHeaderName.str().c_str(),
 			"trader/app.h"
 		);
 		{
@@ -145,10 +152,12 @@ namespace trader {
 				std::transform(nameStr.begin(), nameStr.end(), nameStr.begin(), ::tolower);
 				pathStatement << "Poco::Path filePath(\"" << nameStr << ".config.json\");";
 
-				construct_ex(cpp, config.apiName, 2, 4, 4
+				construct_ex(cpp, config.apiName, 4, 6, 4
 					, appPtrStream.str().c_str(), "app"
+					, apiStream.str().c_str(), "api"
 					, "_uri", baseUrlStream.str().c_str()
 					, "_app", "app"
+					, "_api", "api"
 					, pathStatement.str().c_str()
 					, "if (app->findFile(filePath)) {"
 					, "\tconfig.readFile(filePath.toString());"
