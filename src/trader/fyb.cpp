@@ -44,9 +44,9 @@ namespace trader {
 		//executeTickerDetailedTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTickerDetailed));
 		//executeAccountInfoTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeAccountInfo));
 		//executeTradeHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTradeHistory));
-		executeOrderBookTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeOrderBook));
+		//executeOrderBookTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeOrderBook));
 		//executePendingOrderTimer.start(TimerCallback<Fyb>(*this, &Fyb::executePendingOrders));
-		//executeOrderHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeOrderHistory));
+		executeOrderHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeOrderHistory));
 	}
 
 	void Fyb::executeTickerDetailed(Timer& timer)
@@ -116,7 +116,7 @@ namespace trader {
 		dataBase->trade_HistoryTable->insertMultipleUnique(tradeHistoryRecord);
 	}
 
-	template <typename RECORDTYPE> void findMissing(std::vector<RECORDTYPE>& orders, std::vector<RECORDTYPE>& records, std::vector<RECORDTYPE>& missingRecords)
+	template <typename RECORDTYPE> void findMissing(std::vector<RECORDTYPE>& orders, std::vector<RECORDTYPE>& records, std::vector<RECORDTYPE>& missingRecords, bool ascending = true)
 	{
 		Int32 lastDatabaseSearchIdx = 0;
 		for (auto& order : orders)
@@ -130,8 +130,16 @@ namespace trader {
 					add = false;
 					break;
 				}
-				if (record.price > order.price)
-					break;
+				if (ascending)
+				{
+					if (record.price > order.price)
+						break;
+				}
+				else
+				{
+					if (record.price < order.price)
+						break;
+				}
 			}
 			if (add)
 			{
@@ -204,12 +212,12 @@ namespace trader {
 
 			//Find ask prices in exchange that is not available in records and add it
 			std::vector<Order_Book_Bids::RecordWithId> missingRecords;
-			findMissing<Order_Book_Bids::RecordWithId>(newBids, latestBids, missingRecords);
+			findMissing<Order_Book_Bids::RecordWithId>(newBids, latestBids, missingRecords, false);
 			for (auto& record : missingRecords) { record.dateCreated = (Int32)currentDateTime; record.dateRemoved = 0; }
 			dataBase->order_Book_BidsTable->insertMultiple(missingRecords);
 
 			missingRecords.clear();
-			findMissing<Order_Book_Bids::RecordWithId>(latestBids, newBids, missingRecords);
+			findMissing<Order_Book_Bids::RecordWithId>(latestBids, newBids, missingRecords, false);
 			dataBase->order_Book_BidsTable->deleteMultiple(missingRecords);
 			for (auto& record : missingRecords) { record.dateRemoved = (Int32)currentDateTime; }
 			dataBase->order_Book_BidsTable->insertMultiple(missingRecords);
@@ -264,6 +272,41 @@ namespace trader {
 	void Fyb::executeOrderHistory(Poco::Timer& timer)
 	{
 		(void)timer;
+		Poco::AutoPtr<OrderHistoryParams> orderHistoryParams = new OrderHistoryParams();
+		orderHistoryParams->dataObject.SetLimit(100);
+		Poco::AutoPtr<OrderHistory> orderHistory = fybApi.GetOrderHistory(orderHistoryParams);
+
+		if (orderHistory->dataObject.isSetError() && orderHistory->dataObject.error != 0)
+		{
+			return;
+		}
+
+		My_Trade_History::RecordWithId latestRecord;
+		dataBase->my_Trade_HistoryTable->getLatest(latestRecord);
+		if (!latestRecord.isSetTicket())
+		{
+			latestRecord.ticket = 0;
+		}
+
+		std::vector<My_Trade_History::Record> records;
+		for (auto& order : orderHistory->dataObject.orders)
+		{
+			if (order.ticket > latestRecord.ticket)
+			{
+				My_Trade_History::Record record;
+				record.dateCreated = (time_t)order.date_created;
+				record.dateExecuted = (time_t)order.date_executed;
+				string priceStr = remove_non_digits(order.price);
+				record.price = stod(priceStr);
+				string qtyStr = remove_non_digits(order.qty);
+				record.qty = stod(qtyStr);
+				record.status = order.status;
+				record.type = order.type;
+				record.ticket = order.ticket;
+				records.push_back(record);
+			}
+		}
+		dataBase->my_Trade_HistoryTable->insertMultipleUnique(records);
 	}
 
 

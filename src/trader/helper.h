@@ -23,4 +23,16 @@ namespace trader {
 		return (a.compare(b) == 0);
 	}
 
+	inline bool not_digit(char ch) {
+		return ( '0' <= ch && ch <= '9' ) || ch == '.';
+	}
+
+	inline std::string remove_non_digits(const std::string& input) {
+		std::string result;
+		std::copy_if(input.begin(), input.end(),
+			std::back_inserter(result),
+			not_digit);
+		return result;
+	}
+
 }

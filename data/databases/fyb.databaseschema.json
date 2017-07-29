@@ -391,6 +391,87 @@
         "Ticket"
       ],
       "foreignKeys": []
+    },
+    {
+      "name": "My_Trade_History",
+      "fields": [
+        {
+          "name": "Ticket",
+          "title": "Order Ticket Id",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Unique ticket id for each trade",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "DateCreated",
+          "title": "Order creation date",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Date and Time order was created",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "DateExecuted",
+          "title": "Ordr execution date",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Date and Time order was executed",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Qty",
+          "title": "Trade Amount",
+          "type": "REAL",
+          "format": "",
+          "description": "Amount to trade in this transaction",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Price",
+          "title": "Price Traded at",
+          "type": "REAL",
+          "format": "",
+          "description": "Price at which trade should be made",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Status",
+          "title": "Price Traded at",
+          "type": "TEXT",
+          "format": "",
+          "description": "Price at which trade should be made",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Type",
+          "title": "Buy or Sell",
+          "type": "TEXT",
+          "format": "",
+          "description": "Price at which trade should be made",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+        "Ticket"
+      ],
+      "foreignKeys": []
     }
   ],
   "name": "Fyb"
