@@ -52,3 +52,5 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <functional>
+#include <atomic>

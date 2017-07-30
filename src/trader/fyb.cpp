@@ -23,29 +23,33 @@ using namespace Poco;
 namespace trader {
 
 	Fyb::Fyb(Poco::AutoPtr<trader::App> _app)
-		: fybApi(app, this)
+		: fybApi(_app, this)
 		, app(_app)
-		, executeTickerDetailedTimer(0, 6006)
-		, executeAccountInfoTimer(1001, 6006)
-		, executeTradeHistoryTimer(2002, 6006)
-		, executeOrderBookTimer(3003, 6006)
-		, executePendingOrderTimer(4004, 6006)
-		, executeOrderHistoryTimer(5005, 6006)
+		, dataBase(new FybDatabase(_app->dbSession))
+		, executeTimer(0, 1000)
 	{
 	}
 
 	void Fyb::run()
 	{
-		dataBase = new FybDatabase(app->dbSession);
 		dataBase->init();
-		dataBase->clear();
-	
-		//executeTickerDetailedTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTickerDetailed));
-		//executeAccountInfoTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeAccountInfo));
-		//executeTradeHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeTradeHistory));
-		//executeOrderBookTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeOrderBook));
-		//executePendingOrderTimer.start(TimerCallback<Fyb>(*this, &Fyb::executePendingOrders));
-		executeOrderHistoryTimer.start(TimerCallback<Fyb>(*this, &Fyb::executeOrderHistory));
+		//dataBase->clear();
+
+		using std::placeholders::_1;
+		serialExecutionList.push_back(std::bind(&Fyb::executeTickerDetailed, this, _1));
+		serialExecutionList.push_back(std::bind(&Fyb::executeAccountInfo, this, _1));
+		serialExecutionList.push_back(std::bind(&Fyb::executeTradeHistory, this, _1));
+		serialExecutionList.push_back(std::bind(&Fyb::executeOrderBook, this, _1));
+		serialExecutionList.push_back(std::bind(&Fyb::executePendingOrders, this, _1));
+		serialExecutionList.push_back(std::bind(&Fyb::executeOrderHistory, this, _1));
+		executeTimer.start(TimerCallback<Fyb>(*this, &Fyb::execute));
+	}
+
+	void Fyb::execute(Timer& timer)
+	{
+		static std::atomic_int32_t idx = 0;
+		serialExecutionList[ idx % serialExecutionList.size() ](timer);
+		++idx;
 	}
 
 	void Fyb::executeTickerDetailed(Timer& timer)

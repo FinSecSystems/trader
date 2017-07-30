@@ -14,9 +14,10 @@ namespace trader {
 
 		~Fyb();
 
-		virtual Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
+		Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
 
 		void run();
+		void execute(Poco::Timer& timer);
 
 		void executeTickerDetailed(Poco::Timer& timer);
 		void executeAccountInfo(Poco::Timer& timer);
@@ -33,14 +34,10 @@ namespace trader {
 
 	private:
 		FybApi fybApi;
-		Poco::Timer executeTickerDetailedTimer;
-		Poco::Timer executeAccountInfoTimer;
-		Poco::Timer executeTradeHistoryTimer;
-		Poco::Timer executeOrderBookTimer;
-		Poco::Timer executePendingOrderTimer;
-		Poco::Timer executeOrderHistoryTimer;
+		Poco::Timer executeTimer;
 		Poco::AutoPtr<FybDatabase> dataBase;
 		Poco::AutoPtr<trader::App> app;
+		std::vector<std::function<void(Poco::Timer&)>> serialExecutionList;
 	};
 
 }
