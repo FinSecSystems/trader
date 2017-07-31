@@ -173,9 +173,9 @@ namespace trader {
 			if (!_className.empty())
 			{
 				--_stream;
-				_stream << endl;
-				_stream << "}" << cendl;
-				_stream << endl;
+				_stream << trader::endl;
+				_stream << "}" << trader::cendl;
+				_stream << trader::endl;
 			}
 		}
 
@@ -259,7 +259,7 @@ namespace trader {
 	inline void construct_ex(ApiFileOutputStream& cpp, const string& className, Int32 numParams, Int32 numInitializer, Int32 numStatements, ...)
 	{
 		cpp << className << "::" << className << "(";
-		va_list arguments;
+		va_list arguments; 
 		va_start(arguments, numStatements);
 		poco_assert(numParams % 2 == 0);
 		for (Int32 cnt = 0; cnt < numParams; cnt += 2)
@@ -276,11 +276,11 @@ namespace trader {
 			for (Int32 cnt = 0; cnt < numInitializer; cnt += 2)
 			{
 				const char* str = va_arg(arguments, const char*);
-				cpp << str << " = " << va_arg(arguments, const char*) << cendl;
+				cpp << str << " = " << va_arg(arguments, const char*) << trader::cendl;
 			}
 			for (Int32 cnt = 0; cnt < numStatements; cnt ++)
 			{
-				cpp << va_arg(arguments, const char*) << endl;
+				cpp << va_arg(arguments, const char*) << trader::endl;
 			}
 		}
 		va_end(arguments);

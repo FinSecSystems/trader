@@ -7,14 +7,37 @@
         platforms {
                 "Win64",
                 "Win64-Clang",
-                "Win64-MSClang"
+                "Win64-MSClang",
+				"Linux64-Clang",
+				"Linux64-gcc",
             }
         objdir "tmp"
 
-        filter { "platforms:Win64" }
+		filter { "system:linux" }
+			removeplatforms {                
+				"Win64",
+                "Win64-Clang",
+                "Win64-MSClang"
+				}
+			buildoptions    {
+                "-std=c++11"
+            }
+
+		filter { "system:windows" }
+			removeplatforms {                
+				"Linux64-Clang",
+				"Linux64-gcc"
+				}
+
+		filter { "platforms:Linux64-gcc", "system:linux" }
+			toolset "gcc"
+
+		filter { "platforms:Linux64-clang", "system:linux" }
+			toolset "clang"
+
+        filter { "platforms:Win64", "system:windows" }
             system "Windows"
             architecture "x64"
-            toolset "v141"
 		    flags { 
                 "MultiProcessorCompile"
                 }
@@ -23,12 +46,18 @@
                 }
 			warnings "Extra"
 
-        filter { "platforms:Win64-Clang" }
+		filter { "platforms:Win64", "action:vs2015", "system:windows" }
+            toolset "v140"
+
+		filter { "platforms:Win64", "action:vs2017", "system:windows" }
+            toolset "v141"
+
+        filter { "platforms:Win64-Clang", "system:windows" }
             system "Windows"
             architecture "x64"
             toolset "msc-llvm-vs2014"
 
-        filter { "platforms:Win64-MSClang" }
+        filter { "platforms:Win64-MSClang", "system:windows" }
             system "Windows"
             architecture "x64"
             toolset "v140_clang_c2"
@@ -39,26 +68,28 @@
 
 		filter "configurations:debug"
 			defines     "_DEBUG"
+
+		filter "configurations:release"
+			defines     "NDEBUG"
+			optimize    "Full"
+
+		filter { "configurations:debug", "platforms:Win64" }
+			symbols		"On"
             links { "MSVCRTD.LIB" }
             linkoptions {
                 "/NODEFAULTLIB:msvcrt"
                 }
 
-		filter "configurations:release"
-			defines     "NDEBUG"
-			optimize    "Full"
-			flags       {
-                "NoBufferSecurityCheck",
-                "NoRuntimeChecks"
-                }
-
-		filter { "configurations:debug", "platforms:Win64" }
-			symbols		"On"
-
 		filter { "configurations:debug", "platforms:Win64-MSClang" }
 			buildoptions    {
                 "-g2",
                 "-Wall"
+                }
+
+		filter { "configurations:release", "platforms:Win64" }
+			flags       {
+                "NoBufferSecurityCheck",
+                "NoRuntimeChecks"
                 }
 
 		filter "action:vs*"
@@ -116,8 +147,6 @@
 		kind        "ConsoleApp"
 		includedirs {
             "src/codegen",
-            "deps/TaskScheduler/include",
-            "deps/intel_se_api/ittnotify/include",
             "deps/poco/Net/include",
             "deps/poco/NetSSL_Win/include",
             "deps/poco/Crypto/include",
@@ -128,10 +157,6 @@
             }
 		pchheader   "stdafx.h"
 		pchsource   "src/codegen/stdafx.cpp"
-		links       "deps/intel_se_api/bin/ittnotify64.lib"
-        debugenvs {
-            "PATH=$(SolutionDir)deps\\poco\\bin64"
-        }
         debugargs {
             "/i:$(SolutionDir)data\\apis",
             "/o:$(SolutionDir)tmp\\codegen",
@@ -144,8 +169,6 @@
 			"*.txt","**.md",
 			"src/codegen/**.h", "src/codegen/**.cpp",
 			"include/**.h",
-			"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
-			"deps/TaskScheduler/include/**.h",
             "deps/poco/Crypto/include/**.h", "deps/poco/Crypto/src/**.cpp",
             "deps/poco/Foundation/include/**.h", "deps/poco/Foundation/src/**.cpp",
             "deps/poco/JSON/include/**.h", "deps/poco/JSON/src/**.cpp",
@@ -154,6 +177,20 @@
             "deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
             "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp"
 		}
+
+		filter {"system:windows"}
+			includedirs {
+				"deps/TaskScheduler/include",
+				"deps/intel_se_api/ittnotify/include"
+				}
+			files {
+				"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
+				"deps/TaskScheduler/include/**.h",
+			}
+			links       "deps/intel_se_api/bin/ittnotify64.lib"
+			debugenvs {
+				"PATH=$(SolutionDir)deps\\poco\\bin64"
+			}
 
         filter "files:deps/**.*"
             flags { "ExcludeFromBuild" }
@@ -282,8 +319,6 @@
             }
 		includedirs {
             "src",
-            "deps/TaskScheduler/include",
-            "deps/intel_se_api/ittnotify/include",
             "deps/poco/Net/include",
             "deps/poco/NetSSL_Win/include",
             "deps/poco/Crypto/include",
@@ -297,18 +332,27 @@
             }
 		pchheader   "stdafx.h"
 		pchsource   "src/trader/stdafx.cpp"
-		links       "deps/intel_se_api/bin/ittnotify64.lib"
-        debugenvs {
-            "PATH=$(SolutionDir)deps\\poco\\bin64"
-        }
+
+
+		filter { "system:windows"}
+			includedirs {
+				"deps/TaskScheduler/include",
+				"deps/intel_se_api/ittnotify/include",
+				}
+			links       "deps/intel_se_api/bin/ittnotify64.lib"
+			debugenvs {
+				"PATH=$(SolutionDir)deps\\poco\\bin64"
+			}
+			files {
+				"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
+				"deps/TaskScheduler/include/**.h",			
+			}
 
 		files
 		{
 			"*.txt", "*.md",
 			"src/trader/**.h", "src/trader/**.cpp",
 			"include/**.h",
-			"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
-			"deps/TaskScheduler/include/**.h",
             "deps/poco/Crypto/include/**.h", "deps/poco/Crypto/src/**.cpp",
             "deps/poco/Foundation/include/**.h", "deps/poco/Foundation/src/**.cpp",
             "deps/poco/JSON/include/**.h", "deps/poco/JSON/src/**.cpp",

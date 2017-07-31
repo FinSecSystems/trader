@@ -1,3 +1,5 @@
+#pragma once
+
 #include "stdafx.h"
 #include "Poco/Util/Application.h"
 #include "Poco/Util/Option.h"
@@ -13,9 +15,7 @@
 #include "Poco/StringTokenizer.h"
 #include "endpoint.h"
 #include "fileoutputstream.h"
-#pragma once
 
-#include "utils.h"
 
 namespace trader {
 

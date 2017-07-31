@@ -163,7 +163,9 @@ namespace trader {
 			ostringstream message;
 			message << _type << " generation complete..." << std::endl;
 			std::cout << message.str();
+#if defined(POCO_OS_FAMILY_WINDOWS) 
 			OutputDebugStringA(message.str().c_str());
+#endif
 		}
 		catch (Exception& exc)
 		{

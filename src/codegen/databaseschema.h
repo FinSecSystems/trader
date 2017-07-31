@@ -15,7 +15,6 @@
 #include "fileoutputstream.h"
 #pragma once
 
-#include "utils.h"
 
 namespace trader {
 

@@ -2,7 +2,6 @@
 
 #include "endpoint.h"
 #include "fileoutputstream.h"
-#include "utils.h"
 #include "objectschemadefinition.h"
 
 namespace trader {

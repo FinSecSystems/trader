@@ -36,6 +36,23 @@ namespace trader {
 	using namespace Poco;
 	using namespace std;
 
+	class ApiFileOutputStream;
+	class ApiStreamBuffer;
+
+	class tabs
+	{
+		size_t _n;
+	public:
+		explicit tabs(size_t n) : _n(n) {}
+		size_t getn() const { return _n; }
+
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const tabs& obj);
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const tabs& obj);
+		friend std::ostringstream& operator<<(std::ostringstream& os, const tabs& obj);
+		friend std::ostream& operator<<(ostream& os, const tabs& obj);
+
+	};
+
 	class ApiFileOutputStream
 	{
 	public:
@@ -59,75 +76,69 @@ namespace trader {
 			, indentation(0)
 		{}
 
-		class tabs
-		{
-			size_t _n;
-		public:
-			explicit tabs(size_t n) : _n(n) {}
-			size_t getn() const { return _n; }
-			friend std::ostream& operator<<(ostream& os, const tabs& obj)
-			{
-				size_t n = obj.getn();
-				for (size_t i = 0; i < n; ++i)
-					os << "\t";
-				return os;
-			}
-		};
-
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const char* text)
-		{
-			os.tempStream << text;
-			return os;
-		}
-
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, string& str)
-		{
-			os.tempStream << str;
-			return os;
-		}
-
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const string& str)
-		{
-			os.tempStream << str;
-			return os;
-		}
-
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const Int32& num)
-		{
-			os.tempStream << num;
-			return os;
-		}
-
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, ApiFileOutputStream& (*_Pfn)(ApiFileOutputStream&))
-		{
-			return ((*_Pfn)(os));
-		}
-
-		friend ApiFileOutputStream & endl(ApiFileOutputStream & os)
-		{
-			os.stream << std::endl;
-			os.stream << tabs(os.indentation);
-			os.stream << os.tempStream.str();
-			os.tempStream.str("");
-			os.tempStream.clear();
-			return os;
-		}
-
-		friend ApiFileOutputStream & cendl(ApiFileOutputStream & os)
-		{
-			os.stream << std::endl;
-			os.stream << tabs(os.indentation);
-			os.stream << os.tempStream.str();
-			os.stream << ";";
-			os.tempStream.str("");
-			os.tempStream.clear();
-			return os;
-		}
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const char* text);
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, string& str);
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const string& str);
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const Int32& num);
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, ApiFileOutputStream& (*_Pfn)(ApiFileOutputStream&));
+		friend ApiFileOutputStream & endl(ApiFileOutputStream & os);
+		friend ApiFileOutputStream & cendl(ApiFileOutputStream & os);
 
 		Int32 indentation;
 		Poco::FileOutputStream stream;
 		ostringstream tempStream;
 	};
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const char* text)
+	{
+		os.tempStream << text;
+		return os;
+	}
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, string& str)
+	{
+		os.tempStream << str;
+		return os;
+	}
+
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const string& str)
+	{
+		os.tempStream << str;
+		return os;
+	}
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const Int32& num)
+	{
+		os.tempStream << num;
+		return os;
+	}
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, ApiFileOutputStream& (*_Pfn)(ApiFileOutputStream&))
+	{
+		return ((*_Pfn)(os));
+	}
+
+	inline ApiFileOutputStream & endl(ApiFileOutputStream & os)
+	{
+		os.stream << std::endl;
+		os.stream << tabs(os.indentation);
+		os.stream << os.tempStream.str();
+		os.tempStream.str("");
+		os.tempStream.clear();
+		return os;
+	}
+
+	inline ApiFileOutputStream & cendl(ApiFileOutputStream & os)
+	{
+		os.stream << std::endl;
+		os.stream << tabs(os.indentation);
+		os.stream << os.tempStream.str();
+		os.stream << ";";
+		os.tempStream.str("");
+		os.tempStream.clear();
+		return os;
+	}
 
 	class ApiStreamBuffer
 	{
@@ -152,58 +163,12 @@ namespace trader {
 			indentation = fileStream.indentation;
 		}
 
-		class tabs
-		{
-			size_t _n;
-		public:
-			explicit tabs(size_t n) : _n(n) {}
-			size_t getn() const { return _n; }
-			friend std::ostream& operator<<(ostream& os, const tabs& obj)
-			{
-				size_t n = obj.getn();
-				for (size_t i = 0; i < n; ++i)
-					os << "\t";
-				return os;
-			}
-		};
-
-		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const char* text)
-		{
-			os.tempStream << text;
-			return os;
-		}
-
-		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, string& str)
-		{
-			os.tempStream << str;
-			return os;
-		}
-
-		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const string& str)
-		{
-			os.tempStream << str;
-			return os;
-		}
-
-		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, ApiStreamBuffer& (*_Pfn)(ApiStreamBuffer&))
-		{
-			return ((*_Pfn)(os));
-		}
-
-		friend ApiStreamBuffer & endl(ApiStreamBuffer & os)
-		{
-			os.tempStream << std::endl;
-			os.tempStream << tabs(os.indentation);
-			return os;
-		}
-
-		friend ApiStreamBuffer & cendl(ApiStreamBuffer & os)
-		{
-			os.tempStream << ";";
-			os.tempStream << std::endl;
-			os.tempStream << tabs(os.indentation);
-			return os;
-		}
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const char* text);
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, string& str);
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const string& str);
+		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, ApiStreamBuffer& (*_Pfn)(ApiStreamBuffer&));
+		friend ApiStreamBuffer & endl(ApiStreamBuffer & os);
+		friend ApiStreamBuffer & cendl(ApiStreamBuffer & os);
 
 		inline ApiStreamBuffer & dot(ApiStreamBuffer & os)
 		{
@@ -220,34 +185,82 @@ namespace trader {
 		ostringstream tempStream;
 	};
 
-	class tabs
+	inline ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const char* text)
 	{
-		size_t _n;
-	public:
-		explicit tabs(size_t n) : _n(n) {}
-		size_t getn() const { return _n; }
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const tabs& obj)
-		{
-			size_t n = obj.getn();
-			for (size_t i = 0; i < n; ++i)
-				os.tempStream << "\t";
-			return os;
-		}
-		friend ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const tabs& obj)
-		{
-			size_t n = obj.getn();
-			for (size_t i = 0; i < n; ++i)
-				os.tempStream << "\t";
-			return os;
-		}
-		friend std::ostringstream& operator<<(std::ostringstream& os, const tabs& obj)
-		{
-			size_t n = obj.getn();
-			for (size_t i = 0; i < n; ++i)
-				os << "\t";
-			return os;
-		}
-	};
+		os.tempStream << text;
+		return os;
+	}
+
+	inline ApiStreamBuffer& operator<<(ApiStreamBuffer& os, string& str)
+	{
+		os.tempStream << str;
+		return os;
+	}
+
+	inline ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const string& str)
+	{
+		os.tempStream << str;
+		return os;
+	}
+
+	inline ApiStreamBuffer& operator<<(ApiStreamBuffer& os, ApiStreamBuffer& (*_Pfn)(ApiStreamBuffer&))
+	{
+		return ((*_Pfn)(os));
+	}
+
+	inline ApiStreamBuffer & endl(ApiStreamBuffer & os)
+	{
+		os.tempStream << std::endl;
+		os.tempStream << tabs(os.indentation);
+		return os;
+	}
+
+	inline ApiStreamBuffer & cendl(ApiStreamBuffer & os)
+	{
+		os.tempStream << ";";
+		os.tempStream << std::endl;
+		os.tempStream << tabs(os.indentation);
+		return os;
+	}
+
+	inline ApiStreamBuffer & dot(ApiStreamBuffer & os)
+	{
+		os.tempStream << ".";
+		return os;
+	}
+
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const tabs& obj)
+	{
+		size_t n = obj.getn();
+		for (size_t i = 0; i < n; ++i)
+			os.tempStream << "\t";
+		return os;
+	}
+
+	inline ApiStreamBuffer& operator<<(ApiStreamBuffer& os, const tabs& obj)
+	{
+		size_t n = obj.getn();
+		for (size_t i = 0; i < n; ++i)
+			os.tempStream << "\t";
+		return os;
+	}
+
+	inline std::ostringstream& operator<<(std::ostringstream& os, const tabs& obj)
+	{
+		size_t n = obj.getn();
+		for (size_t i = 0; i < n; ++i)
+			os << "\t";
+		return os;
+	}
+
+	inline std::ostream& operator<<(ostream& os, const tabs& obj)
+	{
+		size_t n = obj.getn();
+		for (size_t i = 0; i < n; ++i)
+			os << "\t";
+		return os;
+	}
 
 
 	class temp_name
@@ -276,40 +289,48 @@ namespace trader {
 		explicit clean_name(std::string& str) : _str(str) {}
 		explicit clean_name(const char* str) : _str(str) {}
 		string getstr() const { return _str; }
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const clean_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-			}
-			os.tempStream << newStr;
-			return os;
-		}
-		friend std::ostringstream& operator<<(std::ostringstream& os, const clean_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-			}
-			os << newStr;
-			return os;
-		}
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const clean_name& obj);
+		friend std::ostringstream& operator<<(std::ostringstream& os, const clean_name& obj);
 		template<class _Traits> friend
 			basic_ostream<char, _Traits>& operator<<(
 				basic_ostream<char, _Traits>& _Ostr,
-				const clean_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-			}
-			_Ostr << newStr;
-			return _Ostr;
-		}
+				const clean_name& obj);
 	};
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const clean_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+		}
+		os.tempStream << newStr;
+		return os;
+	}
+	inline std::ostringstream& operator<<(std::ostringstream& os, const clean_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+		}
+		os << newStr;
+		return os;
+	}
+
+	template<class _Traits> inline
+		basic_ostream<char, _Traits>& operator<<(
+			basic_ostream<char, _Traits>& _Ostr,
+			const clean_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+		}
+		_Ostr << newStr;
+		return _Ostr;
+	}
 
 	class var_name
 	{
@@ -319,43 +340,52 @@ namespace trader {
 		explicit var_name(const std::string& str) : _str(str) {}
 		explicit var_name(const char* str) : _str(str) {}
 		string getstr() const { return _str; }
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const var_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-				std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::tolower);
-			}
-			os.tempStream << newStr;
-			return os;
-		}
-		friend std::ostringstream& operator<<(std::ostringstream& os, const var_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-				std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::tolower);
-			}
-			os << newStr;
-			return os;
-		}
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const var_name& obj);
+		friend std::ostringstream& operator<<(std::ostringstream& os, const var_name& obj);
 		template<class _Traits> friend
 			basic_ostream<char, _Traits>& operator<<(
 				basic_ostream<char, _Traits>& _Ostr,
-				const var_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-				std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::tolower);
-			}
-			_Ostr << newStr;
-			return _Ostr;
-		}
+				const var_name& obj);
 	};
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const var_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+			std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::tolower);
+		}
+		os.tempStream << newStr;
+		return os;
+	}
+
+	inline std::ostringstream& operator<<(std::ostringstream& os, const var_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+			std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::tolower);
+		}
+		os << newStr;
+		return os;
+	}
+
+	template<class _Traits> inline
+		basic_ostream<char, _Traits>& operator<<(
+			basic_ostream<char, _Traits>& _Ostr,
+			const var_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+			std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::tolower);
+		}
+		_Ostr << newStr;
+		return _Ostr;
+	}
 
 	class type_name
  	{
@@ -365,46 +395,55 @@ namespace trader {
 		explicit type_name(const std::string& str) : _str(str) {}
 		explicit type_name(const char* str) : _str(str) {}
 		string getstr() const { return _str; }
-		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const type_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				if (!os.tempStream.str().length())
-					newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-				std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::toupper);
-			}
-			os.tempStream << newStr;
-			return os;
-		}
-		friend std::ostringstream& operator<<(std::ostringstream& os, const type_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				if (!os.str().length())
-					newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-				std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::toupper);
-			}
-			os << newStr;
-			return os;
-		}
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const type_name& obj);
+		friend std::ostringstream& operator<<(std::ostringstream& os, const type_name& obj);
 		template<class _Traits> friend
 			basic_ostream<char, _Traits>& operator<<(
 				basic_ostream<char, _Traits>& _Ostr,
-				const type_name& obj)
-		{
-			string newStr = obj.getstr();
-			if (newStr.length())
-			{
-				if (!_Ostr.width())
-					newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
-				std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::toupper);
-			}
-			_Ostr << newStr;
-			return _Ostr;
-		}
+				const type_name& obj);
 	};
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const type_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			if (!os.tempStream.str().length())
+				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+			std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::toupper);
+		}
+		os.tempStream << newStr;
+		return os;
+	}
+
+	inline std::ostringstream& operator<<(std::ostringstream& os, const type_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			if (!os.str().length())
+				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+			std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::toupper);
+		}
+		os << newStr;
+		return os;
+	}
+
+	template<class _Traits> inline
+		basic_ostream<char, _Traits>& operator<<(
+			basic_ostream<char, _Traits>& _Ostr,
+			const type_name& obj)
+	{
+		string newStr = obj.getstr();
+		if (newStr.length())
+		{
+			if (!_Ostr.width())
+				newStr.erase(std::remove(newStr.begin(), newStr.end(), ':'), newStr.end());
+			std::transform(newStr.begin(), newStr.begin() + 1, newStr.begin(), ::toupper);
+		}
+		_Ostr << newStr;
+		return _Ostr;
+	}
 
 
 	class expansionstringstream
@@ -453,72 +492,12 @@ namespace trader {
 			}
 		}
 
-		friend expansionstringstream& operator<<(expansionstringstream& os, const char* text)
-		{
-			bool previousWasArray = os.wasPrevious(expansionstringstream::ARRAY);
-			os.updateStack(text);
-			bool newIsObject = os.wasPrevious(expansionstringstream::OBJECT);
-			if (!previousWasArray || !newIsObject)
-			{
-				if (!os.varNameStream.str().length())
-				{
-					os.varNameStream << var_name(text);
-				}
-				else
-				{
-					os.varNameStream << clean_name(text);
-				}
-				if (!os.typeNameStream.str().length())
-				{
-					os.typeNameStream << type_name(text);
-				}
-				else
-				{
-					os.typeNameStream << text;
-				}
-				if (!os.prefixStream.str().length())
-				{
-					os.prefixStream << var_name(text);
-				}
-				else
-				{
-					os.prefixStream << std::dot << var_name(text);
-				}
-			}
-			return os;
-		}
-
-		friend expansionstringstream & dot(expansionstringstream & os)
-		{
-			if (os.prefixStream.str().length())
-			{
-				os.prefixStream << ".";
-			}
-			return os;
-		}
-
-		friend expansionstringstream& operator<<(expansionstringstream& os, string& str)
-		{
-			os << str.c_str();
-			return os;
-		}
-
-		friend expansionstringstream& operator<<(expansionstringstream& os, const string& str)
-		{
-			os << str.c_str();
-			return os;
-		}
-
-		friend expansionstringstream& operator<<(expansionstringstream& os, expansionstringstream::Type type)
-		{
-			os << os.getTypeString(type);
-			return os;
-		}
-
-		friend expansionstringstream& operator<<(expansionstringstream& os, expansionstringstream& (*_Pfn)(expansionstringstream&))
-		{
-			return ((*_Pfn)(os));
-		}
+		friend expansionstringstream& operator<<(expansionstringstream& os, const char* text);
+		friend expansionstringstream & dot(expansionstringstream & os);
+		friend expansionstringstream& operator<<(expansionstringstream& os, string& str);
+		friend expansionstringstream& operator<<(expansionstringstream& os, const string& str);
+		friend expansionstringstream& operator<<(expansionstringstream& os, expansionstringstream::Type type);
+		friend expansionstringstream& operator<<(expansionstringstream& os, expansionstringstream& (*_Pfn)(expansionstringstream&));
 
 		std::string prefix_str()
 		{
@@ -556,6 +535,75 @@ namespace trader {
 		ostringstream prefixStream;
 		vector<Type>   typeStack;
 	};
+
+	inline expansionstringstream& operator<<(expansionstringstream& os, const char* text)
+	{
+		bool previousWasArray = os.wasPrevious(expansionstringstream::ARRAY);
+		os.updateStack(text);
+		bool newIsObject = os.wasPrevious(expansionstringstream::OBJECT);
+		if (!previousWasArray || !newIsObject)
+		{
+			if (!os.varNameStream.str().length())
+			{
+				os.varNameStream << var_name(text);
+			}
+			else
+			{
+				os.varNameStream << clean_name(text);
+			}
+			if (!os.typeNameStream.str().length())
+			{
+				os.typeNameStream << type_name(text);
+			}
+			else
+			{
+				os.typeNameStream << text;
+			}
+			if (!os.prefixStream.str().length())
+			{
+				os.prefixStream << var_name(text);
+			}
+			else
+			{
+				os.prefixStream << std::dot << var_name(text);
+			}
+		}
+		return os;
+	}
+
+	inline expansionstringstream & dot(expansionstringstream & os)
+	{
+		if (os.prefixStream.str().length())
+		{
+			os.prefixStream << ".";
+		}
+		return os;
+	}
+
+	inline expansionstringstream& operator<<(expansionstringstream& os, string& str)
+	{
+		os << str.c_str();
+		return os;
+	}
+
+	inline expansionstringstream& operator<<(expansionstringstream& os, const string& str)
+	{
+		os << str.c_str();
+		return os;
+	}
+
+	inline expansionstringstream& operator<<(expansionstringstream& os, expansionstringstream::Type type)
+	{
+		os << os.getTypeString(type);
+		return os;
+	}
+
+	inline expansionstringstream& operator<<(expansionstringstream& os, expansionstringstream& (*_Pfn)(expansionstringstream&))
+	{
+		return ((*_Pfn)(os));
+	}
+
+
 
 }
 
