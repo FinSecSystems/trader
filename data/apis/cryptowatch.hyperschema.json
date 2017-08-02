@@ -1,0 +1,65 @@
+{
+  "definitions": {
+    "AssetList": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "fiat": {
+                "type": "bool"
+              },
+              "route": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "allowance": {
+          "type": "object",
+          "properties": {
+            "cost": {
+              "type": "number"
+            },
+            "remaining": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "required": [ ]
+    }
+  },
+  "properties": {
+    "type": "object",
+    "required": []
+  },
+  "links": [
+    {
+      "href": "assets",
+      "description": "Returns all assets (in no particular order).",
+      "method": "GET",
+      "title": "GetAssetList",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/AssetList"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseurl": "https://api.cryptowat.ch/",
+    "useConfig": true
+  },
+  "required": [],
+  "type": "object"
+}
