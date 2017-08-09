@@ -1,4 +1,8 @@
 @echo off
+pushd %~dp0
+call _lib\_setup_env.cmd
 pushd %~dp0\..
-tools\bin\premake\premake5 vs2017
+echo Premake building for %PREMAKE_TOOLCHAIN%
+tools\bin\premake\premake5 %PREMAKE_TOOLCHAIN%
+popd
 popd
