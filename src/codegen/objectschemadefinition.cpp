@@ -68,6 +68,10 @@ namespace trader {
 			}
 			return "std::string";
 		}
+		else if (jsonType.compare("bool") == 0)
+		{
+			return "bool";
+		}
 		return nullptr;
 	}
 
@@ -103,6 +107,10 @@ namespace trader {
 			}
 			return "\"Empty\"";
 		}
+		else if (jsonType.compare("bool") == 0)
+		{
+			return "false";
+		}
 		return nullptr;
 	}
 
@@ -129,11 +137,6 @@ namespace trader {
 		string type = obj->get("type");
 		if (isObject(type))
 		{
-			//if (!previousArray)
-			{
-			//	expansionStream << expansionstringstream::OBJECT;
-			}
-
 			if (!previousArray)
 			{
 				ostringstream temp;
@@ -266,10 +269,6 @@ namespace trader {
 				ostringstream temp;
 				temp << type_name(keyName) << "Object";
 				expandedName = temp.str();
-			}
-			else
-			{
-				//expandedName += "Object";
 			}
 			JSON::Object::Ptr properties = obj->getObject("properties");
 			{

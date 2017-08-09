@@ -90,13 +90,17 @@ namespace trader {
 			AutoPtr<SplitterChannel> splitterChannel(new SplitterChannel());
 			std::ostringstream logNameStream;
 			logNameStream << commandName() << ".log.txt";
+#if defined(_DEBUG)
 			AutoPtr<Channel> consoleChannel(new ConsoleChannel());
+#endif
 			AutoPtr<FileChannel> rotatedFileChannel(new FileChannel(logNameStream.str()));
 
 			rotatedFileChannel->setProperty("archive", "timestamp");
 			rotatedFileChannel->setProperty("rotateOnOpen", "true");
 
+#if defined(_DEBUG)
 			splitterChannel->addChannel(consoleChannel);
+#endif
 			splitterChannel->addChannel(rotatedFileChannel);
 
 			AutoPtr<Formatter> formatter(new PatternFormatter("%Y-%m-%d %H:%M:%S.%c %N[%P]:%s:%q:%t"));

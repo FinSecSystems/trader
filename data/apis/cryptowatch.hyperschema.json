@@ -58,7 +58,7 @@
   ],
   "config": {
     "baseurl": "https://api.cryptowat.ch/",
-    "useConfig": true
+    "useConfig": false
   },
   "required": [],
   "type": "object"

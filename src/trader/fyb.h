@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api.h"
 #include "fybapi.h"
 #include "fybdatabase.h"
 
@@ -7,7 +8,7 @@ namespace trader {
 
 	class FybApi;
 
-	class Fyb
+	class Fyb : public Api
 	{
 	public:
 		Fyb(Poco::AutoPtr<trader::App> _app);

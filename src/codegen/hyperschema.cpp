@@ -90,14 +90,21 @@ namespace trader {
 		ostringstream baseUrlStream;
 		baseUrlStream << "\"" << config.baseUrl << "\"";
 
-		ostringstream apiStream;
-		apiStream << type_name(name) << "*";
-
-		startHeader(header, 2,
-			"trader/app.h",
-			//baseHeaderName.str().c_str(),
-			configHeaderName.str().c_str()
+		if (config.useConfig)
+		{
+			startHeader(header, 3,
+				"trader/app.h",
+				"trader/api.h",
+				configHeaderName.str().c_str()
 			);
+		}
+		else
+		{
+			startHeader(header, 2,
+				"trader/app.h",
+				"trader/api.h"
+			);
+		}
 		{
 			ScopedNamespace scopedNamesapce(header, config.nameSpace);
 			for (auto& schemaDefinition : config.schemaDefinitions)
@@ -113,7 +120,7 @@ namespace trader {
 				ScopedClass<0> scopedClass(header, config.apiName);
 				construct_header(header, config.apiName, 4
 					, appPtrStream.str().c_str(), "app"
-					, apiStream.str().c_str(), "api"
+					, "Api*", "api"
 				);
 				for (auto& endPoint : endPoints)
 				{
@@ -126,14 +133,14 @@ namespace trader {
 				}
 				header << endl;
 				header << "Poco::AutoPtr<" << namespacename << "::App>" << tabs(1) << "_app" << cendl;
-				header << type_name(name) << "*" << tabs(1) << "_api" << cendl;
+				header << "Api*" << tabs(1) << "_api" << cendl;
 				header << "std::string _uri" << cendl;
 			}
 		}
 
 		startCpp(cpp, 3,
 			config.headerFileName.c_str(),
-			baseHeaderName.str().c_str(),
+			"trader/api.h",
 			"trader/app.h"
 		);
 		{
@@ -152,9 +159,9 @@ namespace trader {
 				std::transform(nameStr.begin(), nameStr.end(), nameStr.begin(), ::tolower);
 				pathStatement << "Poco::Path filePath(\"" << nameStr << ".config.json\");";
 
-				construct_ex(cpp, config.apiName, 4, 6, 4
+				construct_ex(cpp, config.apiName, 4, 6, 8
 					, appPtrStream.str().c_str(), "app"
-					, apiStream.str().c_str(), "api"
+					, "Api*", "api"
 					, "_uri", baseUrlStream.str().c_str()
 					, "_app", "app"
 					, "_api", "api"
@@ -162,14 +169,20 @@ namespace trader {
 					, "if (app->findFile(filePath)) {"
 					, "\tconfig.readFile(filePath.toString());"
 					, "}"
+					, "else"
+					, "{"
+					, "\tthrow Poco::OpenFileException(\"Cannot open config file\", filePath.toString());"
+					, "}"
 				);
 			}
 			else
 			{
-				construct_ex(cpp, config.apiName, 2, 4, 0
+				construct_ex(cpp, config.apiName, 4, 6, 0
 					, appPtrStream.str().c_str(), "app"
+					, "Api*", "api"
 					, "_uri", baseUrlStream.str().c_str()
 					, "_app", "app"
+					, "_api", "api"
 				);
 			}
 
