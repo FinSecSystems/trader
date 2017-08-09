@@ -35,7 +35,18 @@
           }
         }
       },
-      "required": [ ]
+      "required": []
+    },
+    "Allowance": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "type": "number"
+        },
+        "remaining": {
+          "type": "number"
+        }
+      }
     }
   },
   "properties": {
@@ -52,6 +63,18 @@
       "targetSchemas": [
         {
           "$ref": "#/definitions/AssetList"
+        }
+      ]
+    },
+    {
+      "href": "",
+      "description": "Get remaining rest call allowance",
+      "method": "GET",
+      "title": "GetAllowance",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/Allowance"
         }
       ]
     }
