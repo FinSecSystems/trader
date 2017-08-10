@@ -54,3 +54,37 @@
 #include <sstream>
 #include <functional>
 #include <atomic>
+
+using Poco::Util::Application;
+using Poco::Util::Option;
+using Poco::Util::OptionSet;
+using Poco::Util::HelpFormatter;
+using Poco::Util::AbstractConfiguration;
+using Poco::Util::OptionCallback;
+using Poco::AutoPtr;
+using Poco::Channel;
+using Poco::ConsoleChannel;
+using Poco::SplitterChannel;
+using Poco::FileChannel;
+using Poco::FormattingChannel;
+using Poco::Formatter;
+using Poco::PatternFormatter;
+using Poco::Logger;
+using Poco::Message;
+using Poco::Data::Session;
+using Poco::Data::Statement;
+using Poco::Timer;
+using Poco::TimerCallback;
+using Poco::Thread;
+using Poco::Stopwatch;
+using Poco::Data::TypeHandler;
+using Poco::Data::AbstractBinder;
+using Poco::Data::AbstractExtractor;
+using Poco::Data::AbstractPreparator;
+using Poco::AutoPtr;
+using namespace std;
+using namespace Poco;
+using namespace Poco::Data::Keywords;
+using namespace Poco::Net;
+using namespace std::placeholders;
+

@@ -27,6 +27,8 @@ namespace trader {
 		void executePendingOrders(Poco::Timer& timer);
 		void executeOrderHistory(Poco::Timer& timer);
 
+        FybApi api;
+
 	protected:
 		Fyb(const Fyb&);
 		Fyb& operator = (const Fyb&);
@@ -34,7 +36,6 @@ namespace trader {
 		std::string _uri;
 
 	private:
-		FybApi fybApi;
 		Poco::Timer executeTimer;
 		Poco::AutoPtr<FybDatabase> dataBase;
 		Poco::AutoPtr<trader::App> app;

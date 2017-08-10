@@ -5,8 +5,8 @@
 
 namespace trader {
 
-	Exchangeratelab::Exchangeratelab(Poco::AutoPtr<trader::App> _app)
-		: exchangeratelabApi(_app, this)
+	Exchangeratelab::Exchangeratelab(AutoPtr<App> _app)
+		: api(_app, this)
 	{
 	}
 
@@ -14,43 +14,43 @@ namespace trader {
 	{
 	}
 
-	Poco::Dynamic::Var Exchangeratelab::invoke(const std::string& httpMethod, Poco::URI& uri)
+	Dynamic::Var Exchangeratelab::invoke(const string& httpMethod, URI& uri)
 	{
 		(void)httpMethod;
 
 		//Add API key
-		std::ostringstream apiKeyString;
-		apiKeyString << exchangeratelabApi.config.dataObject.api_key;
-		uri.addQueryParameter(std::string("apikey"), apiKeyString.str());
+		ostringstream apiKeyString;
+		apiKeyString << api.config.dataObject.api_key;
+		uri.addQueryParameter(string("apikey"), apiKeyString.str());
 
 		// Create the request URI.
-		Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-		Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);
+		HTTPClientSession session(uri.getHost(), uri.getPort());
+		HTTPRequest req(HTTPRequest::HTTP_GET, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
 
 		session.sendRequest(req);
 
-		Poco::Logger::get("Logs").information("Send Request: %s", uri.toString());
+		Logger::get("Logs").information("Send Request: %s", uri.toString());
 
 		// Receive the response.
-		Poco::Net::HTTPResponse res;
-		std::istream& rs = session.receiveResponse(res);
+		HTTPResponse res;
+		istream& rs = session.receiveResponse(res);
 
 		// Parse the JSON
-		Poco::JSON::Parser parser;
+		JSON::Parser parser;
 		parser.parse(rs);
-		Poco::Dynamic::Var result = parser.result();
-		std::string resultString = Poco::Dynamic::Var::toString(result);
-		Poco::Logger::get("Logs").information("Received Response: %s", resultString);
+		Dynamic::Var result = parser.result();
+		string resultString = Dynamic::Var::toString(result);
+		Logger::get("Logs").information("Received Response: %s", resultString);
 
 		// If everything went fine, return the JSON document.
 		// Otherwise throw an exception.
-		if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+		if (res.getStatus() == Net::HTTPResponse::HTTP_OK)
 		{
 			return result;
 		}
 		else
 		{
-			throw Poco::ApplicationException("Exchangeratelab Error", "");
+			throw ApplicationException("Exchangeratelab Error", "");
 		}
 	}
 }

@@ -362,7 +362,7 @@
             "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp",
             "deps/poco/Data/**.h", "deps/poco/Data/**.cpp",
             "tmp/codegen/**.h", "tmp/codegen/**.cpp",
-			"bin/**.json"
+			"bin/**.json", "bin/**.properties"
 		}
 
         filter "files:deps/**.*"

@@ -1,29 +1,14 @@
 #include "stdafx.h"
 #include "fyb.h"
-#include "fybapi.h"
+#include "api.h"
 #include "fybconfig.h"
 #include "fybdatabase.h"
 #include "helper.h"
 
-using namespace Poco::Data::Keywords;
-using Poco::Data::Session;
-using Poco::Data::Statement;
-using Poco::Timer;
-using Poco::TimerCallback;
-using Poco::Thread;
-using Poco::Stopwatch;
-using Poco::Data::TypeHandler;
-using Poco::Data::AbstractBinder;
-using Poco::Data::AbstractExtractor;
-using Poco::Data::AbstractPreparator;
-using Poco::AutoPtr;
-using namespace std;
-using namespace Poco;
-
 namespace trader {
 
-	Fyb::Fyb(Poco::AutoPtr<trader::App> _app)
-		: fybApi(_app, this)
+	Fyb::Fyb(AutoPtr<trader::App> _app)
+		: api(_app, this)
 		, app(_app)
 		, dataBase(new FybDatabase(_app->dbSession))
 		, executeTimer(0, 1000)
@@ -35,7 +20,6 @@ namespace trader {
 		dataBase->init();
 		//dataBase->clear();
 
-		using std::placeholders::_1;
 		serialExecutionList.push_back(std::bind(&Fyb::executeTickerDetailed, this, _1));
 		serialExecutionList.push_back(std::bind(&Fyb::executeAccountInfo, this, _1));
 		serialExecutionList.push_back(std::bind(&Fyb::executeTradeHistory, this, _1));
@@ -55,10 +39,10 @@ namespace trader {
 	void Fyb::executeTickerDetailed(Timer& timer)
 	{
 		(void)timer;
-		Poco::AutoPtr<TickerDetailed> tickerDetailedData = fybApi.GetTickerDetailed();
+		AutoPtr<TickerDetailed> tickerDetailedData = api.GetTickerDetailed();
 
 		Ticker_Detailed::Record rec;
-		rec.timeStamp = (Poco::Int32)std::time(nullptr);
+		rec.timeStamp = (Int32)std::time(nullptr);
 		rec.ask = tickerDetailedData->dataObject.ask;
 		rec.bid = tickerDetailedData->dataObject.bid;
 		rec.last = tickerDetailedData->dataObject.last;
@@ -70,10 +54,10 @@ namespace trader {
 	void Fyb::executeAccountInfo(Timer& timer)
 	{
 		(void)timer;
-		Poco::AutoPtr<AccountInfo> accountInfo = fybApi.GetAccountInfo();
+		AutoPtr<AccountInfo> accountInfo = api.GetAccountInfo();
 		
 		Account_Balance::Record rec;
-		rec.timeStamp = (Poco::Int32)std::time(nullptr);
+		rec.timeStamp = (Int32)std::time(nullptr);
 		rec.sgdBal = accountInfo->dataObject.sgdBal;
 		rec.btcBal = accountInfo->dataObject.btcBal;
 
@@ -103,14 +87,14 @@ namespace trader {
 			tradesParams->dataObject.SetSince(currentRec.tid);
 		}
 
-		AutoPtr<Trades> trades = fybApi.GetTrades(tradesParams);
+		AutoPtr<Trades> trades = api.GetTrades(tradesParams);
 
 		std::vector<Trade_History::Record> tradeHistoryRecord;
 		for (auto& trade : trades->data)
 		{
 			Trade_History::Record rec;
 			rec.amt = trade.amount;
-			rec.date = (Poco::Int32)trade.date;
+			rec.date = (Int32)trade.date;
 			rec.price = trade.price;
 			rec.tid = trade.tid;
 			tradeHistoryRecord.push_back(rec);
@@ -156,7 +140,7 @@ namespace trader {
 	void Fyb::executeOrderBook(Timer& timer)
 	{
 		(void)timer;
-		Poco::AutoPtr<OrderBook> orderBook = fybApi.GetOrderBook();
+		AutoPtr<OrderBook> orderBook = api.GetOrderBook();
 		time_t currentDateTime = std::time(nullptr);
 
 		if (orderBook->dataObject.asks.empty())
@@ -227,10 +211,10 @@ namespace trader {
 		
 	}
 
-	void Fyb::executePendingOrders(Poco::Timer& timer)
+	void Fyb::executePendingOrders(Timer& timer)
 	{
 		(void)timer;
-		Poco::AutoPtr<PendingOrders> orderBook = fybApi.GetPendingOrders();
+		AutoPtr<PendingOrders> orderBook = api.GetPendingOrders();
 
 		if (orderBook->dataObject.isSetError() && orderBook->dataObject.error != 0)
 		{
@@ -271,12 +255,12 @@ namespace trader {
 			dataBase->my_Pending_Sell_OrdersTable->insertMultipleUnique(sellRecords);
 	}
 
-	void Fyb::executeOrderHistory(Poco::Timer& timer)
+	void Fyb::executeOrderHistory(Timer& timer)
 	{
 		(void)timer;
-		Poco::AutoPtr<OrderHistoryParams> orderHistoryParams = new OrderHistoryParams();
+		AutoPtr<OrderHistoryParams> orderHistoryParams = new OrderHistoryParams();
 		orderHistoryParams->dataObject.SetLimit(100);
-		Poco::AutoPtr<OrderHistory> orderHistory = fybApi.GetOrderHistory(orderHistoryParams);
+		AutoPtr<OrderHistory> orderHistory = api.GetOrderHistory(orderHistoryParams);
 
 		if (orderHistory->dataObject.isSetError() && orderHistory->dataObject.error != 0)
 		{
@@ -316,9 +300,9 @@ namespace trader {
 	{
 	}
 
-	Poco::Dynamic::Var Fyb::invoke(const std::string& httpMethod, Poco::URI& uri)
+	Dynamic::Var Fyb::invoke(const std::string& httpMethod, URI& uri)
 	{
-		static Poco::FastMutex lock;
+		static FastMutex lock;
 		static time_t lastTimeStamp = 0;
 		time_t currentTimeStamp;
 		if (lock.tryLock())
@@ -337,44 +321,44 @@ namespace trader {
 		}
 
 		//Add timestamp
-		std::ostringstream timeString;
+		ostringstream timeString;
 		timeString << currentTimeStamp;
-		uri.addQueryParameter(std::string("timestamp"), timeString.str());
+		uri.addQueryParameter(string("timestamp"), timeString.str());
 
 		// Create the request URI.
-		Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort());
-		Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, uri.getPathAndQuery(), Poco::Net::HTTPMessage::HTTP_1_1);
+		HTTPSClientSession session(uri.getHost(), uri.getPort());
+		HTTPRequest req(HTTPRequest::HTTP_GET, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
 		req.add("Accept-Encoding", "gzip");
 
 		// Sign request
-		if (httpMethod == Poco::Net::HTTPRequest::HTTP_POST)
+		if (httpMethod == HTTPRequest::HTTP_POST)
 		{
 			//Convert to POST
-			Poco::Net::HTMLForm form(req);
-			req.setMethod(Poco::Net::HTTPRequest::HTTP_POST);
+			HTMLForm form(req);
+			req.setMethod(HTTPRequest::HTTP_POST);
 			req.setURI(uri.getPath());
-			form.setEncoding(Poco::Net::HTMLForm::ENCODING_URL);
+			form.setEncoding(HTMLForm::ENCODING_URL);
 
 			//Key
-			req.set("key", fybApi.config.dataObject.consumer_key);
+			req.set("key", api.config.dataObject.consumer_key);
 
 			//Sign
-			std::ostringstream paramStream;
+			ostringstream paramStream;
 			form.write(paramStream);
-			std::string signatureBase = paramStream.str();
-			std::string signingKey = fybApi.config.dataObject.consumer_secret;
-			Poco::HMACEngine<Poco::SHA1Engine> hmacEngine(signingKey);
+			string signatureBase = paramStream.str();
+			string signingKey = api.config.dataObject.consumer_secret;
+			HMACEngine<SHA1Engine> hmacEngine(signingKey);
 			hmacEngine.update(signatureBase);
-			Poco::DigestEngine::Digest digest = hmacEngine.digest();
+			DigestEngine::Digest digest = hmacEngine.digest();
 			std::ostringstream digestHexBin;
-			Poco::HexBinaryEncoder hexBinEncoder(digestHexBin);
+			HexBinaryEncoder hexBinEncoder(digestHexBin);
 			hexBinEncoder.write(reinterpret_cast<char*>(&digest[0]), digest.size());
 			hexBinEncoder.close();
 			req.set("sig", digestHexBin.str());
 
 			//Submit
 			form.prepareSubmit(req);
-			std::ostream& ostr = session.sendRequest(req);
+			ostream& ostr = session.sendRequest(req);
 			form.write(ostr);
 		}
 		else
@@ -382,23 +366,23 @@ namespace trader {
 			session.sendRequest(req);
 		}
 
-		Poco::Logger::get("Logs").information("Send Request: %s", uri.toString());
+		Logger::get("Logs").information("Send Request: %s", uri.toString());
 
 		// Receive the response.
-		Poco::Net::HTTPResponse res;
-		std::istream& rs = session.receiveResponse(res);
+		HTTPResponse res;
+		istream& rs = session.receiveResponse(res);
 
-		Poco::InflatingInputStream inflater(rs, Poco::InflatingStreamBuf::STREAM_GZIP);
+		InflatingInputStream inflater(rs, InflatingStreamBuf::STREAM_GZIP);
 		// Parse the JSON
-		Poco::JSON::Parser parser;
+		JSON::Parser parser;
 		parser.parse(inflater);
-		Poco::Dynamic::Var result = parser.result();
-		std::string resultString = Poco::Dynamic::Var::toString(result);
-		Poco::Logger::get("Logs").information("Received Response: %s", resultString);
+		Dynamic::Var result = parser.result();
+		string resultString = Dynamic::Var::toString(result);
+		Logger::get("Logs").information("Received Response: %s", resultString);
 
 		// If everything went fine, return the JSON document.
 		// Otherwise throw an exception.
-		if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+		if (res.getStatus() == HTTPResponse::HTTP_OK)
 		{
 			return result;
 		}

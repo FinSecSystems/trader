@@ -16,11 +16,11 @@ namespace trader {
 
 		Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
 
+        ExchangeratelabApi api;
 	protected:
 		Exchangeratelab(const Exchangeratelab&);
 		Exchangeratelab& operator = (const Exchangeratelab&);
 
-		ExchangeratelabApi exchangeratelabApi;
 	};
 
 }

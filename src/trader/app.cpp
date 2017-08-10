@@ -2,23 +2,7 @@
 #include "fyb.h"
 #include "exchangeratelab.h"
 #include "app.h"
-
-using Poco::Util::Application;
-using Poco::Util::Option;
-using Poco::Util::OptionSet;
-using Poco::Util::HelpFormatter;
-using Poco::Util::AbstractConfiguration;
-using Poco::Util::OptionCallback;
-using Poco::AutoPtr;
-using Poco::Channel;
-using Poco::ConsoleChannel;
-using Poco::SplitterChannel;
-using Poco::FileChannel;
-using Poco::FormattingChannel;
-using Poco::Formatter;
-using Poco::PatternFormatter;
-using Poco::Logger;
-using Poco::Message;
+#include "cryptowatch.h"
 
 namespace trader {
 
@@ -34,7 +18,7 @@ namespace trader {
 
     }
 
-    void App::handleHelp(const std::string& name, const std::string& value)
+    void App::handleHelp(const string& name, const string& value)
     {
 		(void)name;
 		(void)value;
@@ -48,8 +32,22 @@ namespace trader {
         helpFormatter.setCommand(commandName());
         helpFormatter.setUsage("OPTIONS");
         helpFormatter.setHeader("A simple command line client for posting status updates.");
-        helpFormatter.format(std::cout);
+        helpFormatter.format(cout);
     }
+
+     Poco::Util::AbstractConfiguration& App::appConfig()
+     {
+         try
+         {
+             return Util::Application::instance().config();
+         }
+         catch (NullPointerException&)
+         {
+             throw IllegalStateException(
+                 "An application configuration is required to initialize the application"
+             );
+         }
+     }
 
     int App::main(const std::vector<std::string>& args)
     {
@@ -88,7 +86,7 @@ namespace trader {
 
 			//Initialize logs
 			AutoPtr<SplitterChannel> splitterChannel(new SplitterChannel());
-			std::ostringstream logNameStream;
+			ostringstream logNameStream;
 			logNameStream << commandName() << ".log.txt";
 #if defined(_DEBUG)
 			AutoPtr<Channel> consoleChannel(new ConsoleChannel());
@@ -109,31 +107,46 @@ namespace trader {
 			Logger::create("Logs", formattingChannel, Message::PRIO_TRACE);
 
 			//Initialize DB
-			std::ostringstream dbNameStream;
+			ostringstream dbNameStream;
 			dbNameStream << commandName() << ".db";
-			dbSession = new Poco::Data::Session("SQLite", dbNameStream.str());
+			dbSession = new Data::Session("SQLite", dbNameStream.str());
 
-			trader::Exchangeratelab exchangeRateLab(this);
-			trader::Fyb fyb(this);
-			fyb.run();
-			//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.GetUSDToSGD();
+            loadConfiguration();
+            AutoPtr<AbstractConfiguration> proxyProperties(appConfig().createView("proxy"));
+
+            HTTPSClientSession::ProxyConfig proxyConfig;
+            proxyConfig.host = proxyProperties->getString("hostname");
+            proxyConfig.port = (UInt16)proxyProperties->getUInt("port");
+            proxyConfig.username = proxyProperties->getString("username");
+            proxyConfig.password = proxyProperties->getString("password");
+            proxyConfig.nonProxyHosts = proxyProperties->getString("nonproxyhosts");
+
+            HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
+
+			Exchangeratelab exchangeRateLab(this);
+			Fyb fyb(this);
+			//fyb.run();
+			//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.api.GetUSDToSGD();
+
+            Cryptowatch cryptowatch(this);
+            Poco::AutoPtr<AssetList> assetList = cryptowatch.api.GetAssetList();
 
 			do {
-				Poco::Thread::sleep(10000);
+				Thread::sleep(10000);
 			} while (1);
 		}
-        catch (Poco::Exception& exc)
+        catch (Exception& exc)
         {
-            std::cerr << exc.displayText() << std::endl;
-			Poco::Logger::get("Logs").information("Application Error: %s", exc.displayText());
+            cerr << exc.displayText() << std::endl;
+			Logger::get("Logs").information("Application Error: %s", exc.displayText());
             return Application::EXIT_SOFTWARE;
         }
         return Application::EXIT_OK;
     }
 
-	bool App::findFile(Poco::Path& path) const
+	bool App::findFile(Path& path) const
 	{
-		return Poco::Util::Application::findFile(path);
+		return Util::Application::findFile(path);
 	}
 
 }

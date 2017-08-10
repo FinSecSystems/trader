@@ -52,6 +52,10 @@ namespace trader {
 				{
 					return "double";
 				}
+                else if (format.compare("int64") == 0)
+                {
+                    return "Poco::Int64";
+                }
 			}
 			return "Poco::Int32";
 		}
@@ -91,6 +95,10 @@ namespace trader {
 				{
 					return "std::numeric_limits<double>::max()";
 				}
+                else if (format.compare("int64") == 0)
+                {
+                    return "std::numeric_limits<Poco::Int64>::max()";
+                }
 			}
 			return "std::numeric_limits<Poco::Int32>::max()";
 		}

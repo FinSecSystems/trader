@@ -26,6 +26,7 @@ namespace trader {
 		void defineOptions(Poco::Util::OptionSet& options);
 		void handleHelp(const std::string& name, const std::string& value);
 		void displayHelp();
+        Poco::Util::AbstractConfiguration& appConfig();
 		int main(const std::vector<std::string>& args);
 
 	private:
