@@ -115,11 +115,16 @@ namespace trader {
             AutoPtr<AbstractConfiguration> proxyProperties(appConfig().createView("proxy"));
 
             HTTPSClientSession::ProxyConfig proxyConfig;
-            proxyConfig.host = proxyProperties->getString("hostname");
-            proxyConfig.port = (UInt16)proxyProperties->getUInt("port");
-            proxyConfig.username = proxyProperties->getString("username");
-            proxyConfig.password = proxyProperties->getString("password");
-            proxyConfig.nonProxyHosts = proxyProperties->getString("nonproxyhosts");
+			if (proxyProperties->hasProperty("hostname"))
+				proxyConfig.host = proxyProperties->getString("hostname");
+			if (proxyProperties->hasProperty("port"))
+				proxyConfig.port = (UInt16)proxyProperties->getUInt("port");
+			if (proxyProperties->hasProperty("username"))
+				proxyConfig.username = proxyProperties->getString("username");
+			if (proxyProperties->hasProperty("password"))
+				proxyConfig.password = proxyProperties->getString("password");
+			if (proxyProperties->hasProperty("nonproxyhosts"))
+				proxyConfig.nonProxyHosts = proxyProperties->getString("nonproxyhosts");
 
             HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
 
