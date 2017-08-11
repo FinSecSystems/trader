@@ -22,19 +22,6 @@
               }
             }
           }
-        },
-        "allowance": {
-          "type": "object",
-          "properties": {
-            "cost": {
-              "format": "int64",
-              "type": "number"
-            },
-            "remaining": {
-              "format": "int64",
-              "type": "number"
-            }
-          }
         }
       },
       "required": []
@@ -49,6 +36,24 @@
         "remaining": {
           "format": "int64",
           "type": "number"
+        }
+      }
+    },
+    "AllowanceIntrospector": {
+      "type": "object",
+      "properties": {
+        "allowance": {
+          "type": "object",
+          "properties": {
+            "cost": {
+              "format": "int64",
+              "type": "number"
+            },
+            "remaining": {
+              "format": "int64",
+              "type": "number"
+            }
+          }
         }
       }
     }
