@@ -1,13 +1,16 @@
 #include "stdafx.h"
 #include "cryptowatch.h"
 #include "cryptowatchapi.h"
+#include "cryptowatchdatabase.h"
 #include "helper.h"
 
 namespace trader {
 
     Cryptowatch::Cryptowatch(Poco::AutoPtr<trader::App> _app)
         : api(_app, this)
+		, dataBase(new CryptowatchDatabase(_app->dbSession))
     {
+		dataBase->init();
     }
 
     Cryptowatch::~Cryptowatch()
@@ -18,19 +21,24 @@ namespace trader {
     {
         (void)httpMethod;
         static FastMutex mutex;
-        static Stopwatch lockDownStopWatch;
+		static Int32 lockDownHour = -1;
         {
             FastMutex::ScopedLock lock(mutex);
-            Clock::ClockDiff elapsedTime = lockDownStopWatch.elapsed();
-            if (elapsedTime > 0 && elapsedTime < 60 * 60 * 1000)
-            {
-                throw TimeoutException("Cryptowatch Error", "API allowance exceeded. Initiate 1 hour lockdown");
-            }
-            else
-            {
-                lockDownStopWatch.reset();
-                lockDownStopWatch.stop();
-            }
+			if (lockDownHour != -1)
+			{
+				time_point<system_clock> currentTime = system_clock::now();
+				system_clock::duration currentDuration = currentTime.time_since_epoch();
+				hours h = duration_cast<hours>(currentDuration);
+				int32_t newHour = h.count();
+				if (lockDownHour == newHour)
+				{
+					throw TimeoutException("Cryptowatch Error", "API allowance exceeded. Initiate 1 hour lockdown");
+				}
+				else
+				{
+					lockDownHour = -1;
+				}
+			}
         }
 
         // Create the request URI.
@@ -56,13 +64,45 @@ namespace trader {
         switch (res.getStatus())
         {
             case HTTPResponse::HTTP_OK:
-                return result;
+			{
+				Poco::AutoPtr<AllowanceIntrospector> allowance = new AllowanceIntrospector();
+				allowance->read(result);
+				if (allowance->dataObject.allowanceObject.isSetRemaining())
+				{
+					time_point<system_clock> currentTime = system_clock::now();
+					system_clock::duration currentDuration = currentTime.time_since_epoch();
+					hours h = duration_cast<hours>(currentDuration);
+
+					Api_Cost::Record recInfo;
+					recInfo.timeStamp = time(nullptr);
+					recInfo.method = uri.toString();
+					recInfo.cost = allowance->dataObject.allowanceObject.remaining;
+					dataBase->api_CostTable->insert(recInfo);
+
+					Logger::get("Logs").information("Cryptowatch: %iL nanoseconds remaining for %i hour", allowance->dataObject.allowanceObject.cost, h.count());
+
+					if (allowance->dataObject.allowanceObject.remaining <= 0)
+					{
+						{
+							FastMutex::ScopedLock lock(mutex);
+							lockDownHour = h.count();
+						}
+					}
+
+				}
+				return result;
+			}
             case HTTPResponse::HTTP_TOO_MANY_REQUESTS:
-                {
-                    FastMutex::ScopedLock lock(mutex);
-                    lockDownStopWatch.start();
-                }
-                throw TimeoutException("Cryptowatch Error", "API allowance exceeded. Initiate 1 hour lockdown");
+				{
+					time_point<system_clock> currentTime = system_clock::now();
+					system_clock::duration currentDuration = currentTime.time_since_epoch();
+					hours h = duration_cast<hours>(currentDuration);
+					{
+						FastMutex::ScopedLock lock(mutex);
+						lockDownHour = h.count();
+					}
+					throw TimeoutException("Cryptowatch Error", "API allowance exceeded. Initiate 1 hour lockdown");
+				}
             default:
                 throw ApplicationException("Cryptowatch Error", "");
         }

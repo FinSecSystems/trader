@@ -54,6 +54,8 @@
 #include <sstream>
 #include <functional>
 #include <atomic>
+#include <ctime>
+#include <chrono>
 
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -83,6 +85,7 @@ using Poco::Data::AbstractExtractor;
 using Poco::Data::AbstractPreparator;
 using Poco::AutoPtr;
 using namespace std;
+using namespace std::chrono;
 using namespace Poco;
 using namespace Poco::Data::Keywords;
 using namespace Poco::Net;

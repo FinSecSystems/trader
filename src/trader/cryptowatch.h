@@ -2,6 +2,7 @@
 
 #include "api.h"
 #include "cryptowatchapi.h"
+#include "cryptowatchdatabase.h"
 
 namespace trader {
 
@@ -18,6 +19,7 @@ namespace trader {
 
         CryptowatchApi api;
 
+		Poco::AutoPtr<CryptowatchDatabase> dataBase;
     protected:
         Cryptowatch(const Cryptowatch&);
         Cryptowatch& operator = (const Cryptowatch&);

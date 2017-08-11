@@ -22,6 +22,8 @@ namespace trader {
 
 		friend class Fyb;
 		friend class Exchangeratelab;
+		friend class Cryptowatch;
+
 	protected:
 		void defineOptions(Poco::Util::OptionSet& options);
 		void handleHelp(const std::string& name, const std::string& value);
