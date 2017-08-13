@@ -454,6 +454,7 @@ namespace trader {
 		{
 			ARRAY = 0,
 			OBJECT,
+			MAP,
 			NUM_TYPES
 		};
 
@@ -472,7 +473,8 @@ namespace trader {
 			static const char* TypeString[] =
 			{
 				"Array",
-				"Object"
+				"Object",
+				"Map"
 			};
 			return TypeString[(Int32)type];
 		}
@@ -538,7 +540,7 @@ namespace trader {
 
 	inline expansionstringstream& operator<<(expansionstringstream& os, const char* text)
 	{
-		bool previousWasArray = os.wasPrevious(expansionstringstream::ARRAY);
+		bool previousWasArray = os.wasPrevious(expansionstringstream::ARRAY) || os.wasPrevious(expansionstringstream::MAP);
 		os.updateStack(text);
 		bool newIsObject = os.wasPrevious(expansionstringstream::OBJECT);
 		if (!previousWasArray || !newIsObject)

@@ -1,0 +1,44 @@
+{
+  "tables": [
+    {
+      "name": "Api_Cost",
+      "fields": [
+        {
+          "name": "TimeStamp",
+          "title": "Time Stamp of REST Call",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Current Unix Timestamp",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Method",
+          "title": "REST Call Endpoint",
+          "type": "TEXT",
+          "format": "",
+          "description": "URL of REST Call",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Cost",
+          "title": "Cost in nanoseconds",
+          "type": "REAL",
+          "format": "",
+          "description": "Cost",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [],
+      "primaryKey": [
+      ],
+      "foreignKeys": []
+    }
+  ],
+  "name": "Cryptowatch"
+}

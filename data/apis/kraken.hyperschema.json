@@ -1,0 +1,67 @@
+{
+  "definitions": {
+    "AssetInfo": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "map",
+          "properties": {
+            "key": {
+              "type": "object",
+              "properties": {
+                "aclass": {
+                  "type": "string"
+                },
+                "altname": {
+                  "type": "string"
+                },
+                "decimals": {
+                  "type": "number"
+                },
+                "display_decimals": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": []
+    },
+    "ErrorIntrospector": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "type": "object",
+    "required": []
+  },
+  "links": [
+    {
+      "href": "public/Assets",
+      "description": "Returns list of asset names and info",
+      "method": "GET",
+      "title": "GetAssetInfo",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/AssetInfo"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseurl": "https://api.kraken.com/0/",
+    "useConfig": false
+  },
+  "required": [],
+  "type": "object"
+}

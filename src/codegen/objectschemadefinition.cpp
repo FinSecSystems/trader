@@ -140,6 +140,15 @@ namespace trader {
 		return false;
 	}
 
+	bool isMap(const string& jsonType)
+	{
+		if (jsonType.compare("map") == 0)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	void ObjectSchemaDefinition::cppConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, expansionstringstream expansionStream, string keyName, UInt32 idx, bool previousArray)
 	{
 		string type = obj->get("type");
@@ -201,14 +210,47 @@ namespace trader {
 				}
 			}
 		}
+		else if (isMap(type))
+		{
+			expansionstringstream previousexpansionStream(expansionStream);
+			if (!previousArray)
+			{
+				ostringstream temp;
+				temp << "::" << type_name(keyName) << expansionStream.getTypeString(expansionstringstream::MAP);
+				expansionStream << temp.str();
+			}
+			else
+			{
+				expansionStream << expansionstringstream::MAP;
+			}
+			JSON::Object::Ptr items = obj->getObject("properties");
+			stream << "Poco::JSON::Object::Ptr " << temp_name(idx + 1) << " = " << temp_name(idx + 0) << ".extract<Poco::JSON::Object::Ptr>()" << cendl;
+			stream << "for (Poco::JSON::Object::ConstIterator " << temp_name(idx + 2) << " = " << temp_name(idx + 1) << "->begin(); " << temp_name(idx + 2) << " != " << temp_name(idx + 1) << "->end(); ++" << temp_name(idx + 2) << ")" << endl;
+			{
+				ScopedStream<ApiFileOutputStream> scopedStream(stream);
+				stream << "Poco::Dynamic::Var " << temp_name(idx + 3) << " = " << temp_name(idx + 2) << "->second" << cendl;
+				stream << expansionStream.type_name_str() << " " << expansionStream.var_name_str() << cendl;
+				items = items->getObject("key");
+				cppConstruct(items, stream, expansionStream, keyName, idx + 3, true);
+				if (previousArray)
+				{
+					stream << previousexpansionStream.var_name_str() << ".insert(std::pair<property.first, " << expansionStream.var_name_str() << "))" << cendl;
+				}
+				else
+				{
+					previousexpansionStream << keyName;
+					stream << previousexpansionStream.prefix_str() << ".insert(std::pair<std::string," << expansionStream.type_name_str() << ">(" << temp_name(idx + 2) << "->first, " << expansionStream.var_name_str() << "))" << cendl;
+				}
+			}			
+		}
 		else
 		{
 			const char* cppType = getCppType(type, obj);
 			if (cppType)
 			{
-				if (expansionStream.has(expansionstringstream::ARRAY))
+				if (expansionStream.has(expansionstringstream::ARRAY) || expansionStream.has(expansionstringstream::MAP))
 				{
-					if (expansionStream.wasPrevious(expansionstringstream::ARRAY))
+					if (expansionStream.wasPrevious(expansionstringstream::ARRAY) || expansionStream.wasPrevious(expansionstringstream::MAP))
 					{
 						stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 					}
@@ -253,7 +295,7 @@ namespace trader {
 	void ObjectSchemaDefinition::headerConstructorConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray, bool first)
 	{
 		string type = obj->get("type");
-		if (!isObject(type) && !isArray(type) && !previousArray)
+		if (!isObject(type) && !isArray(type) && !isMap(type) && !previousArray)
 		{
 			if (first)
 			{
@@ -318,6 +360,27 @@ namespace trader {
 			JSON::Object::Ptr itemObj = obj->getObject("items");
 			headerConstruct(itemObj, stream, expandedName, expandedName, true);
 			stream << "typedef std::vector<" << expandedName << "> " << type_name(keyName) << cendl;
+			if (!previousArray)
+			{
+				stream << type_name(keyName) << tabs(1) << var_name(keyName) << cendl;
+			}
+		}
+		else if (isMap(type))
+		{
+			if (!previousArray)
+			{
+				ostringstream temp;
+				temp << type_name(keyName) << "Map";
+				expandedName = temp.str();
+			}
+			else
+			{
+				expandedName += "Map";
+			}
+			JSON::Object::Ptr itemObj = obj->getObject("properties");
+			itemObj = itemObj->getObject("key");
+			headerConstruct(itemObj, stream, expandedName, expandedName, true);
+			stream << "typedef std::map<std::string, " << expandedName << "> " << type_name(keyName) << cendl;
 			if (!previousArray)
 			{
 				stream << type_name(keyName) << tabs(1) << var_name(keyName) << cendl;

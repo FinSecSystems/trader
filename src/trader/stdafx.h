@@ -56,6 +56,7 @@
 #include <atomic>
 #include <ctime>
 #include <chrono>
+#include <map>
 
 using Poco::Util::Application;
 using Poco::Util::Option;
