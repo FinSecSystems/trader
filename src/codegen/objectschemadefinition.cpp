@@ -205,8 +205,15 @@ namespace trader {
 				}
 				else
 				{
-					previousexpansionStream << keyName;
-					stream << previousexpansionStream.prefix_str() << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
+                    if (previousexpansionStream.var_name_str().size() && (expansionStream.wasPrevious(expansionstringstream::ARRAY) || expansionStream.wasPrevious(expansionstringstream::MAP)))
+                    {
+                        stream << previousexpansionStream.var_name_str() << "." << keyName << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
+                    }
+                    else
+                    {
+                        previousexpansionStream << keyName;
+                        stream << previousexpansionStream.prefix_str() << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
+                    }
 				}
 			}
 		}

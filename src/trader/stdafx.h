@@ -22,6 +22,7 @@
 #include "Poco/FileStream.h"
 #include "Poco/StreamCopier.h"
 #include "Poco/SHA1Engine.h"
+#include "Poco/SHA2Engine.h"
 #include "Poco/HMACEngine.h"
 #include "Poco/Base64Encoder.h"
 #include "Poco/Base32Encoder.h"

@@ -3,6 +3,7 @@
 #include "exchangeratelab.h"
 #include "app.h"
 #include "cryptowatch.h"
+#include "kraken.h"
 
 namespace trader {
 
@@ -134,7 +135,14 @@ namespace trader {
 			//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.api.GetUSDToSGD();
 
             Cryptowatch cryptowatch(this);
-            Poco::AutoPtr<AssetList> assetList = cryptowatch.api.GetAssetList();
+            //Poco::AutoPtr<AssetList> assetList = cryptowatch.api.GetAssetList();
+
+            Kraken kraken(this);
+            //kraken.run();
+            Poco::AutoPtr<AssetInfoParams> assetInfoParams = new AssetInfoParams();
+            //AutoPtr<AssetInfo> assetInfo = kraken.api.GetAssetInfo(assetInfoParams);
+
+            AutoPtr<ServerTime> assetInfo = kraken.api.GetServerTime();
 
 			do {
 				Thread::sleep(10000);

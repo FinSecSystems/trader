@@ -23,6 +23,7 @@ namespace trader {
 		friend class Fyb;
 		friend class Exchangeratelab;
 		friend class Cryptowatch;
+        friend class Kraken;
 
 	protected:
 		void defineOptions(Poco::Util::OptionSet& options);

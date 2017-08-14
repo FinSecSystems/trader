@@ -1,5 +1,39 @@
 {
   "definitions": {
+    "ServerTime": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "unixtime": {
+              "type": "number"
+            },
+            "rfc1123": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "AssetInfoParams": {
+      "type": "object",
+      "properties": {
+        "info": {
+          "description": "Info to retrieve - all info (default)",
+          "type": "string"
+        },
+        "aclass": {
+          "description": "Asset Class - currency (default)",
+          "type": "string"
+        },
+        "asset": {
+          "description": "Comma delimited list of assets to get info on (optional.  default = all for given asset class)",
+          "type": "string"
+        }
+      },
+      "required": [ ]
+    },
     "AssetInfo": {
       "type": "object",
       "properties": {
@@ -26,7 +60,7 @@
           }
         }
       },
-      "required": []
+      "required": [ ]
     },
     "ErrorIntrospector": {
       "type": "object",
@@ -38,6 +72,121 @@
           }
         }
       }
+    },
+    "AssetPairsParams": {
+      "type": "object",
+      "properties": {
+        "info": {
+          "description": "info to retrieve (optional), info = all info (default), leverage = leverage info, fees = fees schedule, margin = margin info",
+          "type": "string"
+        },
+        "pair": {
+          "description": "comma delimited list of asset pairs to get info on (optional.  default = all)",
+          "type": "string"
+        }
+      },
+      "required": [ ]
+    },
+    "AssetPairs": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "map",
+          "properties": {
+            "key": {
+              "type": "object",
+              "properties": {
+                "altname": {
+                  "description": "alternate pair name",
+                  "type": "string"
+                },
+                "aclass_base": {
+                  "description": "asset class of base component",
+                  "type": "string"
+                },
+                "base": {
+                  "description": "asset id of base component",
+                  "type": "string"
+                },
+                "aclass_quote ": {
+                  "description": "asset class of quote component",
+                  "type": "string"
+                },
+                "quote": {
+                  "description": "asset id of quote component",
+                  "type": "string"
+                },
+                "lot": {
+                  "description": "volume lot size",
+                  "type": "string"
+                },
+                "pair_decimals": {
+                  "description": "scaling decimal places for pair",
+                  "type": "number"
+                },
+                "lot_decimals": {
+                  "description": "scaling decimal places for volume",
+                  "type": "number"
+                },
+                "lot_multiplier": {
+                  "description": "amount to multiply lot volume by to get currency volume",
+                  "type": "number"
+                },
+                "leverage_buy": {
+                  "description": "array of leverage amounts available when buying",
+                    "type": "array",
+                    "items": {
+                      "format": "double",
+                      "type": "number"
+                    }
+                },
+                "leverage_sell": {
+                  "description": "array of leverage amounts available when selling",
+                    "type": "array",
+                    "items": {
+                      "format": "double",
+                      "type": "number"
+                    }
+                },
+                "fees": {
+                  "description": "fee schedule array in [volume, percent fee] tuples",
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "format": "double",
+                      "type": "number"
+                    }
+                  }
+                },
+                "fees_maker": {
+                  "description": "maker fee schedule array in [volume, percent fee] tuples (if on maker/taker)",
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "format": "double",
+                      "type": "number"
+                    }
+                  }
+                },
+                "fee_volume_currency": {
+                  "description": "volume discount currency",
+                  "type": "string"
+                },
+                "margin_call": {
+                  "description": "margin call level",
+                  "type": "number"
+                },
+                "margin_stop": {
+                  "description": "stop-out/liquidation margin level",
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "properties": {
@@ -45,6 +194,18 @@
     "required": []
   },
   "links": [
+  {
+      "href": "public/Time",
+      "description": "Get server time",
+      "method": "GET",
+      "title": "GetServerTime",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/ServerTime"
+        }
+      ]
+    },
     {
       "href": "public/Assets",
       "description": "Returns list of asset names and info",
@@ -55,12 +216,15 @@
         {
           "$ref": "#/definitions/AssetInfo"
         }
-      ]
+      ],
+      "schema": {
+        "$ref": "#/definitions/AssetInfoParams"
+      }
     }
   ],
   "config": {
     "baseurl": "https://api.kraken.com/0/",
-    "useConfig": false
+    "useConfig": true
   },
   "required": [],
   "type": "object"

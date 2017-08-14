@@ -1,38 +1,59 @@
 {
   "tables": [
     {
-      "name": "Api_Cost",
+      "name": "Asset_Info",
       "fields": [
         {
-          "name": "TimeStamp",
-          "title": "Time Stamp of REST Call",
+          "name": "Asset_Name",
+          "title": "Asset Symbol",
           "type": "INTEGER",
           "format": "",
-          "description": "Current Unix Timestamp",
+          "description": "",
           "constraints": {
             "required": true
           }
         },
         {
-          "name": "Method",
-          "title": "REST Call Endpoint",
+          "name": "Asset_Class",
+          "title": "Asset Type",
           "type": "TEXT",
           "format": "",
-          "description": "URL of REST Call",
+          "description": "",
           "constraints": {
             "required": true
           }
         },
         {
-          "name": "Cost",
-          "title": "Cost in nanoseconds",
-          "type": "REAL",
+          "name": "Alternate_Name",
+          "title": "Alternate name for asset",
+          "type": "TEXT",
           "format": "",
           "description": "Cost",
           "constraints": {
             "required": true
           }
+        },
+        {
+          "name": "Decimals",
+          "title": "",
+          "type": "REAL",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Display_Decimals",
+          "title": "",
+          "type": "REAL",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
         }
+
       ],
       "missingValues": [],
       "primaryKey": [
@@ -40,5 +61,5 @@
       "foreignKeys": []
     }
   ],
-  "name": "Cryptowatch"
+  "name": "Kraken"
 }
