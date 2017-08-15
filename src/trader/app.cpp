@@ -150,9 +150,9 @@ namespace trader {
             //assetPairsParams->dataObject.pair = "XZECZUSD";
             //AutoPtr<AssetPairs> assetPairs = kraken.api.GetAssetPairs(assetPairsParams);
 
-            Poco::AutoPtr<TickerInformationParams> tickerInformationParams = new TickerInformationParams();
-            tickerInformationParams->dataObject.pair = "XZECZUSD";
-            AutoPtr<TickerInformation> tickerInformation = kraken.api.GetTickerInformation(tickerInformationParams);
+            //Poco::AutoPtr<TickerInformationParams> tickerInformationParams = new TickerInformationParams();
+            //tickerInformationParams->dataObject.pair = "XZECZUSD";
+            //AutoPtr<TickerInformation> tickerInformation = kraken.api.GetTickerInformation(tickerInformationParams);
 
 			do {
 				Thread::sleep(10000);
