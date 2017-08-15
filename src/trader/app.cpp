@@ -139,10 +139,20 @@ namespace trader {
 
             Kraken kraken(this);
             //kraken.run();
-            Poco::AutoPtr<AssetInfoParams> assetInfoParams = new AssetInfoParams();
+            //Poco::AutoPtr<AssetInfoParams> assetInfoParams = new AssetInfoParams();
             //AutoPtr<AssetInfo> assetInfo = kraken.api.GetAssetInfo(assetInfoParams);
 
-            AutoPtr<ServerTime> assetInfo = kraken.api.GetServerTime();
+            //AutoPtr<ServerTime> assetInfo = kraken.api.GetServerTime();
+
+            //AutoPtr<AccountBalance> accountBalance = kraken.api.GetAccountBalance();
+
+            //Poco::AutoPtr<AssetPairsParams> assetPairsParams = new AssetPairsParams();
+            //assetPairsParams->dataObject.pair = "XZECZUSD";
+            //AutoPtr<AssetPairs> assetPairs = kraken.api.GetAssetPairs(assetPairsParams);
+
+            Poco::AutoPtr<TickerInformationParams> tickerInformationParams = new TickerInformationParams();
+            tickerInformationParams->dataObject.pair = "XZECZUSD";
+            AutoPtr<TickerInformation> tickerInformation = kraken.api.GetTickerInformation(tickerInformationParams);
 
 			do {
 				Thread::sleep(10000);

@@ -299,7 +299,7 @@ namespace trader {
 	}
 
 
-	void ObjectSchemaDefinition::headerConstructorConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray, bool first)
+	void ObjectSchemaDefinition::headerConstructorConstruct(JSON::Object::Ptr obj, ApiFileOutputStream& stream, string expandedName, string keyName, bool previousArray, bool& first)
 	{
 		string type = obj->get("type");
 		if (!isObject(type) && !isArray(type) && !isMap(type) && !previousArray)
@@ -307,6 +307,7 @@ namespace trader {
 			if (first)
 			{
 				stream << ": ";
+                first = false;
 			}
 			else
 			{
@@ -341,7 +342,6 @@ namespace trader {
 				{
 					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
 					headerConstructorConstruct(propertyObject, stream, expandedName, property.first, false, first);
-					first = false;
 				}
 				{
 					ScopedStream<ApiFileOutputStream> scopedStream(stream);

@@ -108,7 +108,7 @@
                   "description": "asset id of base component",
                   "type": "string"
                 },
-                "aclass_quote ": {
+                "aclass_quote": {
                   "description": "asset class of quote component",
                   "type": "string"
                 },
@@ -134,19 +134,19 @@
                 },
                 "leverage_buy": {
                   "description": "array of leverage amounts available when buying",
-                    "type": "array",
-                    "items": {
-                      "format": "double",
-                      "type": "number"
-                    }
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
                 },
                 "leverage_sell": {
                   "description": "array of leverage amounts available when selling",
-                    "type": "array",
-                    "items": {
-                      "format": "double",
-                      "type": "number"
-                    }
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
                 },
                 "fees": {
                   "description": "fee schedule array in [volume, percent fee] tuples",
@@ -187,7 +187,163 @@
           }
         }
       }
-    }
+    },
+    "AccountBalance": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "map",
+          "properties": {
+            "key": {
+              "format": "double",
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "TickerInformationParams": {
+      "type": "object",
+      "properties": {
+        "pair": {
+          "description": "comma delimited list of asset pairs to get info on",
+          "type": "string"
+        }
+      },
+      "required": [ ]
+    },
+    "TickerInformation": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "map",
+          "properties": {
+            "key": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "description": "ask array(<price>, <whole lot volume>, <lot volume>)",
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "b": {
+                  "description": "bid array(<price>, <whole lot volume>, <lot volume>)",
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "c": {
+                  "description": "last trade closed array(<price>, <lot volume>)",
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "v": {
+                  "description": "volume array(<today>, <last 24 hours>)",
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "p": {
+                  "description": "volume weighted average price array(<today>, <last 24 hours>)",
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "t": {
+                  "description": "number of trades array(<today>, <last 24 hours>)",
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "l": {
+                  "description": "low array(<today>, <last 24 hours>)",
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "h": {
+                  "description": "high array(<today>, <last 24 hours>)",
+                  "type": "array",
+                  "items": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                },
+                "o": {
+                  "description": "today's opening price",
+                  "format": "double",
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "OHLCDataParams": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "return committed OHLC data since given id (optional.  exclusive)",
+          "format": "double",
+          "type": "number"
+        },
+        "interval ": {
+          "description": "time frame interval in minutes (optional): 1 (default), 5, 15, 30, 60, 240, 1440, 10080, 21600",
+          "format": "double",
+          "type": "number"
+        },
+        "pair": {
+          "description": "asset pair to get OHLC data for",
+          "type": "string"
+        }
+      },
+      "required": [ "pair" ]
+    },
+    "OHLCData": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "map",
+          "properties": {
+            "key": {
+              "type": "object",
+              "properties": {
+                "aclass": {
+                  "type": "string"
+                },
+                "altname": {
+                  "type": "string"
+                },
+                "decimals": {
+                  "type": "number"
+                },
+                "display_decimals": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [ ]
+    },
   },
   "properties": {
     "type": "object",
@@ -220,6 +376,48 @@
       "schema": {
         "$ref": "#/definitions/AssetInfoParams"
       }
+    },
+    {
+      "href": "public/AssetPairs",
+      "description": "Get tradable asset pairs",
+      "method": "GET",
+      "title": "GetAssetPairs",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/AssetPairs"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/AssetPairsParams"
+      }
+    },
+    {
+      "href": "public/Ticker",
+      "description": "Get Ticker Information",
+      "method": "GET",
+      "title": "GetTickerInformation",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/TickerInformation"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/TickerInformationParams"
+      }
+    },
+    {
+      "href": "private/Balance",
+      "description": "array of asset names and balance amount",
+      "method": "POST",
+      "title": "GetAccountBalance",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/AccountBalance"
+        }
+      ]
     }
   ],
   "config": {

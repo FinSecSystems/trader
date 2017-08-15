@@ -37,6 +37,33 @@ namespace trader {
 	{
 	}
 
+    class SHA512Engine : public SHA2Engine
+    {
+    public:
+        enum
+        {
+            BLOCK_SIZE = 128,
+            DIGEST_SIZE = 512/8
+        };
+    };
+
+    class SHA256Engine : public SHA2Engine
+    {
+    public:
+        enum
+        {
+            BLOCK_SIZE = 64,
+            DIGEST_SIZE = 256/8
+        };
+
+        SHA256Engine(std::string _str)
+            : SHA2Engine(SHA_256)
+        {
+            updateImpl(_str.c_str(), _str.length());
+        }
+
+    };
+
 	Dynamic::Var Kraken::invoke(const std::string& httpMethod, URI& uri)
 	{
 		static FastMutex lock;
@@ -65,28 +92,60 @@ namespace trader {
 		// Sign request
 		if (httpMethod == HTTPRequest::HTTP_POST)
 		{
-			//Convert to POST
+            //Initialize POST Form with GET params
 			HTMLForm form(req);
-			req.setMethod(HTTPRequest::HTTP_POST);
-			req.setURI(uri.getPath());
 			form.setEncoding(HTMLForm::ENCODING_URL);
+
+            //Convert Get request to POST
+            req.setMethod(HTTPRequest::HTTP_POST);
+            req.setURI(uri.getPath());
 
 			//Key
 			req.set("API-Key", api.config.dataObject.api_key);
 
-			//Sign
-			ostringstream paramStream;
-			form.write(paramStream);
-			string signatureBase = paramStream.str();
-			string signingKey = api.config.dataObject.private_key;
-			HMACEngine<SHA2Engine> hmacEngine(signingKey);
-			hmacEngine.update(signatureBase);
+            //Nonce
+			ostringstream sha256Stream;
+            int64_t nonce = std::time(nullptr);
+            sha256Stream << nonce;
+            sha256Stream << "nonce=";
+            sha256Stream << nonce;
+
+            //Extract POST data
+            ostringstream formData;
+            form.write(formData);
+            if (formData.str().length())
+            {
+                sha256Stream << "&";
+                form.write(sha256Stream);
+            }
+
+            //SHA256 of nonce and POST data
+            SHA256Engine sha256(sha256Stream.str());
+
+            //ostringstream hmac512Stream;
+            //hmac512Stream << uri.getPath();
+            //hmac512Stream << sha256.digest().data();
+            DigestEngine::Digest hmac512Data(uri.getPath().begin(), uri.getPath().end());
+            DigestEngine::Digest sha256Digest = sha256.digest();
+            hmac512Data.insert(hmac512Data.end(), sha256Digest.begin(), sha256Digest.end());
+
+            //Decode private key to base64
+            std::istringstream istr(api.config.dataObject.private_key);
+            Base64Decoder decoder(istr);
+            std::string signingKey;
+            StreamCopier::copyToString(decoder, signingKey);
+
+            //Sign
+			HMACEngine<SHA512Engine> hmacEngine(signingKey);
+			hmacEngine.update(hmac512Data.data(), hmac512Data.size());
+
+            //Encode Signature to Base64
 			DigestEngine::Digest digest = hmacEngine.digest();
-			std::ostringstream digestHexBin;
-			HexBinaryEncoder hexBinEncoder(digestHexBin);
-			hexBinEncoder.write(reinterpret_cast<char*>(&digest[0]), digest.size());
-			hexBinEncoder.close();
-			req.set("sig", digestHexBin.str());
+			std::ostringstream digestBase64;
+			Base64Encoder base64Encoder(digestBase64);
+            base64Encoder.write(reinterpret_cast<char*>(&digest[0]), digest.size());
+            base64Encoder.close();
+			req.set("API-Sign", digestBase64.str());
 
 			//Submit
 			form.prepareSubmit(req);
