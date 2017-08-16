@@ -107,34 +107,37 @@ namespace trader {
 		}
 		{
 			ScopedNamespace scopedNamesapce(header, config.nameSpace);
-			for (auto& schemaDefinition : config.schemaDefinitions)
 			{
-				ObjectSchemaDefinition& def = schemaDefinition.second;
+				ScopedNamespace scopedNamesapceApi(header, config.apiName);
+				for (auto& schemaDefinition : config.schemaDefinitions)
 				{
-					ScopedClass<1> scopedClass(header, def.getName(), "Poco::RefCountedObject");
-					construct_header(header, def.getName(), 0);
-					def.writeHeader(header);
+					ObjectSchemaDefinition& def = schemaDefinition.second;
+					{
+						ScopedClass<1> scopedClass(header, def.getName(), "Poco::RefCountedObject");
+						construct_header(header, def.getName(), 0);
+						def.writeHeader(header);
+					}
 				}
-			}
-			{
-				ScopedClass<0> scopedClass(header, config.apiName);
-				construct_header(header, config.apiName, 4
-					, appPtrStream.str().c_str(), "app"
-					, "Api*", "api"
-				);
-				for (auto& endPoint : endPoints)
 				{
-					endPoint.writeHeader(header);
-				}
-				if (config.useConfig)
-				{
+					ScopedClass<0> scopedClass(header, config.apiName);
+					construct_header(header, config.apiName, 4
+						, appPtrStream.str().c_str(), "app"
+						, "Api*", "api"
+					);
+					for (auto& endPoint : endPoints)
+					{
+						endPoint.writeHeader(header);
+					}
+					if (config.useConfig)
+					{
+						header << endl;
+						header << configClassName << tabs(1) << "config" << cendl;
+					}
 					header << endl;
-					header << configClassName << tabs(1) << "config" << cendl;
+					header << "Poco::AutoPtr<" << namespacename << "::App>" << tabs(1) << "_app" << cendl;
+					header << "Api*" << tabs(1) << "_api" << cendl;
+					header << "std::string _uri" << cendl;
 				}
-				header << endl;
-				header << "Poco::AutoPtr<" << namespacename << "::App>" << tabs(1) << "_app" << cendl;
-				header << "Api*" << tabs(1) << "_api" << cendl;
-				header << "std::string _uri" << cendl;
 			}
 		}
 
