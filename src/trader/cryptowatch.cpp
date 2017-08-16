@@ -74,9 +74,9 @@ namespace trader {
 					hours h = duration_cast<hours>(currentDuration);
 
 					Api_Cost::Record recInfo;
-					recInfo.timeStamp = time(nullptr);
+					recInfo.timeStamp = (Int32)time(nullptr);
 					recInfo.method = uri.toString();
-					recInfo.cost = allowance->dataObject.allowanceObject.remaining;
+					recInfo.cost = (double)allowance->dataObject.allowanceObject.remaining;
 					dataBase->api_CostTable->insert(recInfo);
 
 					Logger::get("Logs").information("Cryptowatch: %iL nanoseconds remaining for %i hour", allowance->dataObject.allowanceObject.cost, h.count());

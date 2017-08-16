@@ -385,7 +385,8 @@
                 "deps/poco/lib64/libeay64MDd.lib",
                 "deps/poco/lib64/PocoJSONd.lib",
                 "deps/poco/lib64/PocoDatad.lib",
-                "deps/poco/lib64/PocoDataSQLited.lib"
+                "deps/poco/lib64/PocoDataSQLited.lib",
+				"deps/poco/lib64/ssleay64MDd.lib"
                 }
 
 		filter "configurations:release"
@@ -401,7 +402,8 @@
                 "deps/poco/lib64/libeay64MD.lib",
                 "deps/poco/lib64/PocoJSON.lib",
                 "deps/poco/lib64/PocoData.lib",
-                "deps/poco/lib64/PocoDataSQLite.lib"
+                "deps/poco/lib64/PocoDataSQLite.lib",
+				"deps/poco/lib64/ssleay64MD.lib"
                 }
 
 		filter "system:windows"
