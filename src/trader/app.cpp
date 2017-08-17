@@ -154,9 +154,9 @@ namespace trader {
             //tickerInformationParams->dataObject.pair = "XZECZUSD";
             //AutoPtr<TickerInformation> tickerInformation = kraken.api.GetTickerInformation(tickerInformationParams);
 
-            Poco::AutoPtr<OHLCDataParams> ohlcDataParams = new OHLCDataParams();
+            Poco::AutoPtr<KrakenApi::OHLCDataParams> ohlcDataParams = new KrakenApi::OHLCDataParams();
             ohlcDataParams->dataObject.pair = "XZECZUSD";
-            AutoPtr<OHLCData> ohlcData = kraken.api.GetOHLCData(ohlcDataParams);
+            AutoPtr<KrakenApi::OHLCData> ohlcData = kraken.api.GetOHLCData(ohlcDataParams);
 
 
 			do {

@@ -119,8 +119,8 @@ namespace trader {
 					}
 				}
 				{
-					ScopedClass<0> scopedClass(header, config.apiName);
-					construct_header(header, config.apiName, 4
+					ScopedClass<0> scopedClass(header, "EndPoints");
+					construct_header(header, "EndPoints", 4
 						, appPtrStream.str().c_str(), "app"
 						, "Api*", "api"
 					);
@@ -148,51 +148,54 @@ namespace trader {
 		);
 		{
 			ScopedNamespace scopedNamesapce(cpp, config.nameSpace);
-			for (auto& schemaDefinition : config.schemaDefinitions)
-			{
-				ObjectSchemaDefinition& def = schemaDefinition.second;
-				construct(cpp, def.getName(), 0);
-				def.writeCpp(cpp);
-			}
+            {
+                ScopedNamespace scopedNamesapceApi(cpp, config.apiName);
+                for (auto& schemaDefinition : config.schemaDefinitions)
+                {
+                    ObjectSchemaDefinition& def = schemaDefinition.second;
+                    construct(cpp, def.getName(), 0);
+                    def.writeCpp(cpp);
+                }
 
-			if (config.useConfig)
-			{
-				ostringstream pathStatement;
-				string nameStr = name;
-				std::transform(nameStr.begin(), nameStr.end(), nameStr.begin(), ::tolower);
-				pathStatement << "Poco::Path filePath(\"" << nameStr << ".config.json\");";
+                if (config.useConfig)
+                {
+                    ostringstream pathStatement;
+                    string nameStr = name;
+                    std::transform(nameStr.begin(), nameStr.end(), nameStr.begin(), ::tolower);
+                    pathStatement << "Poco::Path filePath(\"" << nameStr << ".config.json\");";
 
-				construct_ex(cpp, config.apiName, 4, 6, 8
-					, appPtrStream.str().c_str(), "app"
-					, "Api*", "api"
-					, "_uri", baseUrlStream.str().c_str()
-					, "_app", "app"
-					, "_api", "api"
-					, pathStatement.str().c_str()
-					, "if (app->findFile(filePath)) {"
-					, "\tconfig.readFile(filePath.toString());"
-					, "}"
-					, "else"
-					, "{"
-					, "\tthrow Poco::OpenFileException(\"Cannot open config file\", filePath.toString());"
-					, "}"
-				);
-			}
-			else
-			{
-				construct_ex(cpp, config.apiName, 4, 6, 0
-					, appPtrStream.str().c_str(), "app"
-					, "Api*", "api"
-					, "_uri", baseUrlStream.str().c_str()
-					, "_app", "app"
-					, "_api", "api"
-				);
-			}
+                    construct_ex(cpp, "EndPoints", 4, 6, 8
+                        , appPtrStream.str().c_str(), "app"
+                        , "Api*", "api"
+                        , "_uri", baseUrlStream.str().c_str()
+                        , "_app", "app"
+                        , "_api", "api"
+                        , pathStatement.str().c_str()
+                        , "if (app->findFile(filePath)) {"
+                        , "\tconfig.readFile(filePath.toString());"
+                        , "}"
+                        , "else"
+                        , "{"
+                        , "\tthrow Poco::OpenFileException(\"Cannot open config file\", filePath.toString());"
+                        , "}"
+                    );
+                }
+                else
+                {
+                    construct_ex(cpp, "EndPoints", 4, 6, 0
+                        , appPtrStream.str().c_str(), "app"
+                        , "Api*", "api"
+                        , "_uri", baseUrlStream.str().c_str()
+                        , "_app", "app"
+                        , "_api", "api"
+                    );
+                }
 
-			for (auto& endPoint : endPoints)
-			{
-				endPoint.writeCpp(cpp);
-			}
+                for (auto& endPoint : endPoints)
+                {
+                    endPoint.writeCpp(cpp);
+                }
+            }
 		}
 	}
 

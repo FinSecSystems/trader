@@ -6,7 +6,7 @@
 
 namespace trader {
 
-    class CryptowatchApi;
+    class CryptowatchApi::EndPoints;
 
     class Cryptowatch : public Api
     {
@@ -17,7 +17,7 @@ namespace trader {
 
         Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
 
-        CryptowatchApi api;
+        CryptowatchApi::EndPoints api;
 
 		Poco::AutoPtr<CryptowatchDatabase> dataBase;
     protected:

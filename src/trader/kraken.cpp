@@ -4,10 +4,11 @@
 #include "krakenconfig.h"
 #include "krakendatabase.h"
 #include "helper.h"
-//#include "openssl/hmac.h"
 #include "openssl/ssl.h"
 
 namespace trader {
+
+    using namespace KrakenApi;
 
     Kraken::Kraken(AutoPtr<trader::App> _app)
 		: api(_app, this)

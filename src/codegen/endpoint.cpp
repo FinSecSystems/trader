@@ -77,7 +77,7 @@ namespace trader {
 
 	void EndPoint::writeCpp(ApiFileOutputStream& cpp)
 	{
-		cpp << "Poco::AutoPtr<" << responseSchemaNames[0] << "> " << _config.apiName << "::" << name;
+		cpp << "Poco::AutoPtr<" << responseSchemaNames[0] << "> EndPoints::" << name;
 		cpp << "(";
 		if (!inputSchemaName.empty())
 		{

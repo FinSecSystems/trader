@@ -5,22 +5,22 @@
 
 namespace trader {
 
-	class ExchangeratelabApi;
+        class ExchangeratelabApi::EndPoints;
 
-	class Exchangeratelab : public Api
-	{
-	public:
-		Exchangeratelab(Poco::AutoPtr<trader::App> _app);
+        class Exchangeratelab : public Api
+        {
+        public:
+            Exchangeratelab(Poco::AutoPtr<trader::App> _app);
 
-		~Exchangeratelab();
+            ~Exchangeratelab();
 
-		Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
+            Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
 
-        ExchangeratelabApi api;
-	protected:
-		Exchangeratelab(const Exchangeratelab&);
-		Exchangeratelab& operator = (const Exchangeratelab&);
+            ExchangeratelabApi::EndPoints api;
+        protected:
+            Exchangeratelab(const Exchangeratelab&);
+            Exchangeratelab& operator = (const Exchangeratelab&);
 
-	};
+        };
 
 }

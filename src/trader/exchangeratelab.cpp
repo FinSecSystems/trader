@@ -5,6 +5,8 @@
 
 namespace trader {
 
+    using namespace ExchangeratelabApi;
+
 	Exchangeratelab::Exchangeratelab(AutoPtr<App> _app)
 		: api(_app, this)
 	{

@@ -6,7 +6,7 @@
 
 namespace trader {
 
-	class KrakenApi;
+	class KrakenApi::EndPoints;
 
 	class Kraken : public Api
 	{
@@ -20,7 +20,7 @@ namespace trader {
 		void run();
 		void execute(Poco::Timer& timer);
 
-        KrakenApi api;
+        KrakenApi::EndPoints api;
 
 	protected:
         Kraken(const Kraken&);

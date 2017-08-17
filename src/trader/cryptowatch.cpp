@@ -6,6 +6,8 @@
 
 namespace trader {
 
+    using namespace CryptowatchApi;
+
     Cryptowatch::Cryptowatch(Poco::AutoPtr<trader::App> _app)
         : api(_app, this)
 		, dataBase(new CryptowatchDatabase(_app->dbSession))

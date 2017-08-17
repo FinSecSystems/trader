@@ -7,6 +7,8 @@
 
 namespace trader {
 
+    using namespace FybApi;
+
 	Fyb::Fyb(AutoPtr<trader::App> _app)
 		: api(_app, this)
 		, app(_app)

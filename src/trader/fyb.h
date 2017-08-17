@@ -6,7 +6,7 @@
 
 namespace trader {
 
-	class FybApi;
+	class FybApi::EndPoints;
 
 	class Fyb : public Api
 	{
@@ -27,7 +27,7 @@ namespace trader {
 		void executePendingOrders(Poco::Timer& timer);
 		void executeOrderHistory(Poco::Timer& timer);
 
-        FybApi api;
+        FybApi::EndPoints api;
 
 	protected:
 		Fyb(const Fyb&);
