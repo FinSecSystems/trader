@@ -341,6 +341,173 @@
         }
       },
       "required": [ ]
+    },
+    "OrderBookParams": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "description": "maximum number of asks/bids (optional)",
+          "type": "number"
+        },
+        "pair": {
+          "description": "asset pair to get OHLC data for",
+          "type": "string"
+        }
+      },
+      "required": [ "pair" ]
+    },
+    "OrderBook": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "map",
+          "properties": {
+            "key": {
+              "type": "object",
+              "properties": {
+                "asks": {
+                  "description": "ask side array of array entries(<price>, <volume>, <timestamp>)",
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "format": "double",
+                      "type": "number"
+                    }
+                  }
+                },
+                "bids": {
+                  "description": "bid side array of array entries(<price>, <volume>, <timestamp>)",
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "format": "double",
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [ ]
+    },
+    "RecentTradesParams": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "return trade data since given id (optional.  exclusive)",
+          "type": "number"
+        },
+        "pair": {
+          "description": "asset pair to get OHLC data for",
+          "type": "string"
+        }
+      },
+      "required": [ "pair" ]
+    },
+    "RecentTrades": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "map",
+          "properties": {
+            "key": {
+              "description": "array of array entries(<price>, <volume>, <time>, <buy/sell>, <market/limit>, <miscellaneous>)",
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "last": {
+              "description": "id to be used as since when polling for new trade data",
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [ ]
+    },
+    "RecentSpreadParams": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "return spread data since given id (optional.  inclusive)",
+          "type": "number"
+        },
+        "pair": {
+          "description": "",
+          "type": "string"
+        }
+      },
+      "required": [ "pair" ]
+    },
+    "RecentSpread": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "map",
+          "properties": {
+            "key": {
+              "description": "array of array entries(<time>, <bid>, <ask>)",
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "format": "double",
+                  "type": "number"
+                }
+              }
+            },
+            "last": {
+              "description": "id to be used as since when polling for new spread data",
+              "type": "number"
+            }
+          }
+        }
+      },
+      "required": [ ]
+    },
+    "StandardOrderParams": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "type of order (buy/sell)",
+          "type": "string"
+        },
+        "pair": {
+          "description": "asset pair",
+          "type": "string"
+        },
+        "ordertype": {
+          "description": "order type:\n market\n limit (price = limit price)\n stop-loss (price = stop loss price)\n take-profit (price = take profit price)\n stop-loss-profit (price = stop loss price, price2 = take profit price)\n stop-loss-profit-limit (price = stop loss price, price2 = take profit price)\n stop-loss-limit (price = stop loss trigger price, price2 = triggered limit price)\n take-profit-limit (price = take profit trigger price, price2 = triggered limit price)\n trailing-stop (price = trailing stop offset)\n trailing-stop-limit (price = trailing stop offset, price2 = triggered limit offset)\n stop-loss-and-limit (price = stop loss price, price2 = limit price)\n settle-position",
+          "type": "string",
+        },
+        "price": {
+          "description": "price (optional.  dependent upon ordertype)",
+          "type": "string"
+        },
+        "price2": {
+          "description": "secondary price (optional.  dependent upon ordertype)",
+          "type": "string"
+        },
+        "volume": {
+          "description": "order volume in lots",
+          "format": "double",
+          "type": "number"
+        },
+        "leverage": {
+          "description": "order volume in lots",
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [ "pair" ]
     }
   },
   "properties": {
@@ -431,6 +598,66 @@
           "$ref": "#/definitions/AccountBalance"
         }
       ]
+    },
+    {
+      "href": "public/Depth",
+      "description": "Get Order Book",
+      "method": "POST",
+      "title": "GetOrderBook",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/OrderBook"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/OrderBookParams"
+      }
+    },
+    {
+      "href": "public/Trades",
+      "description": "Get Recent Trades",
+      "method": "POST",
+      "title": "GetRecentTrades",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/RecentTrades"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/RecentTradesParams"
+      }
+    },
+    {
+      "href": "public/Spread",
+      "description": "Recent Spread Data",
+      "method": "POST",
+      "title": "GetRecentSpread",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/RecentSpread"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/RecentSpreadParams"
+      }
+    },
+    {
+      "href": "public/AddOrder",
+      "description": "Add Standard Order",
+      "method": "POST",
+      "title": "AddStandardOrder",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/StandardOrder"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/StandardOrderParams"
+      }
     }
   ],
   "config": {

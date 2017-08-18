@@ -154,9 +154,22 @@ namespace trader {
             //tickerInformationParams->dataObject.pair = "XZECZUSD";
             //AutoPtr<TickerInformation> tickerInformation = kraken.api.GetTickerInformation(tickerInformationParams);
 
-            Poco::AutoPtr<KrakenApi::OHLCDataParams> ohlcDataParams = new KrakenApi::OHLCDataParams();
-            ohlcDataParams->dataObject.pair = "XZECZUSD";
-            AutoPtr<KrakenApi::OHLCData> ohlcData = kraken.api.GetOHLCData(ohlcDataParams);
+            //Poco::AutoPtr<KrakenApi::OHLCDataParams> ohlcDataParams = new KrakenApi::OHLCDataParams();
+            //ohlcDataParams->dataObject.pair = "XZECZUSD";
+            //AutoPtr<KrakenApi::OHLCData> ohlcData = kraken.api.GetOHLCData(ohlcDataParams);
+
+            //Poco::AutoPtr<KrakenApi::OrderBookParams> orderBookParams = new KrakenApi::OrderBookParams();
+            //orderBookParams->dataObject.pair = "XZECZUSD";
+            //AutoPtr<KrakenApi::OrderBook> orderBook = kraken.api.GetOrderBook(orderBookParams);
+
+            //Poco::AutoPtr<KrakenApi::RecentTradesParams> orderBookParams = new KrakenApi::RecentTradesParams();
+            //orderBookParams->dataObject.pair = "XZECZUSD";
+            //AutoPtr<KrakenApi::RecentTrades> orderBook = kraken.api.GetRecentTrades(orderBookParams);
+
+            Poco::AutoPtr<KrakenApi::RecentSpreadParams> orderBookParams = new KrakenApi::RecentSpreadParams();
+            orderBookParams->dataObject.pair = "XZECZUSD";
+            AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
+
 
 
 			do {
