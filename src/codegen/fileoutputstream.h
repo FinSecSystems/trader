@@ -445,6 +445,45 @@ namespace trader {
 		return _Ostr;
 	}
 
+	class comment
+	{
+		std::string _str;
+	public:
+		explicit comment(std::string& str) : _str(str) {}
+		explicit comment(const std::string& str) : _str(str) {}
+		explicit comment(const char* str) : _str(str) {}
+		string getstr() const { return _str; }
+		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const comment& obj);
+	};
+
+	inline ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const comment& obj)
+	{
+		string commentStr = obj.getstr();
+		if (commentStr.length())
+		{
+			string buffer = commentStr;
+			std::size_t found = buffer.find("\n");
+			while (found != std::string::npos)
+			{
+				string temp = buffer.substr(0, found);
+				os.tempStream << "// ";
+				os.tempStream << temp;
+				os << endl;
+				if (found + 1 < buffer.length())
+				{
+					buffer = buffer.substr(found + 1, buffer.length() - (found + 1));
+				}
+				found = buffer.find("\n");
+			}
+			if (buffer.length())
+			{
+				os.tempStream << "// ";
+				os.tempStream << buffer;
+				os << endl;
+			}
+		}
+		return os;
+	}
 
 	class expansionstringstream
 	{
@@ -455,7 +494,14 @@ namespace trader {
 			ARRAY = 0,
 			OBJECT,
 			MAP,
+			VAR,
 			NUM_TYPES
+		};
+
+		struct TypePair
+		{
+			Type type;
+			std::string name;
 		};
 
 		expansionstringstream() {}
@@ -474,7 +520,8 @@ namespace trader {
 			{
 				"Array",
 				"Object",
-				"Map"
+				"Map",
+				""
 			};
 			return TypeString[(Int32)type];
 		}
@@ -488,7 +535,10 @@ namespace trader {
 				std::size_t found = str.find(testString);
 				if (found != std::string::npos)
 				{
-					typeStack.push_back((Type)typeIdx);
+					TypePair tPair;
+					tPair.type = (Type)typeIdx;
+					tPair.name = text;
+					typeStack.push_back(tPair);
 					break;
 				}
 			}
@@ -516,26 +566,102 @@ namespace trader {
 			return typeNameStream.str();
 		}
 
+		std::string debug_str()
+		{
+			std::ostringstream tempStream;
+			std::vector < TypePair > ::reverse_iterator rit = typeStack.rbegin();
+			tempStream << "/*Take 1" << std::endl;
+			for (; rit != typeStack.rend(); ++rit)
+			{
+				tempStream << "." << var_name(rit->name);
+			}
+			tempStream << std::endl;
+			for (; rit != typeStack.rend(); ++rit)
+			{
+				tempStream << var_name(rit->name);
+			}
+			tempStream << std::endl;
+			tempStream << "*/" << std::endl;
+			return typeNameStream.str();
+		}
+
+		std::string debug_str_2()
+		{
+			std::string temp;
+
+			bool arrayMapEncountered = false;
+			std::vector < TypePair > ::reverse_iterator rit = typeStack.rbegin();
+			for (; rit != typeStack.rend(); ++rit)
+			{
+				std::ostringstream tempStr;
+				if (arrayMapEncountered)
+				{
+					tempStr << type_name(rit->name) << temp;
+					temp = tempStr.str();
+				}
+				else if (rit->type == VAR)
+				{
+					tempStr << var_name(rit->name);
+					temp = tempStr.str();
+				}
+				else if (rit->type == MAP || rit->type == ARRAY)
+				{
+					if (temp.length())
+					{
+						tempStr << type_name(rit->name) << std::dot << temp;
+					}
+					else
+					{
+						tempStr << type_name(rit->name);
+					}
+					temp = tempStr.str();
+					arrayMapEncountered = true;
+				}
+				else
+				{
+					if (rit + 1 == typeStack.rend())
+					{
+						tempStr << var_name(rit->name) << std::dot << temp;
+						temp = tempStr.str();
+					}
+				}
+			}
+			std::ostringstream tempStr;
+			tempStr << var_name(temp);
+			temp = tempStr.str();
+			return temp;
+		}
+
 		bool wasPrevious(Type type)
 		{
 			if (typeStack.size())
 			{
 				auto& lastType = typeStack.back();
-				return (lastType == type ? true : false);
+				return (lastType.type == type ? true : false);
 			}
 			return false;
 		}
 
 		bool has(Type type)
 		{
-			std::vector<Type>::iterator it = find(typeStack.begin(), typeStack.end(), type);
+			struct special_compare : public std::unary_function<Type, bool>
+			{
+				explicit special_compare(const Type &baseline) : baseline(baseline) {}
+				bool operator() (const TypePair &arg)
+				{
+					return arg.type == baseline;
+				}
+				Type baseline;
+			};
+
+			std::vector<TypePair>::iterator it = find_if(typeStack.begin(), typeStack.end(), special_compare(type));
 			return (it != typeStack.end() ? true : false);
 		}
 
 		ostringstream varNameStream;
 		ostringstream typeNameStream;
 		ostringstream prefixStream;
-		vector<Type>   typeStack;
+		vector<TypePair>   typeStack;
 	};
 
 	inline expansionstringstream& operator<<(expansionstringstream& os, const char* text)

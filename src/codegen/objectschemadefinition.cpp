@@ -201,20 +201,26 @@ namespace trader {
 				cppConstruct(items, stream, expansionStream, keyName, idx+3, true);
 				if (previousArray)
 				{
+					CODEGEN_DEBUG(stream << comment("Case Array 1"));
 					stream << previousexpansionStream.var_name_str() << ".push_back(" << expansionStream.var_name_str() << ") " << cendl;
 				}
 				else
 				{
                     if (previousexpansionStream.var_name_str().size() && (expansionStream.wasPrevious(expansionstringstream::ARRAY) || expansionStream.wasPrevious(expansionstringstream::MAP)))
                     {
-                        stream << previousexpansionStream.var_name_str() << "." << keyName << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
+						CODEGEN_DEBUG(stream << comment("Case Array 2"));
+						stream << previousexpansionStream.var_name_str() << "." << keyName << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
                     }
                     else
                     {
-                        previousexpansionStream << keyName;
+						CODEGEN_DEBUG(stream << comment("Case Array 3"));
+						previousexpansionStream << keyName;
                         stream << previousexpansionStream.prefix_str() << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
                     }
 				}
+				expansionstringstream newExpansionStream(expansionStream);
+				newExpansionStream << keyName;
+				CODEGEN_DEBUG(stream << "/*" << newExpansionStream.debug_str_2() << "*/" << endl);
 			}
 		}
 		else if (isMap(type))
@@ -242,13 +248,13 @@ namespace trader {
             stream << "Poco::JSON::Object::Ptr " << temp_name(idx + 1) << " = " << temp_name(idx + 0) << ".extract<Poco::JSON::Object::Ptr>()" << cendl;
             stream << "for (Poco::JSON::Object::ConstIterator " << temp_name(idx + 2) << " = " << temp_name(idx + 1) << "->begin(); " << temp_name(idx + 2) << " != " << temp_name(idx + 1) << "->end(); ++" << temp_name(idx + 2) << ")" << endl;
             {
-                ScopedStream<ApiFileOutputStream> scopedStream(stream);
+                ScopedStream<ApiFileOutputStream> scopedStream2(stream);
                 stream << "Poco::Dynamic::Var " << temp_name(idx + 3) << " = " << temp_name(idx + 2) << "->second" << cendl;
                 for (auto& specialKey : specialKeys)
                 {
                     stream << "if ("<< temp_name(idx + 2) << "->first.compare(\"" << specialKey<< "\")==0)" << endl;
                     {
-                        ScopedStream<ApiFileOutputStream> scopedStream(stream);
+                        ScopedStream<ApiFileOutputStream> scopedStream3(stream);
                         JSON::Object::Ptr propertyObject = properties->getObject(specialKey);
                         cppConstruct(propertyObject, stream, previousexpansionStream, specialKey, idx + 3, true);
                     }
@@ -264,13 +270,18 @@ namespace trader {
                     cppConstruct(propertyObject, stream, expansionStream, keyName, idx + 3, true);
                     if (previousArray)
                     {
+						CODEGEN_DEBUG(stream << comment("Case Map A") << endl);
                         stream << previousexpansionStream.var_name_str() << ".insert(std::pair<property.first, " << expansionStream.var_name_str() << "))" << cendl;
                     }
                     else
                     {
-                        previousexpansionStream << keyName;
+						CODEGEN_DEBUG(stream << comment("Case Map B") << endl);
+						previousexpansionStream << keyName;
                         stream << previousexpansionStream.prefix_str() << ".insert(std::pair<std::string," << expansionStream.type_name_str() << ">(" << temp_name(idx + 2) << "->first, " << expansionStream.var_name_str() << "))" << cendl;
                     }
+					expansionstringstream newExpansionStream(expansionStream);
+					newExpansionStream << keyName;
+					CODEGEN_DEBUG(stream << "/*" << newExpansionStream.debug_str_2() << "*/" << endl);
                 }
             }
 		}
@@ -283,17 +294,23 @@ namespace trader {
 				{
 					if (expansionStream.wasPrevious(expansionstringstream::ARRAY) || expansionStream.wasPrevious(expansionstringstream::MAP))
 					{
+						CODEGEN_DEBUG(stream << comment("Case Var 1"));
 						stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 					}
 					else
 					{
+						CODEGEN_DEBUG(stream << comment("Case Var 2"));
 						stream << expansionStream.var_name_str() << "." << keyName << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 					}
 				}
 				else
 				{
+					CODEGEN_DEBUG(stream << comment("Case Var 3"));
 					stream << expansionStream.prefix_str() << "." << keyName << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 				}
+				expansionstringstream newExpansionStream(expansionStream);
+				newExpansionStream << keyName;
+				CODEGEN_DEBUG(stream << "/*" << newExpansionStream.debug_str_2() << "*/" << endl);
 			}
 		}
 	}
@@ -443,7 +460,7 @@ namespace trader {
 					if (!formatVar.isEmpty())
 					{
 						string description = formatVar.convert<string>();
-						stream << "// " << description << endl;
+						stream << comment(description);
 					}
 					stream << "void Set" << type_name(keyName) << "(" << getCppType(type, obj) << " val)" << endl;
 					{

@@ -119,7 +119,7 @@ namespace trader {
 	void EndPoint::writeHeader(ApiFileOutputStream& header)
 	{
 		header << endl;
-		header << "// " << description << endl;
+		header << comment(description);
 		header << "Poco::AutoPtr<" << responseSchemaNames[0] << "> " << name;
 		header << "(";
 		if (!inputSchemaName.empty())

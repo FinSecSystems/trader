@@ -32,7 +32,7 @@
           "type": "string"
         }
       },
-      "required": [ ]
+      "required": []
     },
     "AssetInfo": {
       "type": "object",
@@ -60,7 +60,7 @@
           }
         }
       },
-      "required": [ ]
+      "required": []
     },
     "ErrorIntrospector": {
       "type": "object",
@@ -85,7 +85,7 @@
           "type": "string"
         }
       },
-      "required": [ ]
+      "required": []
     },
     "AssetPairs": {
       "type": "object",
@@ -210,7 +210,7 @@
           "type": "string"
         }
       },
-      "required": [ ]
+      "required": []
     },
     "TickerInformation": {
       "type": "object",
@@ -340,7 +340,7 @@
           }
         }
       },
-      "required": [ ]
+      "required": []
     },
     "OrderBookParams": {
       "type": "object",
@@ -392,7 +392,7 @@
           }
         }
       },
-      "required": [ ]
+      "required": []
     },
     "RecentTradesParams": {
       "type": "object",
@@ -431,7 +431,7 @@
           }
         }
       },
-      "required": [ ]
+      "required": []
     },
     "RecentSpreadParams": {
       "type": "object",
@@ -471,7 +471,7 @@
           }
         }
       },
-      "required": [ ]
+      "required": []
     },
     "StandardOrderParams": {
       "type": "object",
@@ -486,14 +486,14 @@
         },
         "ordertype": {
           "description": "order type:\n market\n limit (price = limit price)\n stop-loss (price = stop loss price)\n take-profit (price = take profit price)\n stop-loss-profit (price = stop loss price, price2 = take profit price)\n stop-loss-profit-limit (price = stop loss price, price2 = take profit price)\n stop-loss-limit (price = stop loss trigger price, price2 = triggered limit price)\n take-profit-limit (price = take profit trigger price, price2 = triggered limit price)\n trailing-stop (price = trailing stop offset)\n trailing-stop-limit (price = trailing stop offset, price2 = triggered limit offset)\n stop-loss-and-limit (price = stop loss price, price2 = limit price)\n settle-position",
-          "type": "string",
+          "type": "string"
         },
         "price": {
           "description": "price (optional.  dependent upon ordertype)",
           "type": "string"
         },
         "price2": {
-          "description": "secondary price (optional.  dependent upon ordertype)",
+          "description": "secondary price\n (optional.  dependent upon ordertype)",
           "type": "string"
         },
         "volume": {
@@ -502,12 +502,61 @@
           "type": "number"
         },
         "leverage": {
-          "description": "order volume in lots",
-          "format": "double",
+          "description": "amount of leverage desired\n (optional.  default = none)",
           "type": "number"
+        },
+        "oflags": {
+          "description": "comma delimited list of order flags (optional):\n viqc = volume in quote currency (not available for leveraged orders)\n fcib = prefer fee in base currency\n fciq = prefer fee in quote currency\n nompp = no market price protection\n post = post only order (available when ordertype = limit)",
+          "type": "string"
+        },
+        "starttm": {
+          "description": "scheduled start time (optional):\n 0 = now (default)\n +<n> = schedule start time <n> seconds from now\n <n> = unix timestamp of start time",
+          "type": "string"
+        },
+        "expiretm": {
+          "description": "expiration time (optional):\n 0 = no expiration (default)\n +<n> = expire <n> seconds from now\n <n> = unix timestamp of expiration time",
+          "type": "string"
+        },
+        "userref": {
+          "description": "user reference id.  32-bit signed number.  (optional)",
+          "type": "number"
+        },
+        "validate ": {
+          "description": "validate inputs only.  do not submit order (optional)",
+          "type": "bool"
         }
       },
       "required": [ "pair" ]
+    },
+    "StandardOrder": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "descr": {
+              "type": "object",
+              "properties": {
+                "order": {
+                  "description": "order description",
+                  "type": "string"
+                },
+                "close": {
+                  "description": "conditional close order description (if conditional close set)",
+                  "type": "string"
+                }
+              }
+            },
+            "txid": {
+              "type": "array",
+              "items": {
+                "description": "array of transaction ids for order (if order was added successfully)",
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "properties": {
@@ -559,7 +608,7 @@
     },
     {
       "href": "public/Ticker",
-      "description": "Get Ticker Information - Note: Today's prices start at 00:00:00 UTC",
+      "description": "Get Ticker Information -\n Note: Today's prices start at 00:00:00 UTC",
       "method": "GET",
       "title": "GetTickerInformation",
       "rel": "create",
@@ -574,7 +623,7 @@
     },
     {
       "href": "public/OHLC",
-      "description": "Get OHLC data - Note: the last entry in the OHLC array is for the current, not-yet-committed frame and will always be present, regardless of the value of \"since\".",
+      "description": "Get OHLC data -\n Note: the last entry in the OHLC array is for the current,\n not-yet-committed frame and will always be present,\n regardless of the value of \"since\".",
       "method": "POST",
       "title": "GetOHLCData",
       "rel": "create",
@@ -589,7 +638,7 @@
     },
     {
       "href": "private/Balance",
-      "description": "array of asset names and balance amount",
+      "description": "Array of asset names and balance amount",
       "method": "POST",
       "title": "GetAccountBalance",
       "rel": "create",

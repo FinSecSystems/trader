@@ -302,3 +302,8 @@ namespace trader {
 	}
 }
 
+#ifdef _DEBUG
+#define CODEGEN_DEBUG(x) x
+#else
+#define CODEGEN_DEBUG(x)
+#endif
