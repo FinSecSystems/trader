@@ -1,0 +1,77 @@
+{
+  "definitions": {
+    "ResultIntrospector": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "bool"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "Markets": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "MarketCurrency": {
+                "type": "string"
+              },
+			        "BaseCurrency" : {
+                "type": "string"
+              },
+			        "MarketCurrencyLong" : {
+                "type": "string"
+              },
+			        "BaseCurrencyLong" :  {
+                "type": "string"
+              },
+              "MinTradeSize": {
+                "format": "float",
+                "type": "number"
+              },
+			        "MarketName" : {
+                "type": "string"
+              },
+			        "IsActive" : {
+                "type": "bool"
+              },
+			        "Created" :  {
+                "type": "string"
+              }
+            }             
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "type": "object",
+    "required": []
+  },
+  "links": [
+    {
+      "href": "public/getmarkets",
+      "description": "Used to get the open and available trading markets at Bittrex along with other meta data.",
+      "method": "GET",
+      "title": "GetMarkets",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/Markets"
+        }
+      ]
+    }
+  ],
+  "config": {
+    "baseurl": "https://bittrex.com/api/v1.1/",
+    "useConfig": true
+  },
+  "required": [],
+  "type": "object"
+}

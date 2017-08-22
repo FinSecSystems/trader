@@ -4,6 +4,7 @@
 #include "app.h"
 #include "cryptowatch.h"
 #include "kraken.h"
+#include "bittrex.h"
 
 namespace trader {
 
@@ -166,11 +167,12 @@ namespace trader {
             //orderBookParams->dataObject.pair = "XZECZUSD";
             //AutoPtr<KrakenApi::RecentTrades> orderBook = kraken.api.GetRecentTrades(orderBookParams);
 
-            Poco::AutoPtr<KrakenApi::RecentSpreadParams> orderBookParams = new KrakenApi::RecentSpreadParams();
-            orderBookParams->dataObject.pair = "XZECZUSD";
-            AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
+            //Poco::AutoPtr<KrakenApi::RecentSpreadParams> orderBookParams = new KrakenApi::RecentSpreadParams();
+            //orderBookParams->dataObject.pair = "XZECZUSD";
+            //AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
 
-
+            Bittrex bittrex(this);
+            AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
 
 			do {
 				Thread::sleep(10000);

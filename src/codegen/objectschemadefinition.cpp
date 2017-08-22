@@ -206,7 +206,7 @@ namespace trader {
 				}
 				else
 				{
-                    if (previousexpansionStream.var_name_str().size() && (expansionStream.wasPrevious(expansionstringstream::ARRAY) || expansionStream.wasPrevious(expansionstringstream::MAP)))
+                    if (previousexpansionStream.var_name_str().size() && (previousexpansionStream.wasPrevious(expansionstringstream::ARRAY) || previousexpansionStream.wasPreviousPrevious(expansionstringstream::MAP)))
                     {
 						CODEGEN_DEBUG(stream << comment("Case Array 2"));
 						stream << previousexpansionStream.var_name_str() << "." << keyName << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
@@ -218,9 +218,10 @@ namespace trader {
                         stream << previousexpansionStream.prefix_str() << ".push_back(" << expansionStream.var_name_str() << ")" << cendl;
                     }
 				}
-				expansionstringstream newExpansionStream(expansionStream);
-				newExpansionStream << keyName;
-				CODEGEN_DEBUG(stream << "/*" << newExpansionStream.debug_str_2() << "*/" << endl);
+                CODEGEN_DEBUG(stream << "/*" << previousexpansionStream.debug_stack_str() << "*/" << endl);
+				//expansionstringstream newExpansionStream(expansionStream);
+				//newExpansionStream << keyName;
+				//CODEGEN_DEBUG(stream << "/*" << newExpansionStream.debug_str_2() << "*/" << endl);
 			}
 		}
 		else if (isMap(type))
@@ -270,12 +271,12 @@ namespace trader {
                     cppConstruct(propertyObject, stream, expansionStream, keyName, idx + 3, true);
                     if (previousArray)
                     {
-						CODEGEN_DEBUG(stream << comment("Case Map A") << endl);
+						CODEGEN_DEBUG(stream << comment("Case Map A"));
                         stream << previousexpansionStream.var_name_str() << ".insert(std::pair<property.first, " << expansionStream.var_name_str() << "))" << cendl;
                     }
                     else
                     {
-						CODEGEN_DEBUG(stream << comment("Case Map B") << endl);
+						CODEGEN_DEBUG(stream << comment("Case Map B"));
 						previousexpansionStream << keyName;
                         stream << previousexpansionStream.prefix_str() << ".insert(std::pair<std::string," << expansionStream.type_name_str() << ">(" << temp_name(idx + 2) << "->first, " << expansionStream.var_name_str() << "))" << cendl;
                     }
@@ -300,13 +301,13 @@ namespace trader {
 					else
 					{
 						CODEGEN_DEBUG(stream << comment("Case Var 2"));
-						stream << expansionStream.var_name_str() << "." << keyName << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+						stream << expansionStream.var_name_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 					}
 				}
 				else
 				{
 					CODEGEN_DEBUG(stream << comment("Case Var 3"));
-					stream << expansionStream.prefix_str() << "." << keyName << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+					stream << expansionStream.prefix_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 				}
 				expansionstringstream newExpansionStream(expansionStream);
 				newExpansionStream << keyName;

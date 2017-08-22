@@ -593,6 +593,15 @@ namespace trader {
 			std::vector < TypePair > ::reverse_iterator rit = typeStack.rbegin();
 			for (; rit != typeStack.rend(); ++rit)
 			{
+                std::vector < TypePair > ::reverse_iterator previous = rit + 1;
+                bool previousArrayOrMap = false;
+                if (previous != typeStack.rend())
+                {
+                    if (previous->type == ARRAY || previous->type == MAP)
+                    {
+                        previousArrayOrMap = true;
+                    }
+                }
 				std::ostringstream tempStr;
 				if (arrayMapEncountered)
 				{
@@ -606,7 +615,7 @@ namespace trader {
 				}
 				else if (rit->type == MAP || rit->type == ARRAY)
 				{
-					if (temp.length())
+					if (temp.length() && !previousArrayOrMap)
 					{
 						tempStr << type_name(rit->name) << std::dot << temp;
 					}
@@ -631,6 +640,27 @@ namespace trader {
 			temp = tempStr.str();
 			return temp;
 		}
+
+        std::string debug_stack_str()
+        {
+            std::ostringstream tempStr;
+            std::vector < TypePair > ::iterator it = typeStack.begin();
+            for (; it != typeStack.end(); ++it)
+            {
+                tempStr << getTypeString(it->type) << ".";
+            }
+            return tempStr.str();
+        }
+
+        bool wasPreviousPrevious(Type type)
+        {
+            if (typeStack.size()>1)
+            {
+                auto& lastType = typeStack[typeStack.size()-2];
+                return (lastType.type == type ? true : false);
+            }
+            return false;
+        }
 
 		bool wasPrevious(Type type)
 		{

@@ -24,6 +24,7 @@ namespace trader {
 		friend class Exchangeratelab;
 		friend class Cryptowatch;
         friend class Kraken;
+        friend class Bittrex;
 
 	protected:
 		void defineOptions(Poco::Util::OptionSet& options);
