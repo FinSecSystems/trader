@@ -22,29 +22,66 @@
               "MarketCurrency": {
                 "type": "string"
               },
-			        "BaseCurrency" : {
+              "BaseCurrency": {
                 "type": "string"
               },
-			        "MarketCurrencyLong" : {
+              "MarketCurrencyLong": {
                 "type": "string"
               },
-			        "BaseCurrencyLong" :  {
+              "BaseCurrencyLong": {
                 "type": "string"
               },
               "MinTradeSize": {
                 "format": "float",
                 "type": "number"
               },
-			        "MarketName" : {
+              "MarketName": {
                 "type": "string"
               },
-			        "IsActive" : {
+              "IsActive": {
                 "type": "bool"
               },
-			        "Created" :  {
+              "Created": {
                 "type": "string"
               }
-            }             
+            }
+          }
+        }
+      }
+    },
+    "Balances": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Currency": {
+                "type": "string"
+              },
+              "Balance": {
+                "format": "float",
+                "type": "number"
+              },
+              "Available": {
+                "format": "float",
+                "type": "number"
+              },
+              "Pending": {
+                "format": "float",
+                "type": "number"
+              },
+              "CryptoAddress": {
+                "type": "string"
+              },
+              "Requested": {
+                "type": "bool"
+              },
+              "Uuid": {
+                "type": "string"
+              }
+            }
           }
         }
       }
@@ -64,6 +101,18 @@
       "targetSchemas": [
         {
           "$ref": "#/definitions/Markets"
+        }
+      ]
+    },
+    {
+      "href": "account/getbalances",
+      "description": "Used to retrieve all balances from your account",
+      "method": "GET",
+      "title": "GetBalances",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/Balances"
         }
       ]
     }

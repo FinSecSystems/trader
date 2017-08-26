@@ -2,6 +2,7 @@
 #include "bittrex.h"
 #include "bittrexapi.h"
 #include "helper.h"
+#include "shautils.h"
 
 namespace trader {
 
@@ -16,35 +17,52 @@ namespace trader {
     {
     }
 
+	std::string signature(const std::string& uri,
+		const std::string& secret
+	)
+	{
+		// add path to data to encrypt
+		std::vector<unsigned char> data(uri.begin(), uri.end());
+		std::vector<unsigned char> secretkey(secret.begin(), secret.end());
+		// and compute HMAC
+		//return b64_encode(hmac_sha512(data, secretkey));
+		return b64_encode(hmac_sha512(data, b64_decode(secret)));
+		//std::vector<unsigned char> sig = hmac_sha512(data, secretkey);
+		//std::string retVal(sig.begin(), sig.end());
+		//return retVal;
+	}
+
     Dynamic::Var Bittrex::invoke(const string& httpMethod, URI& uri)
     {
         (void)httpMethod;
 
+		time_t currentTimeStamp = std::time(nullptr);
+
+		bool privateApi = (uri.getHost().find("public") == std::string::npos);
+
+		// Sign request
+		if (privateApi)
+		{
+			//Add api key
+			uri.addQueryParameter(string("apikey"), api.config.dataObject.api_key);
+
+			//Add nonce
+			ostringstream nonceStream;
+			nonceStream << currentTimeStamp;
+			uri.addQueryParameter(string("nonce"), nonceStream.str());
+		}
+
         // Create the request URI.
         HTTPSClientSession session(uri.getHost(), uri.getPort());
         HTTPRequest req(HTTPRequest::HTTP_GET, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
-        //req.add("Accept-Encoding", "gzip");
 
-        // Sign request
-        if (httpMethod == HTTPRequest::HTTP_POST)
-        {
-            //TODO
+		if (privateApi)
+		{
+			req.set("apisign", signature(uri.toString(), api.config.dataObject.api_secret));
+		}
 
-            //Convert to POST
-            HTMLForm form(req);
-            req.setMethod(HTTPRequest::HTTP_POST);
-            req.setURI(uri.getPath());
-            form.setEncoding(HTMLForm::ENCODING_URL);
-
-            //Submit
-            form.prepareSubmit(req);
-            ostream& ostr = session.sendRequest(req);
-            form.write(ostr);
-        }
-        else
-        {
-            session.sendRequest(req);
-        }
+		//Submit
+		session.sendRequest(req);
 
         Logger::get("Logs").information("Send Request: %s", uri.toString());
 
@@ -52,10 +70,8 @@ namespace trader {
         HTTPResponse res;
         istream& rs = session.receiveResponse(res);
 
-        //InflatingInputStream inflater(rs, InflatingStreamBuf::STREAM_GZIP);
         // Parse the JSON
         JSON::Parser parser;
-        //parser.parse(inflater);
         parser.parse(rs);
         Dynamic::Var result = parser.result();
         string resultString = Dynamic::Var::toString(result);
@@ -69,13 +85,13 @@ namespace trader {
             msg->read(result);
             if (!msg->dataObject.success)
             {
-                throw ApplicationException("Kraken Error", "Received Error Response");
+                throw ApplicationException("Bittrex Error", "Received Error Response");
             }
             return result;
         }
         else
         {
-            throw ApplicationException("Kraken Error", "");
+            throw ApplicationException("Bittrex Error", "");
         }
     }
 }

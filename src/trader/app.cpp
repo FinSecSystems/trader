@@ -103,10 +103,10 @@ namespace trader {
 #endif
 			splitterChannel->addChannel(rotatedFileChannel);
 
-			AutoPtr<Formatter> formatter(new PatternFormatter("%Y-%m-%d %H:%M:%S.%c %N[%P]:%s:%q:%t"));
-			AutoPtr<Channel> formattingChannel(new FormattingChannel(formatter, splitterChannel));
+			//AutoPtr<Formatter> formatter(new PatternFormatter("%Y-%m-%d %H:%M:%S.%c %N[%P]:%s:%q:%t"));
+			//AutoPtr<Channel> formattingChannel(new FormattingChannel(formatter, splitterChannel));
 
-			Logger::create("Logs", formattingChannel, Message::PRIO_TRACE);
+			//Logger::create("Logs", formattingChannel, Message::PRIO_TRACE);
 
 			//Initialize DB
 			ostringstream dbNameStream;
@@ -172,7 +172,8 @@ namespace trader {
             //AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
 
             Bittrex bittrex(this);
-            AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
+            //AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
+			AutoPtr<BittrexApi::Balances> balances = bittrex.api.GetBalances();
 
 			do {
 				Thread::sleep(10000);
