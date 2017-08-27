@@ -49,7 +49,7 @@
         }
       }
     },
-    "Balances": {
+    "Balance": {
       "type": "object",
       "properties": {
         "result": {
@@ -61,15 +61,15 @@
                 "type": "string"
               },
               "Balance": {
-                "format": "float",
+                "format": "double",
                 "type": "number"
               },
               "Available": {
-                "format": "float",
+                "format": "double",
                 "type": "number"
               },
               "Pending": {
-                "format": "float",
+                "format": "double",
                 "type": "number"
               },
               "CryptoAddress": {
@@ -85,8 +85,16 @@
           }
         }
       }
+    },
+    "BalanceParams": {
+      "type": "object",
+      "properties": {
+        "Currency": {
+          "type": "string"
+        }
+      }
     }
-  },
+    },
   "properties": {
     "type": "object",
     "required": []
@@ -108,13 +116,16 @@
       "href": "account/getbalances",
       "description": "Used to retrieve all balances from your account",
       "method": "GET",
-      "title": "GetBalances",
+      "title": "GetBalance",
       "rel": "create",
       "targetSchemas": [
         {
-          "$ref": "#/definitions/Balances"
+          "$ref": "#/definitions/Balance"
         }
-      ]
+      ],
+      "schema": {
+        "$ref": "#/definitions/BalanceParams"
+      }
     }
   ],
   "config": {

@@ -173,7 +173,10 @@ namespace trader {
 
             Bittrex bittrex(this);
             //AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
-			AutoPtr<BittrexApi::Balances> balances = bittrex.api.GetBalances();
+
+			AutoPtr<BittrexApi::BalanceParams> balanceParam = new BittrexApi::BalanceParams();
+			balanceParam->dataObject.SetCurrency("BTC");
+			AutoPtr<BittrexApi::Balance> balance = bittrex.api.GetBalance(balanceParam);
 
 			do {
 				Thread::sleep(10000);

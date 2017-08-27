@@ -17,19 +17,22 @@ namespace trader {
     {
     }
 
-	std::string signature(const std::string& uri,
-		const std::string& secret
-	)
+	string getHMAC2(string keyParam, string message)
 	{
-		// add path to data to encrypt
-		std::vector<unsigned char> data(uri.begin(), uri.end());
-		std::vector<unsigned char> secretkey(secret.begin(), secret.end());
-		// and compute HMAC
-		//return b64_encode(hmac_sha512(data, secretkey));
-		return b64_encode(hmac_sha512(data, b64_decode(secret)));
-		//std::vector<unsigned char> sig = hmac_sha512(data, secretkey);
-		//std::string retVal(sig.begin(), sig.end());
-		//return retVal;
+		char key[10000];
+		char data[10000];
+		strcpy(key, keyParam.c_str());
+		strncpy(data, message.c_str(), sizeof(data));
+
+		unsigned char* digest;
+		digest = HMAC(EVP_sha512(), key, (int)strlen(key), (unsigned char*)data, (int)strlen(data), NULL, NULL);
+		char mdString[SHA512_DIGEST_LENGTH*2+1];
+		for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
+			sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+		mdString[SHA512_DIGEST_LENGTH * 2] = '\0';
+
+		string output = mdString;
+		return output;
 	}
 
     Dynamic::Var Bittrex::invoke(const string& httpMethod, URI& uri)
@@ -58,7 +61,7 @@ namespace trader {
 
 		if (privateApi)
 		{
-			req.set("apisign", signature(uri.toString(), api.config.dataObject.api_secret));
+			req.set("apisign", getHMAC2(api.config.dataObject.api_secret, uri.toString()));
 		}
 
 		//Submit

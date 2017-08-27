@@ -291,23 +291,27 @@ namespace trader {
 			const char* cppType = getCppType(type, obj);
 			if (cppType)
 			{
-				if (expansionStream.has(expansionstringstream::ARRAY) || expansionStream.has(expansionstringstream::MAP))
+				stream << "if (!" << temp_name(idx) << ".isEmpty())" << endl;
 				{
-					if (expansionStream.wasPrevious(expansionstringstream::ARRAY) || expansionStream.wasPrevious(expansionstringstream::MAP))
+					ScopedStream<ApiFileOutputStream> scopedStream(stream);
+					if (expansionStream.has(expansionstringstream::ARRAY) || expansionStream.has(expansionstringstream::MAP))
 					{
-						CODEGEN_DEBUG(stream << comment("Case Var 1"));
-						stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+						if (expansionStream.wasPrevious(expansionstringstream::ARRAY) || expansionStream.wasPrevious(expansionstringstream::MAP))
+						{
+							CODEGEN_DEBUG(stream << comment("Case Var 1"));
+							stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+						}
+						else
+						{
+							CODEGEN_DEBUG(stream << comment("Case Var 2"));
+							stream << expansionStream.var_name_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+						}
 					}
 					else
 					{
-						CODEGEN_DEBUG(stream << comment("Case Var 2"));
-						stream << expansionStream.var_name_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+						CODEGEN_DEBUG(stream << comment("Case Var 3"));
+						stream << expansionStream.prefix_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 					}
-				}
-				else
-				{
-					CODEGEN_DEBUG(stream << comment("Case Var 3"));
-					stream << expansionStream.prefix_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
 				}
 				expansionstringstream newExpansionStream(expansionStream);
 				newExpansionStream << keyName;
@@ -550,12 +554,12 @@ namespace trader {
 						}
 					}
 					JSON::Object::Ptr propertyObject = property.second.extract<JSON::Object::Ptr>();
-					stream << "if (" << var_name(name) << "->dataObject." << property.first << " != " << getCppDefaultVal(propertyObject->get("type"), propertyObject) << ") ";
+					stream << "if (" << var_name(name) << "->dataObject." << var_name(property.first) << " != " << getCppDefaultVal(propertyObject->get("type"), propertyObject) << ") ";
 					{
 						ScopedStream<ApiFileOutputStream> scopedStream(stream);
-						stream << var_name(name) << "->dataObject.Set" << type_name(property.first) << "(" << var_name(name) << "->dataObject." << property.first << ")" << cendl;
+						stream << var_name(name) << "->dataObject.Set" << type_name(property.first) << "(" << var_name(name) << "->dataObject." << var_name(property.first) << ")" << cendl;
 						stream << "std::ostringstream var" << count << cendl;
-						stream << "var" << count << " << " << var_name(name) << "->dataObject." << property.first << cendl;
+						stream << "var" << count << " << " << var_name(name) << "->dataObject." << var_name(property.first) << cendl;
 						stream << "uri.addQueryParameter(std::string(\"" << property.first << "\"), var" << count << ".str())" << cendl;
 					}
 					if (isRequired)

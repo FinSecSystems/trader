@@ -25,3 +25,6 @@
 [submodule "deps/krakenapi"]
 	path = deps/krakenapi
 	url = http://github.com/viknash/krakenapi
+[submodule "deps/optmarket-bittrex"]
+	path = deps/optmarket-bittrex
+	url = https://github.com/vncoelho/optmarket-bittrex

@@ -188,8 +188,9 @@ namespace trader {
 						}
 					}
 					header << endl;
-					construct_header(header, nameStream.str().c_str(), 2,
-						"Poco::Data::Session*", "_db"
+					construct_header(header, nameStream.str().c_str(), 4,
+						"Poco::Data::Session*", "_db",
+						"std::string", "_suffix = \"\""
 						);
 					header << "void init()" << cendl;
 					header << endl;
@@ -216,6 +217,8 @@ namespace trader {
 					header << "std::size_t getAll(std::vector<" << nameStream.str() << "::RecordWithId>& records, std::string condition)" << cendl;
 					header << endl;
 					header << "Poco::Data::Session* db" << cendl;
+					header << endl;
+					header << "std::string tableName" << cendl;
 					header << endl;
 				}
 			}
@@ -397,18 +400,28 @@ namespace trader {
 			}
 			cpp << endl;
 
+
 			for (auto& tableVar : *tables)
 			{
 				JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
 				string name = table->getValue<std::string>("name");
+				std::ostringstream tableNameStr;
+				tableNameStr << "tableNameStr << \"" << apiName << "_" << name << "\";";
+
 				ostringstream nameStream;
 				nameStream << type_name(name);
 				
 				JSON::Array::Ptr fields = table->getArray("fields");
 
-				construct_ex(cpp, nameStream.str(), 2, 2, 0,
+				construct_ex(cpp, nameStream.str(), 4, 2, 4,
 					"Poco::Data::Session*", "_db",
-					"db", "_db");
+					"std::string", "_suffix",
+					"db", "_db",
+					"std::ostringstream tableNameStr;",
+					tableNameStr.str().c_str(),
+					"if (_suffix.length()) tableNameStr << \"_\" << _suffix;",
+					"tableName = tableNameStr.str();"
+				);
 
 				ostringstream keyStream;
 				generateInit(cpp, nameStream, apiName, keyStream, table, fields, name);
@@ -429,11 +442,13 @@ namespace trader {
 
 	void DatabaseSchema::generateInit(ApiFileOutputStream& cpp, ostringstream& nameStream, string& apiName, ostringstream& keyStream, JSON::Object::Ptr table, JSON::Array::Ptr fields, string& name)
 	{
+		(void)apiName;
+		(void)name;
 		cpp << "void " << nameStream.str() << "::init()" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> initStream(cpp);
 			// Create table
-			cpp << "*db << \"CREATE TABLE IF NOT EXISTS " << apiName << "_" << name << " (";
+			cpp << "*db << \"CREATE TABLE IF NOT EXISTS \" << tableName << \" (";
 			bool first = true;
 			for (auto& fieldVar : *fields)
 			{
@@ -479,7 +494,7 @@ namespace trader {
 				}
 				if (keyStream.str().length())
 				{
-					cpp << "*db << \"CREATE " << (unique ? "UNIQUE" : "") << " INDEX IF NOT EXISTS " << apiName << "_" << name << "_Index on " << apiName << "_" << name << "(" << keyStream.str() << ")\", now" << cendl;
+					cpp << "*db << \"CREATE " << (unique ? "UNIQUE" : "") << " INDEX IF NOT EXISTS \" << tableName << \"_Index on \" << tableName << \"(" << keyStream.str() << ")\", now" << cendl;
 				}
 			}
 		}
@@ -490,10 +505,11 @@ namespace trader {
 	{
 		(void)keyStream;
 		(void)apiName;
+		(void)name;
 		cpp << "void " << nameStream.str() << "::clear()" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> clearStream(cpp);
-			cpp << "*db << \"DELETE FROM "  << apiName << "_" << name << "\", now" << cendl;
+			cpp << "*db << \"DELETE FROM \" << tableName, now" << cendl;
 			cpp << "*db << \"VACUUM\", now" << cendl;
 		}
 		cpp << endl;
@@ -502,12 +518,13 @@ namespace trader {
 	void DatabaseSchema::generateInsert(ApiFileOutputStream& cpp, ostringstream& nameStream, string& apiName, ostringstream& keyStream, JSON::Object::Ptr table, JSON::Array::Ptr fields)
 	{
 		(void)keyStream;
+		(void)apiName;
 		cpp << "void " << nameStream.str() << "::insert(" << nameStream.str() << "::Record& record)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
 			JSON::Array::Ptr primaryKeys = table->getArray("primaryKey");
 			cpp << "Poco::Data::Statement insert(*db)" << cendl;
-			cpp << "insert << \"INSERT INTO " << apiName << "_" << type_name(nameStream.str()) << " VALUES(";
+			cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
 			for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 			{
 				if (cnt != 0) cpp << ", ";
@@ -528,6 +545,7 @@ namespace trader {
 
 	void DatabaseSchema::generateInsertAndDeleteUnchanged(ApiFileOutputStream& cpp, ostringstream& nameStream, string& apiName, ostringstream& keyStream, JSON::Object::Ptr table, JSON::Array::Ptr fields)
 	{
+		(void)apiName;
 		cpp << "void " << nameStream.str() << "::insertAndDeleteUnchanged(" << nameStream.str() << "::Record& record)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
@@ -535,7 +553,7 @@ namespace trader {
 			if (primaryKeys->size())
 			{
 				cpp << "std::vector<" << type_name(nameStream.str()) << "::Record> " << var_name(nameStream.str()) << cendl;
-				cpp << "*db << \"SELECT * FROM " << apiName << "_" << type_name(nameStream.str()) << " ORDER BY " << keyStream.str() << " DESC LIMIT 1\"," << endl;
+				cpp << "*db << \"SELECT * FROM \" << tableName << \" ORDER BY " << keyStream.str() << " DESC LIMIT 1\"," << endl;
 				cpp << tabs(1) << "into(" << var_name(nameStream.str()) << ")," << endl;
 				cpp << tabs(1) << "now" << cendl;
 				cpp << endl;
@@ -581,14 +599,14 @@ namespace trader {
 					cpp << ")" << endl;
 					{
 						ScopedStream<ApiFileOutputStream> ifNotEmptyStream(cpp);
-						cpp << "*db << \"DELETE FROM " << apiName << "_" << var_name(nameStream.str()) << " WHERE " << type_name(keyStream.str()) << " = ?\"," << endl;
+						cpp << "*db << \"DELETE FROM \" << tableName << \" WHERE " << type_name(keyStream.str()) << " = ?\"," << endl;
 						cpp << tabs(1) << "use(" << var_name(nameStream.str()) << "[0]." << var_name(keyStream.str()) << ")," << endl;
 						cpp << tabs(1) << "now" << cendl;
 					}
 				}
 				cpp << endl;
 				cpp << "Poco::Data::Statement insert(*db)" << cendl;
-				cpp << "insert << \"INSERT INTO " << apiName << "_" << type_name(nameStream.str()) << " VALUES(";
+				cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
 				for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 				{
 					if (cnt != 0) cpp << ", ";
@@ -613,13 +631,14 @@ namespace trader {
 
 	void DatabaseSchema::generateInsertOnce(ApiFileOutputStream& cpp, ostringstream& nameStream, string& apiName, ostringstream& keyStream, JSON::Object::Ptr table, JSON::Array::Ptr fields)
 	{
+		(void)apiName;
 		(void)keyStream;
 		cpp << "void " << nameStream.str() << "::insertOnce(" << nameStream.str() << "::Record& record)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
 
 			cpp << "Poco::UInt32 count" << cendl;
-			cpp << "*db << \"SELECT count(*) FROM " << apiName << "_" << type_name(nameStream.str()) << "\"," << endl;
+			cpp << "*db << \"SELECT count(*) FROM \" << tableName," << endl;
 			cpp << tabs(1) << "into(count)," << endl;
 			cpp << tabs(1) << "now" << cendl;
 			cpp << endl;
@@ -628,7 +647,7 @@ namespace trader {
 			{
 				ScopedStream<ApiFileOutputStream> ifCountStream(cpp);
 				cpp << "Poco::Data::Statement insert(*db)" << cendl;
-				cpp << "insert << \"INSERT INTO " << apiName << "_" << type_name(nameStream.str()) << " VALUES(";
+				cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
 				for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 				{
 					if (cnt != 0) cpp << ", ";
@@ -650,6 +669,7 @@ namespace trader {
 
 	void DatabaseSchema::generateInsertUnique(ApiFileOutputStream& cpp, ostringstream& nameStream, string& apiName, ostringstream& keyStream, JSON::Object::Ptr table, JSON::Array::Ptr fields)
 	{
+		(void)apiName;
 		(void)keyStream;
 		cpp << "void " << nameStream.str() << "::insertUnique(" << nameStream.str() << "::Record& record)" << endl;
 		{
@@ -659,7 +679,7 @@ namespace trader {
 			if (primaryKeys->size())
 			{
 				cpp << "Poco::UInt32 count" << cendl;
-				cpp << "*db << \"SELECT count(*) FROM " << apiName << "_" << type_name(nameStream.str()) << " WHERE " << type_name(keyStream.str()) << " = ?\"," << endl;
+				cpp << "*db << \"SELECT count(*) FROM \" << tableName << \" WHERE " << type_name(keyStream.str()) << " = ?\"," << endl;
 				cpp << tabs(1) << "use(record." << var_name(keyStream.str()) << ")," << endl;
 				cpp << tabs(1) << "into(count)," << endl;
 				cpp << tabs(1) << "now" << cendl;
@@ -669,7 +689,7 @@ namespace trader {
 				{
 					ScopedStream<ApiFileOutputStream> ifCountStream(cpp);
 					cpp << "Poco::Data::Statement insert(*db)" << cendl;
-					cpp << "insert << \"INSERT INTO " << apiName << "_" << type_name(nameStream.str()) << " VALUES(";
+					cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
 					for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 					{
 						if (cnt != 0) cpp << ", ";
@@ -703,7 +723,7 @@ namespace trader {
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
 			cpp << "if (records.empty()) return" << cendl;
 			cpp << "Poco::Data::Statement insert(*db)" << cendl;
-			cpp << "insert << \"INSERT INTO " << apiName << "_" << type_name(nameStream.str()) << " VALUES(";
+			cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
 			for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 			{
 				if (cnt != 0) cpp << ", ";
@@ -732,7 +752,7 @@ namespace trader {
 				}
 				cpp << "records.push_back(record)" << cendl;
 			}
-			cpp << "insert << \"INSERT INTO " << apiName << "_" << type_name(nameStream.str()) << " VALUES(";
+			cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
 			for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 			{
 				if (cnt != 0) cpp << ", ";
@@ -772,11 +792,11 @@ namespace trader {
 			cpp << "std::vector<" << type_name(nameStream.str()) << "::RecordWithId> " << var_name(nameStream.str()) << cendl;
 			if (primaryKeys->size())
 			{
-				cpp << "*db << \"SELECT *,rowid FROM " << apiName << "_" << type_name(nameStream.str()) << " ORDER BY " << keyStream.str() << " DESC LIMIT 1\"," << endl;
+				cpp << "*db << \"SELECT *,rowid FROM \" << tableName << \" ORDER BY " << keyStream.str() << " DESC LIMIT 1\"," << endl;
 			}
 			else
 			{
-				cpp << "*db << \"SELECT *,rowid FROM " << apiName << "_" << type_name(nameStream.str()) << " ORDER BY ROWID ASC LIMIT 1\"," << endl;
+				cpp << "*db << \"SELECT *,rowid FROM \" << tableName << \" ORDER BY ROWID ASC LIMIT 1\"," << endl;
 			}
 			cpp << tabs(1) << "into(" << var_name(nameStream.str()) << ")," << endl;
 			cpp << tabs(1) << "now" << cendl;
@@ -798,7 +818,7 @@ namespace trader {
 		{
 			ScopedStream<ApiFileOutputStream> getLatestStream(cpp);
 			cpp << "Poco::Data::Statement select(*db)" << cendl;
-			cpp << "select << \"SELECT *,rowid FROM " << apiName << "_" << type_name(nameStream.str()) << "\"" << cendl;
+			cpp << "select << \"SELECT *,rowid FROM \" << tableName" << cendl;
 			cpp << "if (condition.length())" << endl;
 			cpp << tabs(1) << "select << \" WHERE \" << condition" << cendl;
 			cpp << "select << \" ORDER BY ROWID ASC\"," << endl;
@@ -816,7 +836,7 @@ namespace trader {
 		{
 			ScopedStream<ApiFileOutputStream> deleteStream(cpp);
 			cpp << "Poco::Data::Statement statement(*db)" << cendl;
-			cpp << "statement << \"DELETE FROM " << apiName << "_" << type_name(nameStream.str()) << " WHERE rowid IN(\"" << cendl;
+			cpp << "statement << \"DELETE FROM \" << tableName << \" WHERE rowid IN(\"" << cendl;
 			cpp << "bool first = true" << cendl;
 			cpp << "for (auto& rec : records)";
 			{
