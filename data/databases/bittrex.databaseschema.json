@@ -1,0 +1,65 @@
+{
+  "tables": [
+    {
+      "name": "Asset_Info2",
+      "fields": [
+        {
+          "name": "Asset_Name",
+          "title": "Asset Symbol",
+          "type": "INTEGER",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Asset_Class",
+          "title": "Asset Type",
+          "type": "TEXT",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Alternate_Name",
+          "title": "Alternate name for asset",
+          "type": "TEXT",
+          "format": "",
+          "description": "Cost",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Decimals",
+          "title": "",
+          "type": "REAL",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Display_Decimals",
+          "title": "",
+          "type": "REAL",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        }
+
+      ],
+      "missingValues": [],
+      "primaryKey": [
+      ],
+      "foreignKeys": []
+    }
+  ],
+  "name": "Bittrex"
+}

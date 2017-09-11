@@ -10,7 +10,14 @@ namespace trader {
 
     Bittrex::Bittrex(Poco::AutoPtr<trader::App> _app)
         : api(_app, this)
+        , dataBase(new BittrexDatabase(_app->dbSession))
     {
+    }
+
+    void Bittrex::run()
+    {
+        AutoPtr<BittrexApi::Markets> balance = api.GetMarkets();
+
     }
 
     Bittrex::~Bittrex()

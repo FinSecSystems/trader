@@ -172,6 +172,7 @@ namespace trader {
             //AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
 
             Bittrex bittrex(this);
+            bittrex.run();
             //AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
 
 			AutoPtr<BittrexApi::BalanceParams> balanceParam = new BittrexApi::BalanceParams();
