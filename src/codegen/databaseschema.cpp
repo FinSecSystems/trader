@@ -455,7 +455,8 @@ namespace trader {
 		{
 			ScopedStream<ApiFileOutputStream> initStream(cpp);
 			// Create table
-			cpp << "*db << \"CREATE TABLE IF NOT EXISTS \" << tableName << \" (";
+            cpp << "Logger::get(\"Logs\").information(\"DB Check and Create : %s\", tableName)" << cendl;
+			cpp << "*db << \"CREATE TABLE IF NOT EXISTS \\\"\" << tableName << \"\\\" (";
 			bool first = true;
 			for (auto& fieldVar : *fields)
 			{
@@ -501,7 +502,7 @@ namespace trader {
 				}
 				if (keyStream.str().length())
 				{
-					cpp << "*db << \"CREATE " << (unique ? "UNIQUE" : "") << " INDEX IF NOT EXISTS \" << tableName << \"_Index on \" << tableName << \"(" << keyStream.str() << ")\", now" << cendl;
+					cpp << "*db << \"CREATE " << (unique ? "UNIQUE" : "") << " INDEX IF NOT EXISTS \\\"\" << tableName << \"_Index\\\" on \\\"\" << tableName << \"\\\"(" << keyStream.str() << ")\", now" << cendl;
 				}
 			}
 		}
@@ -516,7 +517,8 @@ namespace trader {
 		cpp << "void " << nameStream.str() << "::clear()" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> clearStream(cpp);
-			cpp << "*db << \"DELETE FROM \" << tableName, now" << cendl;
+            cpp << "Logger::get(\"Logs\").information(\"DB Clear : %s\", tableName)" << cendl;
+			cpp << "*db << \"DELETE FROM \\\"\" << tableName << \"\\\"\", now" << cendl;
 			cpp << "*db << \"VACUUM\", now" << cendl;
 		}
 		cpp << endl;
@@ -530,8 +532,9 @@ namespace trader {
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
 			JSON::Array::Ptr primaryKeys = table->getArray("primaryKey");
+            cpp << "Logger::get(\"Logs\").information(\"DB Insert : %s\", tableName)" << cendl;
 			cpp << "Poco::Data::Statement insert(*db)" << cendl;
-			cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
+			cpp << "insert << \"INSERT INTO \\\"\" << tableName << \"\\\" VALUES(";
 			for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 			{
 				if (cnt != 0) cpp << ", ";
@@ -556,11 +559,12 @@ namespace trader {
 		cpp << "void " << nameStream.str() << "::insertAndDeleteUnchanged(" << nameStream.str() << "::Record& record)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
-			JSON::Array::Ptr primaryKeys = table->getArray("primaryKey");
+            cpp << "Logger::get(\"Logs\").information(\"DB Insert and Delete Unchanged : %s\", tableName)" << cendl;
+            JSON::Array::Ptr primaryKeys = table->getArray("primaryKey");
 			if (primaryKeys->size())
 			{
 				cpp << "std::vector<" << type_name(nameStream.str()) << "::Record> " << var_name(nameStream.str()) << cendl;
-				cpp << "*db << \"SELECT * FROM \" << tableName << \" ORDER BY " << keyStream.str() << " DESC LIMIT 1\"," << endl;
+				cpp << "*db << \"SELECT * FROM \\\"\" << tableName << \"\\\" ORDER BY " << keyStream.str() << " DESC LIMIT 1\"," << endl;
 				cpp << tabs(1) << "into(" << var_name(nameStream.str()) << ")," << endl;
 				cpp << tabs(1) << "now" << cendl;
 				cpp << endl;
@@ -606,14 +610,14 @@ namespace trader {
 					cpp << ")" << endl;
 					{
 						ScopedStream<ApiFileOutputStream> ifNotEmptyStream(cpp);
-						cpp << "*db << \"DELETE FROM \" << tableName << \" WHERE " << type_name(keyStream.str()) << " = ?\"," << endl;
+						cpp << "*db << \"DELETE FROM \\\"\" << tableName << \"\\\" WHERE " << type_name(keyStream.str()) << " = ?\"," << endl;
 						cpp << tabs(1) << "use(" << var_name(nameStream.str()) << "[0]." << var_name(keyStream.str()) << ")," << endl;
 						cpp << tabs(1) << "now" << cendl;
 					}
 				}
 				cpp << endl;
 				cpp << "Poco::Data::Statement insert(*db)" << cendl;
-				cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
+				cpp << "insert << \"INSERT INTO \\\"\" << tableName << \"\\\" VALUES(";
 				for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 				{
 					if (cnt != 0) cpp << ", ";
@@ -643,9 +647,9 @@ namespace trader {
 		cpp << "void " << nameStream.str() << "::insertOnce(" << nameStream.str() << "::Record& record)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
-
+            cpp << "Logger::get(\"Logs\").information(\"DB Insert Once : %s\", tableName)" << cendl;
 			cpp << "Poco::UInt32 count" << cendl;
-			cpp << "*db << \"SELECT count(*) FROM \" << tableName," << endl;
+			cpp << "*db << \"SELECT count(*) FROM \\\"\" << tableName << \"\\\"\"," << endl;
 			cpp << tabs(1) << "into(count)," << endl;
 			cpp << tabs(1) << "now" << cendl;
 			cpp << endl;
@@ -654,7 +658,7 @@ namespace trader {
 			{
 				ScopedStream<ApiFileOutputStream> ifCountStream(cpp);
 				cpp << "Poco::Data::Statement insert(*db)" << cendl;
-				cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
+				cpp << "insert << \"INSERT INTO \\\"\" << tableName << \"\\\" VALUES(";
 				for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 				{
 					if (cnt != 0) cpp << ", ";
@@ -685,8 +689,9 @@ namespace trader {
 			JSON::Array::Ptr primaryKeys = table->getArray("primaryKey");
 			if (primaryKeys->size())
 			{
+                cpp << "Logger::get(\"Logs\").information(\"DB Insert Unique : %s\", tableName)" << cendl;
 				cpp << "Poco::UInt32 count" << cendl;
-				cpp << "*db << \"SELECT count(*) FROM \" << tableName << \" WHERE " << type_name(keyStream.str()) << " = ?\"," << endl;
+				cpp << "*db << \"SELECT count(*) FROM \\\"\" << tableName << \"\\\" WHERE " << type_name(keyStream.str()) << " = ?\"," << endl;
 				cpp << tabs(1) << "use(record." << var_name(keyStream.str()) << ")," << endl;
 				cpp << tabs(1) << "into(count)," << endl;
 				cpp << tabs(1) << "now" << cendl;
@@ -696,7 +701,7 @@ namespace trader {
 				{
 					ScopedStream<ApiFileOutputStream> ifCountStream(cpp);
 					cpp << "Poco::Data::Statement insert(*db)" << cendl;
-					cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
+					cpp << "insert << \"INSERT INTO \\\"\" << tableName << \"\\\" VALUES(";
 					for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 					{
 						if (cnt != 0) cpp << ", ";
@@ -728,9 +733,10 @@ namespace trader {
 		cpp << "void " << nameStream.str() << "::insertMultiple(std::vector<" << nameStream.str() << "::Record>& records)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
+            cpp << "Logger::get(\"Logs\").information(\"DB Insert Multiple : %s\", tableName)" << cendl;
 			cpp << "if (records.empty()) return" << cendl;
 			cpp << "Poco::Data::Statement insert(*db)" << cendl;
-			cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
+			cpp << "insert << \"INSERT INTO \\\"\" << tableName << \"\\\" VALUES(";
 			for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 			{
 				if (cnt != 0) cpp << ", ";
@@ -744,6 +750,7 @@ namespace trader {
 		cpp << "void " << nameStream.str() << "::insertMultiple(std::vector<" << nameStream.str() << "::RecordWithId>& recordWithIds)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
+            cpp << "Logger::get(\"Logs\").information(\"DB Insert Multiple with Ids : %s\", tableName)" << cendl;
 			cpp << "if (recordWithIds.empty()) return" << cendl;
 			cpp << "Poco::Data::Statement insert(*db)" << cendl;
 			cpp << "std::vector<" << nameStream.str() << "::Record> records" << cendl;
@@ -759,7 +766,7 @@ namespace trader {
 				}
 				cpp << "records.push_back(record)" << cendl;
 			}
-			cpp << "insert << \"INSERT INTO \" << tableName << \" VALUES(";
+			cpp << "insert << \"INSERT INTO \\\"\" << tableName << \"\\\" VALUES(";
 			for (Poco::UInt32 cnt = 0; cnt < fields->size(); cnt++)
 			{
 				if (cnt != 0) cpp << ", ";
@@ -779,6 +786,7 @@ namespace trader {
 		cpp << "void " << nameStream.str() << "::insertMultipleUnique(std::vector<" << nameStream.str() << "::Record>& records)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> insertStream(cpp);
+            cpp << "Logger::get(\"Logs\").information(\"DB Insert Multiple Unique : %s\", tableName)" << cendl;
 			cpp << "for (auto& record : records)" << endl;
 			{
 				ScopedStream<ApiFileOutputStream> forEachStream(cpp);
@@ -795,15 +803,16 @@ namespace trader {
 		cpp << "void " << nameStream.str() << "::getLatest(" << nameStream.str() << "::RecordWithId& rec)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> getLatestStream(cpp);
+            cpp << "Logger::get(\"Logs\").information(\"DB Get Latest : %s\", tableName)" << cendl;
 			JSON::Array::Ptr primaryKeys = table->getArray("primaryKey");
 			cpp << "std::vector<" << type_name(nameStream.str()) << "::RecordWithId> " << var_name(nameStream.str()) << cendl;
 			if (primaryKeys->size())
 			{
-				cpp << "*db << \"SELECT *,rowid FROM \" << tableName << \" ORDER BY " << keyStream.str() << " DESC LIMIT 1\"," << endl;
+				cpp << "*db << \"SELECT *,rowid FROM \\\"\" << tableName << \"\\\" ORDER BY " << keyStream.str() << " DESC LIMIT 1\"," << endl;
 			}
 			else
 			{
-				cpp << "*db << \"SELECT *,rowid FROM \" << tableName << \" ORDER BY ROWID ASC LIMIT 1\"," << endl;
+				cpp << "*db << \"SELECT *,rowid FROM \\\"\" << tableName << \"\\\" ORDER BY ROWID ASC LIMIT 1\"," << endl;
 			}
 			cpp << tabs(1) << "into(" << var_name(nameStream.str()) << ")," << endl;
 			cpp << tabs(1) << "now" << cendl;
@@ -824,8 +833,9 @@ namespace trader {
 		cpp << "std::size_t " << nameStream.str() << "::getAll(std::vector<" << nameStream.str() << "::RecordWithId>& records, std::string condition)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> getLatestStream(cpp);
+            cpp << "Logger::get(\"Logs\").information(\"DB Get All : %s\", tableName)" << cendl;
 			cpp << "Poco::Data::Statement select(*db)" << cendl;
-			cpp << "select << \"SELECT *,rowid FROM \" << tableName" << cendl;
+			cpp << "select << \"SELECT *,rowid FROM \\\"\" << tableName << \"\\\"\"" << cendl;
 			cpp << "if (condition.length())" << endl;
 			cpp << tabs(1) << "select << \" WHERE \" << condition" << cendl;
 			cpp << "select << \" ORDER BY ROWID ASC\"," << endl;
@@ -842,8 +852,9 @@ namespace trader {
 		cpp << "void " << nameStream.str() << "::deleteMultiple(std::vector<" << nameStream.str() << "::RecordWithId>& records)" << endl;
 		{
 			ScopedStream<ApiFileOutputStream> deleteStream(cpp);
+            cpp << "Logger::get(\"Logs\").information(\"DB Generate Delete Multiple : %s\", tableName)" << cendl;
 			cpp << "Poco::Data::Statement statement(*db)" << cendl;
-			cpp << "statement << \"DELETE FROM \" << tableName << \" WHERE rowid IN(\"" << cendl;
+			cpp << "statement << \"DELETE FROM \\\"\" << tableName << \"\\\" WHERE rowid IN(\"" << cendl;
 			cpp << "bool first = true" << cendl;
 			cpp << "for (auto& rec : records)";
 			{

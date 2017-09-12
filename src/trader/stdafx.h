@@ -60,6 +60,7 @@
 #include <ctime>
 #include <chrono>
 #include <map>
+#include <unordered_map>
 
 using Poco::Util::Application;
 using Poco::Util::Option;

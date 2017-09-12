@@ -93,6 +93,51 @@
           "type": "string"
         }
       }
+    },
+    "History": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Id": {
+                "type": "number"
+              },
+              "TimeStamp": {
+                "type": "string"
+              },
+              "Quantity": {
+                "format": "double",
+                "type": "number"
+              },
+              "Price": {
+                "format": "double",
+                "type": "number"
+              },
+              "Total": {
+                "format": "double",
+                "type": "number"
+              },
+              "Filltype": {
+                "type": "string"
+              },
+              "OrderType": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "HistoryParams": {
+      "type": "object",
+      "properties": {
+        "market": {
+          "type": "string"
+        }
+      }
     }
     },
   "properties": {
@@ -125,6 +170,21 @@
       ],
       "schema": {
         "$ref": "#/definitions/BalanceParams"
+      }
+    },
+    {
+      "href": "public/getmarkethistory",
+      "description": "Used to retrieve the latest trades that have occured for a specific market",
+      "method": "GET",
+      "title": "GetMarketHistory",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/History"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/HistoryParams"
       }
     }
   ],

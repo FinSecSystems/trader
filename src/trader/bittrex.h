@@ -23,6 +23,8 @@ namespace trader {
         BittrexApi::EndPoints api;
 
         Poco::AutoPtr<BittrexDatabase::Tables> dataBase;
+
+        std::unordered_map<std::string, Poco::AutoPtr<BittrexDatabase::Trade_History>> marketToTradeHistoryMap;
     protected:
         Bittrex(const Bittrex&);
         Bittrex& operator = (const Bittrex&);

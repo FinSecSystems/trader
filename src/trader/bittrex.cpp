@@ -7,6 +7,7 @@
 namespace trader {
 
     using namespace BittrexApi;
+    using namespace BittrexDatabase;
 
     Bittrex::Bittrex(Poco::AutoPtr<trader::App> _app)
         : api(_app, this)
@@ -16,8 +17,21 @@ namespace trader {
 
     void Bittrex::run()
     {
-        AutoPtr<BittrexApi::Markets> balance = api.GetMarkets();
-
+        AutoPtr<Markets> balance = api.GetMarkets();
+        for (auto& market : balance->dataObject.result)
+        {
+            if (market.isActive && market.isSetMarketName())
+            {
+                Poco::AutoPtr<Trade_History> tradeHistoryTable = new Trade_History(dataBase->db, market.marketName);
+                marketToTradeHistoryMap.insert({ market.marketName,tradeHistoryTable });
+                tradeHistoryTable->init();
+            }
+        }
+        for (auto& market : marketToTradeHistoryMap)
+        {
+            
+            AutoPtr<BittrexApi::History> history = api.GetMarketHistory();
+        }
     }
 
     Bittrex::~Bittrex()

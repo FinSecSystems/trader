@@ -1,11 +1,92 @@
 {
   "tables": [
     {
-      "name": "Asset_Info3",
+      "name": "Trade_History",
       "fields": [
         {
-          "name": "Asset_Name",
-          "title": "Asset Symbol",
+          "name": "TradeId",
+          "title": "",
+          "type": "INTEGER",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "TimeStamp",
+          "title": "Time Stamp",
+          "type": "INTEGER",
+          "format": "",
+          "description": "Current Unix Timestamp",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "Volume",
+          "title": "",
+          "type": "REAL",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Price",
+          "title": "",
+          "type": "REAL",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "Total",
+          "title": "",
+          "type": "REAL",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "FillType",
+          "title": "",
+          "type": "TEXT",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "OrderType",
+          "title": "",
+          "type": "TEXT",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        }
+      ],
+      "missingValues": [ ],
+      "primaryKey": [ "TradeId"
+      ],
+      "foreignKeys": [ ]
+    },
+    {
+      "name": "Markets",
+      "fields": [
+        {
+          "name": "Created",
+          "title": "Timestamp",
           "type": "INTEGER",
           "format": "",
           "description": "",
@@ -14,8 +95,19 @@
           }
         },
         {
-          "name": "Asset_Class",
-          "title": "Asset Type",
+          "name": "MarketName",
+          "title": "",
+          "type": "TEXT",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "unique": true,
+            "required": true
+          }
+        },
+        {
+          "name": "MarketCurrency",
+          "title": "",
           "type": "TEXT",
           "format": "",
           "description": "",
@@ -24,17 +116,27 @@
           }
         },
         {
-          "name": "Alternate_Name",
-          "title": "Alternate name for asset",
+          "name": "BaseCurrency",
+          "title": "",
           "type": "TEXT",
           "format": "",
-          "description": "Cost",
+          "description": "",
           "constraints": {
             "required": true
           }
         },
         {
-          "name": "Decimals",
+          "name": "MarketCurrencyLong",
+          "title": "",
+          "type": "TEXT",
+          "format": "",
+          "description": "",
+          "constraints": {
+            "required": true
+          }
+        },
+        {
+          "name": "BaseCurrencyLong",
           "title": "",
           "type": "REAL",
           "format": "",
@@ -44,7 +146,7 @@
           }
         },
         {
-          "name": "Display_Decimals",
+          "name": "MinTradeSize",
           "title": "",
           "type": "REAL",
           "format": "",
@@ -53,10 +155,9 @@
             "required": true
           }
         }
-
       ],
       "missingValues": [],
-      "primaryKey": [
+      "primaryKey": [ "MarketName"
       ],
       "foreignKeys": []
     }
