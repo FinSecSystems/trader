@@ -1,7 +1,7 @@
 {
   "tables": [
     {
-      "name": "Asset_Info2",
+      "name": "Asset_Info3",
       "fields": [
         {
           "name": "Asset_Name",

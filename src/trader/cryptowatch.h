@@ -7,6 +7,7 @@
 namespace trader {
 
     class CryptowatchApi::EndPoints;
+    class CryptowatchDatabase::Tables;
 
     class Cryptowatch : public Api
     {
@@ -19,7 +20,7 @@ namespace trader {
 
         CryptowatchApi::EndPoints api;
 
-		Poco::AutoPtr<CryptowatchDatabase> dataBase;
+		Poco::AutoPtr<CryptowatchDatabase::Tables> dataBase;
     protected:
         Cryptowatch(const Cryptowatch&);
         Cryptowatch& operator = (const Cryptowatch&);

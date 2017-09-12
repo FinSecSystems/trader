@@ -7,6 +7,7 @@
 namespace trader {
 
 	class FybApi::EndPoints;
+    class FybDatabase::Tables;
 
 	class Fyb : public Api
 	{
@@ -37,7 +38,7 @@ namespace trader {
 
 	private:
 		Poco::Timer executeTimer;
-		Poco::AutoPtr<FybDatabase> dataBase;
+		Poco::AutoPtr<FybDatabase::Tables> dataBase;
 		Poco::AutoPtr<trader::App> app;
 		std::vector<std::function<void(Poco::Timer&)>> serialExecutionList;
 	};

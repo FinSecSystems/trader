@@ -7,6 +7,7 @@
 namespace trader {
 
 	class KrakenApi::EndPoints;
+    class KrakenDatabase::Tables;
 
 	class Kraken : public Api
 	{
@@ -30,7 +31,7 @@ namespace trader {
 
 	private:
 		Poco::Timer executeTimer;
-		Poco::AutoPtr<KrakenDatabase> dataBase;
+		Poco::AutoPtr<KrakenDatabase::Tables> dataBase;
 		Poco::AutoPtr<trader::App> app;
 		std::vector<std::function<void(Poco::Timer&)>> serialExecutionList;
 	};

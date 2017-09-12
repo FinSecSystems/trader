@@ -7,6 +7,7 @@
 namespace trader {
 
     class BittrexApi::EndPoints;
+    class BittrexDatabase::Tables;
 
     class Bittrex : public Api
     {
@@ -21,7 +22,7 @@ namespace trader {
 
         BittrexApi::EndPoints api;
 
-        Poco::AutoPtr<BittrexDatabase> dataBase;
+        Poco::AutoPtr<BittrexDatabase::Tables> dataBase;
     protected:
         Bittrex(const Bittrex&);
         Bittrex& operator = (const Bittrex&);

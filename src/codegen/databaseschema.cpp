@@ -86,162 +86,166 @@ namespace trader {
 
 		startHeader(header, 0);
 		{
-			ScopedNamespace scopedNamesapce(header, config.nameSpace);
-			for (auto& tableVar : *tables)
-			{
-				JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
-				string name = table->getValue<std::string>("name");
-				ostringstream nameStream;
-				nameStream << type_name(name);
+			ScopedNamespace scopedNamespaceTrader(header, config.nameSpace);
+            {
+                ScopedNamespace scopedNamespaceDb(header, config.apiName);
 
-				JSON::Array::Ptr fields = table->getArray("fields");
+                for (auto& tableVar : *tables)
+                {
+                    JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
+                    string name = table->getValue<std::string>("name");
+                    ostringstream nameStream;
+                    nameStream << type_name(name);
 
-				ScopedClass<1> scopedClass(header, nameStream.str().c_str(), "Poco::RefCountedObject");
-				{
-					{
-						ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, "Record");
-						for (auto& fieldVar : *fields)
-						{
-							JSON::Object::Ptr field = fieldVar.extract<JSON::Object::Ptr>();
-							string fieldName = field->getValue<std::string>("name");
-							string description = field->getValue<std::string>("description");
-							string type = field->getValue<std::string>("type");
-							header << "// " << description << endl;
-							header << getCppType(type) << tabs(1) << var_name(fieldName) << cendl;
-							header << endl;
-							header << "bool isSet" << type_name(fieldName) << "() ";
-							{
-								ScopedStream<ApiFileOutputStream> isSetScope(header);
-								header << "return (" << var_name(fieldName) << " != " << getCppDefaultVal(type) << ")" << cendl;
-							}
-							header << endl;
-						}
+                    JSON::Array::Ptr fields = table->getArray("fields");
 
-						header << "Record()" << endl;
-						bool first = true;
-						for (auto& fieldVar : *fields)
-						{
-							JSON::Object::Ptr field = fieldVar.extract<JSON::Object::Ptr>();
-							string fieldName = field->getValue<std::string>("name");
-							string type = field->getValue<std::string>("type");
-							if (first)
-							{
-								header << ": ";
-							}
-							else
-							{
-								header << ", ";
-							}
-							header << var_name(fieldName) << "(" << getCppDefaultVal(type) << ")" << endl;
-							first = false;
-						}
-						{
-							ScopedStream<ApiFileOutputStream> recordScope(header);
-						}
-					}
-					header << endl;
-					{
-						ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, "RecordWithId");
-						for (auto& fieldVar : *fields)
-						{
-							JSON::Object::Ptr field = fieldVar.extract<JSON::Object::Ptr>();
-							string fieldName = field->getValue<std::string>("name");
-							string description = field->getValue<std::string>("description");
-							string type = field->getValue<std::string>("type");
-							header << "// " << description << endl;
-							header << getCppType(type) << tabs(1) << var_name(fieldName) << cendl;
-							header << endl;
-							header << "bool isSet" << type_name(fieldName) << "() ";
-							{
-								ScopedStream<ApiFileOutputStream> isSetScope(header);
-								header << "return (" << var_name(fieldName) << " != " << getCppDefaultVal(type) << ")" << cendl;
-							}
-							header << endl;
-						}
+                    ScopedClass<1> scopedClass(header, nameStream.str().c_str(), "Poco::RefCountedObject");
+                    {
+                        {
+                            ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, "Record");
+                            for (auto& fieldVar : *fields)
+                            {
+                                JSON::Object::Ptr field = fieldVar.extract<JSON::Object::Ptr>();
+                                string fieldName = field->getValue<std::string>("name");
+                                string description = field->getValue<std::string>("description");
+                                string type = field->getValue<std::string>("type");
+                                header << "// " << description << endl;
+                                header << getCppType(type) << tabs(1) << var_name(fieldName) << cendl;
+                                header << endl;
+                                header << "bool isSet" << type_name(fieldName) << "() ";
+                                {
+                                    ScopedStream<ApiFileOutputStream> isSetScope(header);
+                                    header << "return (" << var_name(fieldName) << " != " << getCppDefaultVal(type) << ")" << cendl;
+                                }
+                                header << endl;
+                            }
 
-						header << "//Record ID in database" << endl;
-						header << getCppType("INTEGER") << tabs(1) << "id" << cendl;
-						header << endl;
+                            header << "Record()" << endl;
+                            bool first = true;
+                            for (auto& fieldVar : *fields)
+                            {
+                                JSON::Object::Ptr field = fieldVar.extract<JSON::Object::Ptr>();
+                                string fieldName = field->getValue<std::string>("name");
+                                string type = field->getValue<std::string>("type");
+                                if (first)
+                                {
+                                    header << ": ";
+                                }
+                                else
+                                {
+                                    header << ", ";
+                                }
+                                header << var_name(fieldName) << "(" << getCppDefaultVal(type) << ")" << endl;
+                                first = false;
+                            }
+                            {
+                                ScopedStream<ApiFileOutputStream> recordScope(header);
+                            }
+                        }
+                        header << endl;
+                        {
+                            ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, "RecordWithId");
+                            for (auto& fieldVar : *fields)
+                            {
+                                JSON::Object::Ptr field = fieldVar.extract<JSON::Object::Ptr>();
+                                string fieldName = field->getValue<std::string>("name");
+                                string description = field->getValue<std::string>("description");
+                                string type = field->getValue<std::string>("type");
+                                header << "// " << description << endl;
+                                header << getCppType(type) << tabs(1) << var_name(fieldName) << cendl;
+                                header << endl;
+                                header << "bool isSet" << type_name(fieldName) << "() ";
+                                {
+                                    ScopedStream<ApiFileOutputStream> isSetScope(header);
+                                    header << "return (" << var_name(fieldName) << " != " << getCppDefaultVal(type) << ")" << cendl;
+                                }
+                                header << endl;
+                            }
 
-						header << "RecordWithId()" << endl;
-						bool first = true;
-						for (auto& fieldVar : *fields)
-						{
-							JSON::Object::Ptr field = fieldVar.extract<JSON::Object::Ptr>();
-							string fieldName = field->getValue<std::string>("name");
-							string type = field->getValue<std::string>("type");
-							if (first)
-							{
-								header << ": ";
-							}
-							else
-							{
-								header << ", ";
-							}
-							header << var_name(fieldName) << "(" << getCppDefaultVal(type) << ")" << endl;
-							first = false;
-						}
-						header << (first ? ": " : ", ");
-						header << "id(" << getCppDefaultVal("INTEGER") << ")" << endl;
-						{
-							ScopedStream<ApiFileOutputStream> recordScope(header);
-						}
-					}
-					header << endl;
-					construct_header(header, nameStream.str().c_str(), 4,
-						"Poco::Data::Session*", "_db",
-						"std::string", "_suffix = \"\""
-						);
-					header << "void init()" << cendl;
-					header << endl;
-					header << "void clear()" << cendl;
-					header << endl;
-					header << "void insert(" << nameStream.str() << "::Record& record)" << cendl;
-					header << endl;
-					header << "void insertOnce(" << nameStream.str() << "::Record& record)" << cendl;
-					header << endl;
-					header << "void insertMultiple(std::vector<" << nameStream.str() << "::Record>& records)" << cendl;
-					header << endl;
-					header << "void insertMultiple(std::vector<" << nameStream.str() << "::RecordWithId>& records)" << cendl;
-					header << endl;
-					header << "void insertMultipleUnique(std::vector<" << nameStream.str() << "::Record>& records)" << cendl;
-					header << endl;
-					header << "void deleteMultiple(std::vector<" << nameStream.str() << "::RecordWithId>& records)" << cendl;
-					header << endl;
-					header << "void insertAndDeleteUnchanged(" << nameStream.str() << "::Record& record)" << cendl;
-					header << endl;
-					header << "void insertUnique(" << nameStream.str() << "::Record& record)" << cendl;
-					header << endl;
-					header << "void getLatest("<< nameStream.str() << "::RecordWithId& rec)" << cendl;
-					header << endl;
-					header << "std::size_t getAll(std::vector<" << nameStream.str() << "::RecordWithId>& records, std::string condition)" << cendl;
-					header << endl;
-					header << "Poco::Data::Session* db" << cendl;
-					header << endl;
-					header << "std::string tableName" << cendl;
-					header << endl;
-				}
-			}
+                            header << "//Record ID in database" << endl;
+                            header << getCppType("INTEGER") << tabs(1) << "id" << cendl;
+                            header << endl;
 
-			{
-				ScopedClass<1> scopedClass(header, config.apiName.c_str(), "Poco::RefCountedObject");
-				construct_header(header, config.apiName.c_str(), 2,
-					"Poco::Data::Session*", "_db"
-				);
-				header << "void init()" << cendl;
-				header << endl;
-				header << "void clear()" << cendl;
-				header << endl;
-				header << "Poco::Data::Session* db" << cendl;
-				header << endl;
-				for (auto& tableVar : *tables)
-				{
-					JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
-					string name = table->getValue<std::string>("name");
-					header << "Poco::AutoPtr<" << type_name(name) << "> " << var_name(name) << "Table" << cendl;
-					header << endl;
-				}
-			}
+                            header << "RecordWithId()" << endl;
+                            bool first = true;
+                            for (auto& fieldVar : *fields)
+                            {
+                                JSON::Object::Ptr field = fieldVar.extract<JSON::Object::Ptr>();
+                                string fieldName = field->getValue<std::string>("name");
+                                string type = field->getValue<std::string>("type");
+                                if (first)
+                                {
+                                    header << ": ";
+                                }
+                                else
+                                {
+                                    header << ", ";
+                                }
+                                header << var_name(fieldName) << "(" << getCppDefaultVal(type) << ")" << endl;
+                                first = false;
+                            }
+                            header << (first ? ": " : ", ");
+                            header << "id(" << getCppDefaultVal("INTEGER") << ")" << endl;
+                            {
+                                ScopedStream<ApiFileOutputStream> recordScope(header);
+                            }
+                        }
+                        header << endl;
+                        construct_header(header, nameStream.str().c_str(), 4,
+                            "Poco::Data::Session*", "_db",
+                            "std::string", "_suffix = \"\""
+                        );
+                        header << "void init()" << cendl;
+                        header << endl;
+                        header << "void clear()" << cendl;
+                        header << endl;
+                        header << "void insert(" << nameStream.str() << "::Record& record)" << cendl;
+                        header << endl;
+                        header << "void insertOnce(" << nameStream.str() << "::Record& record)" << cendl;
+                        header << endl;
+                        header << "void insertMultiple(std::vector<" << nameStream.str() << "::Record>& records)" << cendl;
+                        header << endl;
+                        header << "void insertMultiple(std::vector<" << nameStream.str() << "::RecordWithId>& records)" << cendl;
+                        header << endl;
+                        header << "void insertMultipleUnique(std::vector<" << nameStream.str() << "::Record>& records)" << cendl;
+                        header << endl;
+                        header << "void deleteMultiple(std::vector<" << nameStream.str() << "::RecordWithId>& records)" << cendl;
+                        header << endl;
+                        header << "void insertAndDeleteUnchanged(" << nameStream.str() << "::Record& record)" << cendl;
+                        header << endl;
+                        header << "void insertUnique(" << nameStream.str() << "::Record& record)" << cendl;
+                        header << endl;
+                        header << "void getLatest(" << nameStream.str() << "::RecordWithId& rec)" << cendl;
+                        header << endl;
+                        header << "std::size_t getAll(std::vector<" << nameStream.str() << "::RecordWithId>& records, std::string condition)" << cendl;
+                        header << endl;
+                        header << "Poco::Data::Session* db" << cendl;
+                        header << endl;
+                        header << "std::string tableName" << cendl;
+                        header << endl;
+                    }
+                }
+
+                {
+                    ScopedClass<1> scopedClass(header, "Tables", "Poco::RefCountedObject");
+                    construct_header(header, "Tables", 2,
+                        "Poco::Data::Session*", "_db"
+                    );
+                    header << "void init()" << cendl;
+                    header << endl;
+                    header << "void clear()" << cendl;
+                    header << endl;
+                    header << "Poco::Data::Session* db" << cendl;
+                    header << endl;
+                    for (auto& tableVar : *tables)
+                    {
+                        JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
+                        string name = table->getValue<std::string>("name");
+                        header << "Poco::AutoPtr<" << type_name(name) << "> " << var_name(name) << "Table" << cendl;
+                        header << endl;
+                    }
+                }
+            }
 		}
 		header << endl;
 
@@ -256,7 +260,7 @@ namespace trader {
 				JSON::Array::Ptr fields = table->getArray("fields");
 
 				header << "template <>" << endl;
-				header << "class Poco::Data::TypeHandler<" << config.nameSpace << "::" << nameStream.str().c_str() << "::Record>" << endl;
+				header << "class Poco::Data::TypeHandler<" << config.nameSpace << "::" << config.apiName << "::" << nameStream.str().c_str() << "::Record>" << endl;
 				{
 					ScopedStream<ApiFileOutputStream> typeHandlerScope(header);
 					header << "public:" << endl;
@@ -266,7 +270,7 @@ namespace trader {
 						header << "return " << (Poco::Int32)fields->size() << cendl;
 					}
 					header << endl;
-					header << "static void bind(std::size_t pos, const " << config.nameSpace << "::" << type_name(nameStream.str()) << "::Record& record, Poco::Data::AbstractBinder::Ptr pBinder, Poco::Data::AbstractBinder::Direction dir)" << endl;
+					header << "static void bind(std::size_t pos, const " << config.nameSpace << "::" << config.apiName << "::" << type_name(nameStream.str()) << "::Record& record, Poco::Data::AbstractBinder::Ptr pBinder, Poco::Data::AbstractBinder::Direction dir)" << endl;
 					{
 						ScopedStream<ApiFileOutputStream> bindScope(header);
 						for (auto& fieldVar : *fields)
@@ -278,7 +282,7 @@ namespace trader {
 						}
 					}
 					header << endl;
-					header << "static void extract(std::size_t pos, " << config.nameSpace << "::" << type_name(nameStream.str()) << "::Record& record, " << config.nameSpace << "::" << type_name(nameStream.str()) << "::Record& deflt, Poco::Data::AbstractExtractor::Ptr pExtr)" << endl;
+					header << "static void extract(std::size_t pos, " << config.nameSpace << "::" << config.apiName << "::" << type_name(nameStream.str()) << "::Record& record, " << config.nameSpace << "::" << config.apiName << "::" << type_name(nameStream.str()) << "::Record& deflt, Poco::Data::AbstractExtractor::Ptr pExtr)" << endl;
 					{
 						ScopedStream<ApiFileOutputStream> extractScope(header);
 						for (auto& fieldVar : *fields)
@@ -290,7 +294,7 @@ namespace trader {
 						}
 					}
 					header << endl;
-					header << "static void prepare(std::size_t pos, " << config.nameSpace << "::" << type_name(nameStream.str()) << "::Record& record, Poco::Data::AbstractPreparator::Ptr pPrep)" << endl;
+					header << "static void prepare(std::size_t pos, " << config.nameSpace << "::" << config.apiName << "::" << type_name(nameStream.str()) << "::Record& record, Poco::Data::AbstractPreparator::Ptr pPrep)" << endl;
 					{
 						ScopedStream<ApiFileOutputStream> extractScope(header);
 						for (auto& fieldVar : *fields)
@@ -306,7 +310,7 @@ namespace trader {
 				header << endl;
 
 				header << "template <>" << endl;
-				header << "class Poco::Data::TypeHandler<" << config.nameSpace << "::" << nameStream.str().c_str() << "::RecordWithId>" << endl;
+				header << "class Poco::Data::TypeHandler<" << config.nameSpace << "::" << config.apiName << "::" << nameStream.str().c_str() << "::RecordWithId>" << endl;
 				{
 					ScopedStream<ApiFileOutputStream> typeHandlerScope(header);
 					header << "public:" << endl;
@@ -316,7 +320,7 @@ namespace trader {
 						header << "return " << (Poco::Int32)fields->size() + 1 << cendl;
 					}
 					header << endl;
-					header << "static void bind(std::size_t pos, const " << config.nameSpace << "::" << type_name(nameStream.str()) << "::RecordWithId& record, Poco::Data::AbstractBinder::Ptr pBinder, Poco::Data::AbstractBinder::Direction dir)" << endl;
+					header << "static void bind(std::size_t pos, const " << config.nameSpace << "::" << config.apiName << "::" << type_name(nameStream.str()) << "::RecordWithId& record, Poco::Data::AbstractBinder::Ptr pBinder, Poco::Data::AbstractBinder::Direction dir)" << endl;
 					{
 						ScopedStream<ApiFileOutputStream> bindScope(header);
 						for (auto& fieldVar : *fields)
@@ -329,7 +333,7 @@ namespace trader {
 						header << "Poco::Data::TypeHandler<" << getCppType("INTEGER") << ">::bind(pos++, record.id, pBinder, dir)" << cendl;
 					}
 					header << endl;
-					header << "static void extract(std::size_t pos, " << config.nameSpace << "::" << type_name(nameStream.str()) << "::RecordWithId& record, " << config.nameSpace << "::" << type_name(nameStream.str()) << "::RecordWithId& deflt, Poco::Data::AbstractExtractor::Ptr pExtr)" << endl;
+					header << "static void extract(std::size_t pos, " << config.nameSpace << "::" << config.apiName << "::" << type_name(nameStream.str()) << "::RecordWithId& record, " << config.nameSpace << "::" << config.apiName << "::" << type_name(nameStream.str()) << "::RecordWithId& deflt, Poco::Data::AbstractExtractor::Ptr pExtr)" << endl;
 					{
 						ScopedStream<ApiFileOutputStream> extractScope(header);
 						for (auto& fieldVar : *fields)
@@ -342,7 +346,7 @@ namespace trader {
 						header << "Poco::Data::TypeHandler<" << getCppType("INTEGER") << ">::extract(pos++, record.id, deflt.id, pExtr)" << cendl;
 					}
 					header << endl;
-					header << "static void prepare(std::size_t pos, " << config.nameSpace << "::" << type_name(nameStream.str()) << "::RecordWithId& record, Poco::Data::AbstractPreparator::Ptr pPrep)" << endl;
+					header << "static void prepare(std::size_t pos, " << config.nameSpace << "::" << config.apiName << "::" << type_name(nameStream.str()) << "::RecordWithId& record, Poco::Data::AbstractPreparator::Ptr pPrep)" << endl;
 					{
 						ScopedStream<ApiFileOutputStream> extractScope(header);
 						for (auto& fieldVar : *fields)
@@ -364,80 +368,83 @@ namespace trader {
 			config.headerFileName.c_str(),
 			"trader/helper.h"
 		);
-		{
-			ScopedNamespace scopedNamesapce(cpp, config.nameSpace);
-			cpp << "using namespace Poco::Data::Keywords" << cendl;
-			cpp << endl;
+        {
+            ScopedNamespace scopedNamespace(cpp, config.nameSpace);
+            cpp << "using namespace Poco::Data::Keywords" << cendl;
+            cpp << endl;
+            {
+                ScopedNamespace scopedDb(cpp, config.apiName);
 
-			construct_ex(cpp, config.apiName.c_str(), 2, 2, 0,
-				"Poco::Data::Session*", "_db",
-				"db", "_db");
+                construct_ex(cpp, "Tables", 2, 2, 0,
+                    "Poco::Data::Session*", "_db",
+                    "db", "_db");
 
-			cpp << "void " << config.apiName << "::init()" << endl;
-			{
-				ScopedStream<ApiFileOutputStream> initStream(cpp);
-				for (auto& tableVar : *tables)
-				{
-					JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
-					string name = table->getValue<std::string>("name");
-					cpp << var_name(name) << "Table = new " << type_name(name) << "(db)" << cendl;
-					cpp << var_name(name) << "Table->init()" << cendl;
-					cpp << endl;
-				}
-			}
-			cpp << endl;
+                cpp << "void Tables::init()" << endl;
+                {
+                    ScopedStream<ApiFileOutputStream> initStream(cpp);
+                    for (auto& tableVar : *tables)
+                    {
+                        JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
+                        string name = table->getValue<std::string>("name");
+                        cpp << var_name(name) << "Table = new " << type_name(name) << "(db)" << cendl;
+                        cpp << var_name(name) << "Table->init()" << cendl;
+                        cpp << endl;
+                    }
+                }
+                cpp << endl;
 
-			cpp << "void " << config.apiName << "::clear()" << endl;
-			{
-				ScopedStream<ApiFileOutputStream> initStream(cpp);
-				for (auto& tableVar : *tables)
-				{
-					JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
-					string name = table->getValue<std::string>("name");
-					cpp << var_name(name) << "Table->clear()" << cendl;
-					cpp << endl;
-				}
-			}
-			cpp << endl;
+                cpp << "void Tables::clear()" << endl;
+                {
+                    ScopedStream<ApiFileOutputStream> initStream(cpp);
+                    for (auto& tableVar : *tables)
+                    {
+                        JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
+                        string name = table->getValue<std::string>("name");
+                        cpp << var_name(name) << "Table->clear()" << cendl;
+                        cpp << endl;
+                    }
+                }
+                cpp << endl;
 
 
-			for (auto& tableVar : *tables)
-			{
-				JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
-				string name = table->getValue<std::string>("name");
-				std::ostringstream tableNameStr;
-				tableNameStr << "tableNameStr << \"" << apiName << "_" << name << "\";";
+                for (auto& tableVar : *tables)
+                {
+                    JSON::Object::Ptr table = tableVar.extract<JSON::Object::Ptr>();
+                    string name = table->getValue<std::string>("name");
+                    std::ostringstream tableNameStr;
+                    tableNameStr << "tableNameStr << \"" << apiName << "_" << name << "\";";
 
-				ostringstream nameStream;
-				nameStream << type_name(name);
-				
-				JSON::Array::Ptr fields = table->getArray("fields");
+                    ostringstream nameStream;
+                    nameStream << type_name(name);
 
-				construct_ex(cpp, nameStream.str(), 4, 2, 4,
-					"Poco::Data::Session*", "_db",
-					"std::string", "_suffix",
-					"db", "_db",
-					"std::ostringstream tableNameStr;",
-					tableNameStr.str().c_str(),
-					"if (_suffix.length()) tableNameStr << \"_\" << _suffix;",
-					"tableName = tableNameStr.str();"
-				);
+                    JSON::Array::Ptr fields = table->getArray("fields");
 
-				ostringstream keyStream;
-				generateInit(cpp, nameStream, apiName, keyStream, table, fields, name);
-				generateClear(cpp, nameStream, apiName, keyStream, table, fields, name);
-				generateInsert(cpp, nameStream, apiName, keyStream, table, fields);
-				generateInsertMultiple(cpp, nameStream, apiName, keyStream, table, fields);
-				generateDeleteMultiple(cpp, nameStream, apiName, keyStream, table, fields);
-				generateGetLatest(cpp, nameStream, apiName, keyStream, table, fields);
-				generateGetAll(cpp, nameStream, apiName, keyStream, table, fields);
-				generateInsertOnce(cpp, nameStream, apiName, keyStream, table, fields);
-				generateInsertUnique(cpp, nameStream, apiName, keyStream, table, fields);
-				generateInsertUniqueMultiple(cpp, nameStream, apiName, keyStream, table, fields);
-				generateInsertAndDeleteUnchanged(cpp, nameStream, apiName, keyStream, table, fields);
-				cpp << endl;
-			}
-		}
+                    construct_ex(cpp, nameStream.str(), 4, 2, 4,
+                        "Poco::Data::Session*", "_db",
+                        "std::string", "_suffix",
+                        "db", "_db",
+                        "std::ostringstream tableNameStr;",
+                        tableNameStr.str().c_str(),
+                        "if (_suffix.length()) tableNameStr << \"_\" << _suffix;",
+                        "tableName = tableNameStr.str();"
+                    );
+
+                    ostringstream keyStream;
+                    generateInit(cpp, nameStream, apiName, keyStream, table, fields, name);
+                    generateClear(cpp, nameStream, apiName, keyStream, table, fields, name);
+                    generateInsert(cpp, nameStream, apiName, keyStream, table, fields);
+                    generateInsertMultiple(cpp, nameStream, apiName, keyStream, table, fields);
+                    generateDeleteMultiple(cpp, nameStream, apiName, keyStream, table, fields);
+                    generateGetLatest(cpp, nameStream, apiName, keyStream, table, fields);
+                    generateGetAll(cpp, nameStream, apiName, keyStream, table, fields);
+                    generateInsertOnce(cpp, nameStream, apiName, keyStream, table, fields);
+                    generateInsertUnique(cpp, nameStream, apiName, keyStream, table, fields);
+                    generateInsertUniqueMultiple(cpp, nameStream, apiName, keyStream, table, fields);
+                    generateInsertAndDeleteUnchanged(cpp, nameStream, apiName, keyStream, table, fields);
+                    cpp << endl;
+                }
+            }
+        }
 	}
 
 	void DatabaseSchema::generateInit(ApiFileOutputStream& cpp, ostringstream& nameStream, string& apiName, ostringstream& keyStream, JSON::Object::Ptr table, JSON::Array::Ptr fields, string& name)
