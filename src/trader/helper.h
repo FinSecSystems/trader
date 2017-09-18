@@ -35,4 +35,30 @@ namespace trader {
 		return result;
 	}
 
+    class FormattedTime
+    {
+    public:
+        FormattedTime(const char* _format)
+            : format(_format)
+            , time(std::numeric_limits<time_t>::max())
+        {}
+
+        void operator = (const std::string& str) {
+            std::tm t = {};
+            std::istringstream ss(str);
+            ss >> std::get_time(&t, format.c_str());
+            if (!ss.fail()) {
+                time = mktime(&t);
+            }
+        }
+
+        void operator = (const FormattedTime& ft) {
+            time = ft.time;
+            format = ft.format;
+        }
+
+        std::time_t time;
+        std::string format;
+    };
+
 }

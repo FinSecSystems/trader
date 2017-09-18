@@ -92,17 +92,19 @@ namespace trader {
 
 		if (config.useConfig)
 		{
-			startHeader(header, 3,
+			startHeader(header, 4,
 				"trader/app.h",
 				"trader/api.h",
-				configHeaderName.str().c_str()
+				configHeaderName.str().c_str(),
+                "trader/helper.h"
 			);
 		}
 		else
 		{
-			startHeader(header, 2,
+			startHeader(header, 3,
 				"trader/app.h",
-				"trader/api.h"
+				"trader/api.h",
+                "trader/helper.h"
 			);
 		}
 		{

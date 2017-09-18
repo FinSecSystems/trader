@@ -716,7 +716,7 @@ namespace trader {
 					}
 					cpp << cendl;
 					cpp << "insert.execute()" << cendl;
-				}
+                }
 			}
 			else
 			{

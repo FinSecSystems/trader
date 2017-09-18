@@ -28,3 +28,6 @@
 [submodule "deps/optmarket-bittrex"]
 	path = deps/optmarket-bittrex
 	url = https://github.com/vncoelho/optmarket-bittrex
+[submodule "deps/cef"]
+	path = deps/cef
+	url = https://bitbucket.org/chromiumembedded/cef.git

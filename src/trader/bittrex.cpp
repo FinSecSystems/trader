@@ -29,8 +29,26 @@ namespace trader {
         }
         for (auto& market : marketToTradeHistoryMap)
         {
-            
-            AutoPtr<BittrexApi::History> history = api.GetMarketHistory();
+            Poco::AutoPtr<HistoryParams> historyParams = new HistoryParams();
+            historyParams->dataObject.SetMarket(market.first);
+            AutoPtr<History> history = api.GetMarketHistory(historyParams);
+            Trade_History& table = *market.second;
+
+            std::vector<Trade_History::Record> records;
+            for (auto& result : history->dataObject.result )
+            {
+                History::DataObject::ResultArray& trade = result;
+                Trade_History::Record rec;
+                rec.tradeId = trade.id;
+                rec.orderType = trade.orderType;
+                rec.price = trade.price;
+                rec.total = trade.total;
+                rec.volume = trade.quantity;
+                rec.fillType = trade.filltype;
+                rec.timeStamp = (Int32)trade.timeStamp.time;
+                records.push_back(rec);
+            }
+            table.insertMultipleUnique(records);
         }
     }
 

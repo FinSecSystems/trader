@@ -69,6 +69,10 @@ namespace trader {
 				{
 					return "char";
 				}
+                else if (format.compare("time") == 0)
+                {
+                    return "FormattedTime";
+                }
 			}
 			return "std::string";
 		}
@@ -79,7 +83,41 @@ namespace trader {
 		return nullptr;
 	}
 
-	const char* getCppDefaultVal (const string& jsonType, JSON::Object::Ptr obj)
+    const char* getJsonLibType(const string& jsonType, JSON::Object::Ptr obj)
+    {
+        if (jsonType.compare("string") == 0)
+        {
+            Poco::Dynamic::Var formatVar = obj->get("format");
+            if (!formatVar.isEmpty())
+            {
+                string format = formatVar.convert<string>();
+                if (format.compare("time") == 0)
+                {
+                    return "std::string";
+                }
+            }
+        }
+        return getCppType(jsonType, obj);
+    }
+
+    bool useIsSet(const string& jsonType, JSON::Object::Ptr obj)
+    {
+        if (jsonType.compare("string") == 0)
+        {
+            Poco::Dynamic::Var formatVar = obj->get("format");
+            if (!formatVar.isEmpty())
+            {
+                string format = formatVar.convert<string>();
+                if (format.compare("time") == 0)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+	std::string getCppDefaultVal (const string& jsonType, JSON::Object::Ptr obj)
 	{
 		if (jsonType.compare("number") == 0)
 		{
@@ -112,6 +150,17 @@ namespace trader {
 				{
 					return "std::numeric_limits<char>::max()";
 				}
+                else if (format.compare("time") == 0)
+                {
+                    Poco::Dynamic::Var patternVar = obj->get("pattern");
+                    if (!patternVar.isEmpty())
+                    {
+                        string pattern = patternVar.convert<string>();
+                        ostringstream stream;
+                        stream << "\"" << pattern << "\"";
+                        return stream.str().c_str();
+                    }
+                }
 			}
 			return "\"Empty\"";
 		}
@@ -299,18 +348,18 @@ namespace trader {
 						if (expansionStream.wasPrevious(expansionstringstream::ARRAY) || expansionStream.wasPrevious(expansionstringstream::MAP))
 						{
 							CODEGEN_DEBUG(stream << comment("Case Var 1"));
-							stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+							stream << expansionStream.var_name_str() << " = " << temp_name(idx) << ".convert<" << getJsonLibType(type, obj) << ">()" << cendl;
 						}
 						else
 						{
 							CODEGEN_DEBUG(stream << comment("Case Var 2"));
-							stream << expansionStream.var_name_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+							stream << expansionStream.var_name_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getJsonLibType(type, obj) << ">()" << cendl;
 						}
 					}
 					else
 					{
 						CODEGEN_DEBUG(stream << comment("Case Var 3"));
-						stream << expansionStream.prefix_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getCppType(type, obj) << ">()" << cendl;
+						stream << expansionStream.prefix_str() << "." << var_name(keyName) << " = " << temp_name(idx) << ".convert<" << getJsonLibType(type, obj) << ">()" << cendl;
 					}
 				}
 				expansionstringstream newExpansionStream(expansionStream);
@@ -471,7 +520,7 @@ namespace trader {
 					{
 						ScopedStream<ApiFileOutputStream> scopedStream(stream);
 						Poco::Dynamic::Var patternVar = obj->get("pattern");
-						if (!patternVar.isEmpty())
+						if (!patternVar.isEmpty() && useIsSet(type, obj))
 						{
 							string pattern = patternVar.convert<string>();
 							trader::replace(pattern, "\\", "\\\\");
@@ -501,12 +550,15 @@ namespace trader {
 						}
 					}
 					stream << endl;
-					stream << "bool isSet" << type_name(keyName) << "() ";
-					{
-						ScopedStream<ApiFileOutputStream> isSetScope(stream);
-						stream << "return (" << var_name(keyName) << " != " << getCppDefaultVal(type, obj) << ")" << cendl;
-					}
-					stream << endl;
+                    if (useIsSet(type, obj))
+                    {
+                        stream << "bool isSet" << type_name(keyName) << "() ";
+                        {
+                            ScopedStream<ApiFileOutputStream> isSetScope(stream);
+                            stream << "return (" << var_name(keyName) << " != " << getCppDefaultVal(type, obj) << ")" << cendl;
+                        }
+                        stream << endl;
+                    }
 					stream << getCppType(type, obj) << tabs(1) << var_name(keyName) << cendl;
 				}
 				stream << endl;

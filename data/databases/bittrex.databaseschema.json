@@ -82,7 +82,7 @@
       "foreignKeys": [ ]
     },
     {
-      "name": "Markets",
+      "name": "Market_List",
       "fields": [
         {
           "name": "Created",
