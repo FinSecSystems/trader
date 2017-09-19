@@ -17,27 +17,133 @@ namespace trader {
 
     void Bittrex::run()
     {
+        //Get Markets and create tables
         AutoPtr<Markets> balance = api.GetMarkets();
         for (auto& market : balance->dataObject.result)
         {
             if (market.isActive && market.isSetMarketName())
             {
-                Poco::AutoPtr<Trade_History> tradeHistoryTable = new Trade_History(dataBase->db, market.marketName);
-                marketToTradeHistoryMap.insert({ market.marketName,tradeHistoryTable });
-                tradeHistoryTable->init();
+                //Add market if it does not already exist
+                std::unordered_map<std::string, MarketData>::const_iterator marketExists = marketToTradeHistoryMap.find(market.marketName);
+                if (marketExists == marketToTradeHistoryMap.end())
+                {
+                    Poco::AutoPtr<Trade_History> tradeHistoryTable = new Trade_History(dataBase->db, market.marketName);
+                    MarketData marketData;
+                    marketData.storage = tradeHistoryTable;
+                    marketToTradeHistoryMap.insert({ market.marketName, marketData });
+                    tradeHistoryTable->init();
+                }
             }
         }
+
+        //Populate Trade History
         for (auto& market : marketToTradeHistoryMap)
         {
+            //Retrieve Trade History through REST API Call
+            const std::string& marketName = market.first;
             Poco::AutoPtr<HistoryParams> historyParams = new HistoryParams();
-            historyParams->dataObject.SetMarket(market.first);
+            historyParams->dataObject.SetMarket(marketName);
             AutoPtr<History> history = api.GetMarketHistory(historyParams);
-            Trade_History& table = *market.second;
+            
+            //Save to in-memory cache
+            MarketData& marketData = market.second;
+            Int32& lastCachedId = marketData.lastCachedId;
+            for (History::DataObject::Result::reverse_iterator rit = history->dataObject.result.rbegin(); rit != history->dataObject.result.rend(); ++rit)
+            {
+                History::DataObject::ResultArray& trade = *rit;
+                if (trade.id <= lastCachedId)
+                {
+                    break;
+                }
+                marketData.cache.insert({ trade.id, trade });
+                lastCachedId = trade.id;
+            }
+
+            //Check pump
+
+            static double ANALYSIS_INTERVAL_SECS = 30.0 * 60.0; // 30 minutes
+            static double BUY_SELL_RATIO = 2.0; //2:1
+            static double VOLUME_INCREASE = 1.0; //100%
+            static double PRICE_INCREASE = 0.1; //10%
+
+            time_t lastTimeStamp = 0;
+            double totalVolumeRecent = 0;
+            double totalVolumePrevious = 0;
+            double latestPrice = 0;
+            double oldestPrice = 0;
+            Int32 numBuys = 0;
+            Int32 numSells = 0;
+            for (auto& order : marketData.cache)
+            {
+                BittrexApi::History::DataObject::ResultArray& trade = order.second;
+                if (!lastTimeStamp)
+                {
+                    lastTimeStamp = trade.timeStamp.time;
+                }
+                if (std::difftime(trade.timeStamp.time, lastTimeStamp) > ANALYSIS_INTERVAL_SECS)
+                {
+                    break;
+                }
+                if (!latestPrice)
+                {
+                    latestPrice = trade.price;
+                }
+                oldestPrice = trade.price;
+                if (std::difftime(trade.timeStamp.time, lastTimeStamp) < ANALYSIS_INTERVAL_SECS/2)
+                {
+                    totalVolumeRecent += trade.quantity;
+                }
+                else
+                {
+                    totalVolumePrevious += trade.quantity;
+                }
+                if (trade.orderType.compare("SELL") == 0)
+                {
+                    numSells++;
+                }
+                if (trade.orderType.compare("BUY") == 0)
+                {
+                    numBuys++;
+                }
+            }
+
+            double buySellRatio = numBuys / numSells ;
+            if (buySellRatio >= BUY_SELL_RATIO)
+            {
+                printf("%s: Buy sell ratio %f\n", marketName.c_str(), buySellRatio);
+            }
+
+            double volumeIncrease = (totalVolumeRecent - totalVolumePrevious) / totalVolumePrevious;
+            if (volumeIncrease > VOLUME_INCREASE)
+            {
+                printf("%s: Volume Increase %2.2f\n", marketName.c_str(), volumeIncrease*100.0);
+            }
+
+            double priceIncrease = (latestPrice - oldestPrice) / oldestPrice;
+            if (priceIncrease > PRICE_INCREASE)
+            {
+                printf("%s: Price Increase %2.2f\n", marketName.c_str(), priceIncrease*100.0);
+            }
+
+            //Save to storage
+            Trade_History& table = *marketData.storage;
+            Trade_History::RecordWithId latestRec;
+            table.getLatest(latestRec);
+
+            Int32 latestStoredTradeId = 0;
+            if (latestRec.isSetTradeId())
+            {
+                latestStoredTradeId = latestRec.tradeId;
+            }
 
             std::vector<Trade_History::Record> records;
-            for (auto& result : history->dataObject.result )
+            for (History::DataObject::Result::reverse_iterator rit = history->dataObject.result.rbegin(); rit != history->dataObject.result.rend(); ++rit)
             {
-                History::DataObject::ResultArray& trade = result;
+                History::DataObject::ResultArray& trade = *rit;
+                if (trade.id <= latestStoredTradeId)
+                {
+                    break;
+                }
                 Trade_History::Record rec;
                 rec.tradeId = trade.id;
                 rec.orderType = trade.orderType;
@@ -48,7 +154,10 @@ namespace trader {
                 rec.timeStamp = (Int32)trade.timeStamp.time;
                 records.push_back(rec);
             }
-            table.insertMultipleUnique(records);
+            if (!records.empty())
+            {
+                table.insertMultipleUnique(records);
+            }
         }
     }
 

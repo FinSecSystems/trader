@@ -24,7 +24,17 @@ namespace trader {
 
         Poco::AutoPtr<BittrexDatabase::Tables> dataBase;
 
-        std::unordered_map<std::string, Poco::AutoPtr<BittrexDatabase::Trade_History>> marketToTradeHistoryMap;
+        struct MarketData
+        {
+            MarketData()
+                : lastCachedId(0)
+            {}
+            Poco::AutoPtr<BittrexDatabase::Trade_History> storage;
+            std::map<Poco::Int32, BittrexApi::History::DataObject::ResultArray> cache;
+            Poco::Int32 lastCachedId;
+        };
+
+        std::unordered_map<std::string, MarketData> marketToTradeHistoryMap;
     protected:
         Bittrex(const Bittrex&);
         Bittrex& operator = (const Bittrex&);
