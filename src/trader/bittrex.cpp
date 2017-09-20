@@ -17,6 +17,7 @@ namespace trader {
 
     void Bittrex::run()
     {
+        static bool useStorage = false;
         //Get Markets and create tables
         AutoPtr<Markets> balance = api.GetMarkets();
         for (auto& market : balance->dataObject.result)
@@ -31,10 +32,15 @@ namespace trader {
                     MarketData marketData;
                     marketData.storage = tradeHistoryTable;
                     marketToTradeHistoryMap.insert({ market.marketName, marketData });
-                    tradeHistoryTable->init();
+                    if (useStorage)
+                    {
+                        tradeHistoryTable->init();
+                    }
                 }
             }
         }
+
+
 
         //Populate Trade History
         for (auto& market : marketToTradeHistoryMap)
@@ -67,12 +73,14 @@ namespace trader {
             static double PRICE_INCREASE = 0.1; //10%
 
             time_t lastTimeStamp = 0;
+            time_t oldestTimeStamp = 0;
             double totalVolumeRecent = 0;
             double totalVolumePrevious = 0;
             double latestPrice = 0;
             double oldestPrice = 0;
             Int32 numBuys = 0;
             Int32 numSells = 0;
+            Int32 numEntries = 0;
             for (auto& order : marketData.cache)
             {
                 BittrexApi::History::DataObject::ResultArray& trade = order.second;
@@ -105,16 +113,25 @@ namespace trader {
                 {
                     numBuys++;
                 }
+                numEntries++;
+                oldestTimeStamp = trade.timeStamp.time;
             }
 
-            double buySellRatio = numBuys / numSells ;
+            char recentTime[20];
+            strftime(recentTime, 20, "%Y-%m-%d %H:%M:%S", localtime(&lastTimeStamp));
+            char oldestTime[20];
+            strftime(oldestTime, 20, "%Y-%m-%d %H:%M:%S", localtime(&oldestTimeStamp));
+
+            printf("%s: Oldest Time %s, Newest Time %s, Num Entries %d\n", marketName.c_str(), oldestTime, recentTime, numEntries);
+
+            double buySellRatio = numBuys / (numSells > 0 ? numSells : 1 ) ;
             if (buySellRatio >= BUY_SELL_RATIO)
             {
                 printf("%s: Buy sell ratio %f\n", marketName.c_str(), buySellRatio);
             }
 
             double volumeIncrease = (totalVolumeRecent - totalVolumePrevious) / totalVolumePrevious;
-            if (volumeIncrease > VOLUME_INCREASE)
+            if (totalVolumePrevious > 0 && volumeIncrease > VOLUME_INCREASE)
             {
                 printf("%s: Volume Increase %2.2f\n", marketName.c_str(), volumeIncrease*100.0);
             }
@@ -125,38 +142,43 @@ namespace trader {
                 printf("%s: Price Increase %2.2f\n", marketName.c_str(), priceIncrease*100.0);
             }
 
-            //Save to storage
-            Trade_History& table = *marketData.storage;
-            Trade_History::RecordWithId latestRec;
-            table.getLatest(latestRec);
+//            break;
 
-            Int32 latestStoredTradeId = 0;
-            if (latestRec.isSetTradeId())
+            if (useStorage)
             {
-                latestStoredTradeId = latestRec.tradeId;
-            }
+                //Save to storage
+                Trade_History& table = *marketData.storage;
+                Trade_History::RecordWithId latestRec;
+                table.getLatest(latestRec);
 
-            std::vector<Trade_History::Record> records;
-            for (History::DataObject::Result::reverse_iterator rit = history->dataObject.result.rbegin(); rit != history->dataObject.result.rend(); ++rit)
-            {
-                History::DataObject::ResultArray& trade = *rit;
-                if (trade.id <= latestStoredTradeId)
+                Int32 latestStoredTradeId = 0;
+                if (latestRec.isSetTradeId())
                 {
-                    break;
+                    latestStoredTradeId = latestRec.tradeId;
                 }
-                Trade_History::Record rec;
-                rec.tradeId = trade.id;
-                rec.orderType = trade.orderType;
-                rec.price = trade.price;
-                rec.total = trade.total;
-                rec.volume = trade.quantity;
-                rec.fillType = trade.filltype;
-                rec.timeStamp = (Int32)trade.timeStamp.time;
-                records.push_back(rec);
-            }
-            if (!records.empty())
-            {
-                table.insertMultipleUnique(records);
+
+                std::vector<Trade_History::Record> records;
+                for (History::DataObject::Result::reverse_iterator rit = history->dataObject.result.rbegin(); rit != history->dataObject.result.rend(); ++rit)
+                {
+                    History::DataObject::ResultArray& trade = *rit;
+                    if (trade.id <= latestStoredTradeId)
+                    {
+                        break;
+                    }
+                    Trade_History::Record rec;
+                    rec.tradeId = trade.id;
+                    rec.orderType = trade.orderType;
+                    rec.price = trade.price;
+                    rec.total = trade.total;
+                    rec.volume = trade.quantity;
+                    rec.fillType = trade.filltype;
+                    rec.timeStamp = (Int32)trade.timeStamp.time;
+                    records.push_back(rec);
+                }
+                if (!records.empty())
+                {
+                    table.insertMultipleUnique(records);
+                }
             }
         }
     }

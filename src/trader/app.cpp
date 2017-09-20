@@ -99,7 +99,7 @@ namespace trader {
 			rotatedFileChannel->setProperty("rotateOnOpen", "true");
 
 #if defined(_DEBUG)
-			splitterChannel->addChannel(consoleChannel);
+			//splitterChannel->addChannel(consoleChannel);
 #endif
 			splitterChannel->addChannel(rotatedFileChannel);
 
@@ -175,6 +175,7 @@ namespace trader {
             while (1)
             {
                 bittrex.run();
+                break;
             }
             //AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
 
