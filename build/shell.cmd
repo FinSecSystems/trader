@@ -14,6 +14,8 @@ set PATH=%CD%\bin;%CD%\tools\bin;%PATH%
 set PATH=%CD%\tools\bin;%PATH%
 set PATH=%CD%\tools\cmake\bin;%PATH%
 set PATH=%CD%\tools\nvm;%PATH%
+rem echo %WindowsSdkDir%
+rem echo %WindowsSDKLibVersion%
 
 for /f "usebackq tokens=1* delims=: " %%i in (`%CD%\tools\bin\vswhere\vswhere -latest -requires Microsoft.Component.MSBuild`) do (
   if /i "%%i"=="installationPath" set LatestVS=%%j
@@ -21,17 +23,20 @@ for /f "usebackq tokens=1* delims=: " %%i in (`%CD%\tools\bin\vswhere\vswhere -l
 
 REM Setup Visual Studio Environment
 doskey devenv=devenv.exe /useenv $*
-
+setlocal enabledelayedexpansion
 IF NOT "%LatestVS%"=="" (
 	set "VS150COMNTOOLS=%LatestVS%\Common7\Tools\"
-	%comspec% /k "%LatestVS%\VC\Auxiliary\Build\vcvarsall.bat" x64
+	call "%LatestVS%\VC\Auxiliary\Build\vcvarsall.bat" x64
+
 ) ELSE (
 	IF NOT "%VS140COMNTOOLS%"=="" (
 		ECHO Visual Studio 2015
-		%comspec% /k "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" x64
+		call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" x64
 	) ELSE (
 		ECHO Visual Studio 2012
-		%comspec% /k "%VS110COMNTOOLS%\..\..\VC\vcvarsall.bat" x64
+		call "%VS110COMNTOOLS%\..\..\VC\vcvarsall.bat" x64
 	)
 )
+set PATH=!WindowsSdkDir!bin\!WindowsSDKLibVersion!x64\;!PATH!
+%comspec% /k
 popd

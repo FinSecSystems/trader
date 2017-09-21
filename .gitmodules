@@ -31,3 +31,6 @@
 [submodule "deps/cef"]
 	path = deps/cef
 	url = https://bitbucket.org/chromiumembedded/cef.git
+[submodule "deps/bgfx"]
+	path = deps/bgfx
+	url = https://github.com/viknash/bgfx.git

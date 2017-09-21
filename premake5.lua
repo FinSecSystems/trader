@@ -39,7 +39,8 @@
             system "Windows"
             architecture "x64"
 		    flags { 
-                "MultiProcessorCompile"
+                "MultiProcessorCompile",
+				"StaticRuntime"
                 }
             buildoptions    {
                 "/GR-"
@@ -338,10 +339,10 @@
 			includedirs {
 				"deps/TaskScheduler/include",
 				"deps/intel_se_api/ittnotify/include",
+				"deps\cef\cef_binary_3.3163.1667.g88c82d2_windows64\include"
 				}
-			links       "deps/intel_se_api/bin/ittnotify64.lib"
-			debugenvs {
-				"PATH=$(SolutionDir)deps\\poco\\bin64"
+			links {
+				"deps/intel_se_api/bin/ittnotify64.lib"
 			}
 			files {
 				"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
@@ -406,7 +407,21 @@
 				"deps/poco/lib64/ssleay64MD.lib"
                 }
 
-		filter "system:windows"
+		filter { "configurations:release", "platforms:Win64" }
+			debugenvs {
+				"PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release"
+			}
+			links {
+                "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\libcef.lib",
+                "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\cef_sandbox.lib"
+                }
 
-
+		filter { "configurations:debug", "platforms:Win64" }
+			debugenvs {
+				"PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug"
+			}
+			links {
+                "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug\\libcef.lib",
+                "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug\\cef_sandbox.lib"
+                }
 
