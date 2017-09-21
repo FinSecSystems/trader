@@ -34,3 +34,9 @@
 [submodule "deps/bgfx"]
 	path = deps/bgfx
 	url = https://github.com/viknash/bgfx.git
+[submodule "deps/bx"]
+	path = deps/bx
+	url = https://github.com/viknash/bx.git
+[submodule "deps/bimg"]
+	path = deps/bimg
+	url = https://github.com/viknash/bimg.git

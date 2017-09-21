@@ -26,15 +26,15 @@ doskey devenv=devenv.exe /useenv $*
 setlocal enabledelayedexpansion
 IF NOT "%LatestVS%"=="" (
 	set "VS150COMNTOOLS=%LatestVS%\Common7\Tools\"
-	call "%LatestVS%\VC\Auxiliary\Build\vcvarsall.bat" x64
+	call "%LatestVS%\VC\Auxiliary\Build\vcvarsall.bat" x64 8.1
 
 ) ELSE (
 	IF NOT "%VS140COMNTOOLS%"=="" (
 		ECHO Visual Studio 2015
-		call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" x64
+		call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" x64 8.1
 	) ELSE (
 		ECHO Visual Studio 2012
-		call "%VS110COMNTOOLS%\..\..\VC\vcvarsall.bat" x64
+		call "%VS110COMNTOOLS%\..\..\VC\vcvarsall.bat" x64 8.1
 	)
 )
 set PATH=!WindowsSdkDir!bin\!WindowsSDKLibVersion!x64\;!PATH!

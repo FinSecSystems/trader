@@ -148,12 +148,8 @@
 		kind        "ConsoleApp"
 		includedirs {
             "src/codegen",
-            "deps/poco/Net/include",
-            "deps/poco/NetSSL_Win/include",
-            "deps/poco/Crypto/include",
             "deps/poco/Foundation/include",
             "deps/poco/Util/include",
-            "deps/poco/openssl/include",
             "deps/poco/JSON/include"
             }
 		pchheader   "stdafx.h"
@@ -188,7 +184,9 @@
 				"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
 				"deps/TaskScheduler/include/**.h",
 			}
-			links       "deps/intel_se_api/bin/ittnotify64.lib"
+			links       {
+				"Iphlpapi.lib"
+			}
 			debugenvs {
 				"PATH=$(SolutionDir)deps\\poco\\bin64"
 			}
@@ -204,28 +202,20 @@
 			targetdir   "bin/debug"
 			debugdir    "bin/debug"
 		    links       { 
-                "deps/poco/lib64/PocoFoundationd.lib",
-                "deps/poco/lib64/PocoNetd.lib",
-                "deps/poco/lib64/PocoNetSSLWind.lib",
-                "deps/poco/lib64/PocoUtild.lib",
-                "deps/poco/lib64/PocoCryptod.lib",
-                "deps/poco/lib64/ssleay64MDd.lib",
-                "deps/poco/lib64/libeay64MDd.lib",
-                "deps/poco/lib64/PocoJSONd.lib"
+                "deps/poco/lib64/PocoFoundationmtd.lib",
+                "deps/poco/lib64/PocoUtilmtd.lib",
+                "deps/poco/lib64/PocoJSONmtd.lib",
+				"deps/poco/lib64/PocoXMLmtd.lib"
                 }
 
 		filter "configurations:release"
 			targetdir   "bin/release"
 			debugdir    "bin/release"
 		    links       { 
-                "deps/poco/lib64/PocoFoundation.lib",
-                "deps/poco/lib64/PocoNet.lib",
-                "deps/poco/lib64/PocoNetSSLWin.lib",
-                "deps/poco/lib64/PocoUtil.lib",
-                "deps/poco/lib64/PocoCrypto.lib",
-                "deps/poco/lib64/ssleay64MD.lib",
-                "deps/poco/lib64/libeay64MD.lib",
-                "deps/poco/lib64/PocoJSON.lib"
+                "deps/poco/lib64/PocoFoundationmt.lib",
+                "deps/poco/lib64/PocoUtilmt.lib",
+                "deps/poco/lib64/PocoJSONmt.lib",
+				"deps/poco/lib64/PocoXMLmt.lib"
                 }
 
 	project "apis"
@@ -339,10 +329,13 @@
 			includedirs {
 				"deps/TaskScheduler/include",
 				"deps/intel_se_api/ittnotify/include",
-				"deps\cef\cef_binary_3.3163.1667.g88c82d2_windows64\include"
+				"deps/cef/cef_binary_3.3163.1667.g88c82d2_windows64/include"
 				}
 			links {
-				"deps/intel_se_api/bin/ittnotify64.lib"
+				"deps/intel_se_api/bin/ittnotify64.lib",
+				"Iphlpapi.lib",
+				"ws2_32.lib",
+				"crypt32.lib"
 			}
 			files {
 				"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
@@ -377,34 +370,34 @@
 			targetdir   "bin/debug"
 			debugdir    "bin/debug"
 		    links       { 
-                "deps/poco/lib64/PocoFoundationd.lib",
-                "deps/poco/lib64/PocoNetd.lib",
-                "deps/poco/lib64/PocoNetSSLWind.lib",
-                "deps/poco/lib64/PocoUtild.lib",
-                "deps/poco/lib64/PocoCryptod.lib",
-                "deps/poco/lib64/ssleay64MDd.lib",
-                "deps/poco/lib64/libeay64MDd.lib",
-                "deps/poco/lib64/PocoJSONd.lib",
-                "deps/poco/lib64/PocoDatad.lib",
-                "deps/poco/lib64/PocoDataSQLited.lib",
-				"deps/poco/lib64/ssleay64MDd.lib"
+                "deps/poco/lib64/PocoFoundationmtd.lib",
+                "deps/poco/lib64/PocoNetmtd.lib",
+                "deps/poco/lib64/PocoNetSSLWinmtd.lib",
+                "deps/poco/lib64/PocoUtilmtd.lib",
+                "deps/poco/lib64/PocoCryptomtd.lib",
+                "deps/poco/lib64/ssleay64MTd.lib",
+                "deps/poco/lib64/libeay64MTd.lib",
+                "deps/poco/lib64/PocoJSONmtd.lib",
+                "deps/poco/lib64/PocoDatamtd.lib",
+                "deps/poco/lib64/PocoDataSQLitemtd.lib",
+				"deps/poco/lib64/PocoXMLmtd.lib"
                 }
 
 		filter "configurations:release"
 			targetdir   "bin/release"
 			debugdir    "bin/release"
 		    links       { 
-                "deps/poco/lib64/PocoFoundation.lib",
-                "deps/poco/lib64/PocoNet.lib",
-                "deps/poco/lib64/PocoNetSSLWin.lib",
-                "deps/poco/lib64/PocoUtil.lib",
-                "deps/poco/lib64/PocoCrypto.lib",
-                "deps/poco/lib64/ssleay64MD.lib",
-                "deps/poco/lib64/libeay64MD.lib",
-                "deps/poco/lib64/PocoJSON.lib",
-                "deps/poco/lib64/PocoData.lib",
-                "deps/poco/lib64/PocoDataSQLite.lib",
-				"deps/poco/lib64/ssleay64MD.lib"
+                "deps/poco/lib64/PocoFoundationmt.lib",
+                "deps/poco/lib64/PocoNetmt.lib",
+                "deps/poco/lib64/PocoNetSSLWinmt.lib",
+                "deps/poco/lib64/PocoUtilmt.lib",
+                "deps/poco/lib64/PocoCryptomt.lib",
+                "deps/poco/lib64/ssleay64MT.lib",
+                "deps/poco/lib64/libeay64MT.lib",
+                "deps/poco/lib64/PocoJSONmt.lib",
+                "deps/poco/lib64/PocoDatamt.lib",
+                "deps/poco/lib64/PocoDataSQLitemt.lib",
+				"deps/poco/lib64/PocoXMLmt.lib"
                 }
 
 		filter { "configurations:release", "platforms:Win64" }
