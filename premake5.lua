@@ -127,21 +127,39 @@
             "*.lua"
 		}
 
-        buildcommands {
-            "$(SolutionDir)build\\genproj.cmd"
-        }
+		filter { "system:linux" }
+			buildcommands {
+				"%{wks.location}/tools/bin/premake5/premake gmake"
+			}
 
-        rebuildcommands {
-            "{RMDIR} $(SolutionDir)*.vcxproj*",
-            "{RMDIR} $(SolutionDir)*.sln*",
-            "$(SolutionDir)build\\genproj.cmd"
-        }
+			rebuildcommands {
+				"{RMDIR} %{wks.location}/Makefile",
+				"{RMDIR} %{wks.location}/*.make",
+				"%{wks.location}/tools/bin/premake5/premake gmake"
+			}
 
-        cleancommands {
-            "{RMDIR} $(SolutionDir)*.vcxproj*",
-            "{RMDIR} $(SolutionDir)*.sln*",
-        }
+			cleancommands {
+				"{RMDIR} %{wks.location}Makefile",
+				"{RMDIR} %{wks.location}*.make"
+			}
 
+		filter { "system:windows" }
+			buildcommands {
+				"$(SolutionDir)build\\genproj.cmd"
+			}
+
+			rebuildcommands {
+				"{RMDIR} $(SolutionDir)*.vcxproj*",
+				"{RMDIR} $(SolutionDir)*.sln*",
+				"$(SolutionDir)build\\genproj.cmd"
+			}
+
+			cleancommands {
+				"{RMDIR} $(SolutionDir)*.vcxproj*",
+				"{RMDIR} $(SolutionDir)*.sln*",
+			}
+		
+		
 	project "codegen"
 		targetname  "codegen"
 		language    "C++"
