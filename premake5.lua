@@ -129,13 +129,13 @@
 
 		filter { "system:linux" }
 			buildcommands {
-				"%{wks.location}/tools/bin/premake5/premake gmake"
+				"%{wks.location}/tools/bin/premake/premake5 gmake"
 			}
 
 			rebuildcommands {
 				"{RMDIR} %{wks.location}/Makefile",
 				"{RMDIR} %{wks.location}/*.make",
-				"%{wks.location}/tools/bin/premake5/premake gmake"
+				"%{wks.location}/tools/bin/premake/premake5 gmake"
 			}
 
 			cleancommands {
@@ -181,7 +181,6 @@
 
 		files
 		{
-			"*.txt","**.md",
 			"src/codegen/**.h", "src/codegen/**.cpp",
 			"include/**.h",
             "deps/poco/Crypto/include/**.h", "deps/poco/Crypto/src/**.cpp",
@@ -199,6 +198,7 @@
 				"deps/intel_se_api/ittnotify/include"
 				}
 			files {
+				"*.txt","**.md",
 				"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
 				"deps/TaskScheduler/include/**.h",
 			}
@@ -216,9 +216,23 @@
 		{
 		}
 
-		filter "configurations:debug"
-			targetdir   "bin/debug"
-			debugdir    "bin/debug"
+		filter { "platforms:Linux64-clang", "system:linux", "configurations:debug"  }
+		    links       { 
+                "deps/poco/lib/Linux/x86_64/PocoFoundationd",
+                "deps/poco/lib/Linux/x86_64/PocoUtild",
+                "deps/poco/lib/Linux/x86_64/PocoJSONd",
+				"deps/poco/lib/Linux/x86_64/PocoXMLd"
+                }
+				
+		filter { "platforms:Linux64-clang", "system:linux", "configurations:release"  }
+		    links       { 
+                "deps/poco/lib/Linux/x86_64/PocoFoundation",
+                "deps/poco/lib/Linux/x86_64/PocoUtil",
+                "deps/poco/lib/Linux/x86_64/PocoJSON",
+				"deps/poco/lib/Linux/x86_64/PocoXML"
+                }
+
+        filter { "platforms:Win64", "system:windows", "configurations:debug" }		
 		    links       { 
                 "deps/poco/lib64/PocoFoundationmtd.lib",
                 "deps/poco/lib64/PocoUtilmtd.lib",
@@ -226,15 +240,22 @@
 				"deps/poco/lib64/PocoXMLmtd.lib"
                 }
 
-		filter "configurations:release"
-			targetdir   "bin/release"
-			debugdir    "bin/release"
+        filter { "platforms:Win64", "system:windows", "configurations:release" }		
 		    links       { 
                 "deps/poco/lib64/PocoFoundationmt.lib",
                 "deps/poco/lib64/PocoUtilmt.lib",
                 "deps/poco/lib64/PocoJSONmt.lib",
 				"deps/poco/lib64/PocoXMLmt.lib"
                 }
+				
+				
+		filter "configurations:debug"
+			targetdir   "bin/debug"
+			debugdir    "bin/debug"
+
+		filter "configurations:release"
+			targetdir   "bin/release"
+			debugdir    "bin/release"
 
 	project "apis"
 		targetname  "apis"
