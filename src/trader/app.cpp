@@ -203,4 +203,4 @@ namespace trader {
 
 }
 
-POCO_APP_MAIN(trader::App)
+POCO_APP_MAIN(trader::App) 

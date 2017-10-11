@@ -1,9 +1,9 @@
 
-#include "targetver.h"
 #pragma warning(push)
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4251)
 #include "Poco/Poco.h"
+#include "targetver.h"
 #include "Poco/Net/HTMLForm.h"
 #include "Poco/Util/AbstractConfiguration.h"
 #include "Poco/AutoPtr.h"
@@ -11,7 +11,9 @@
 #include "Poco/JSON/ParseHandler.h"
 #include "Poco/JSON/JSONException.h"
 #include "Poco/Net/HTMLForm.h"
+#if defined(POCO_OS_FAMILY_WINDOWS) 
 #include "Poco/Net/HTTPSClientSession.h"
+#endif
 #include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/HTTPResponse.h"
 #include "Poco/Net/OAuth10Credentials.h"

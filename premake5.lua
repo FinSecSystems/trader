@@ -164,6 +164,8 @@
 		targetname  "codegen"
 		language    "C++"
 		kind        "ConsoleApp"
+		targetdir   "bin/%{cfg.platform}/%{cfg.buildcfg}"
+		debugdir    "bin/%{cfg.platform}/%{cfg.buildcfg}"
 		includedirs {
             "src/codegen",
             "deps/poco/Foundation/include",
@@ -247,15 +249,6 @@
                 "deps/poco/lib64/PocoJSONmt.lib",
 				"deps/poco/lib64/PocoXMLmt.lib"
                 }
-				
-				
-		filter "configurations:debug"
-			targetdir   "bin/debug"
-			debugdir    "bin/debug"
-
-		filter "configurations:release"
-			targetdir   "bin/release"
-			debugdir    "bin/release"
 
 	project "apis"
 		targetname  "apis"
@@ -269,20 +262,35 @@
             "data/apis/**.json"
 		}
 
-       buildcommands {
-			"PATH=$(SolutionDir)deps\\poco\\bin64",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
-       }
+		filter { "platforms:Win64", "system:windows" }				
+		   buildcommands {
+				"PATH=$(SolutionDir)deps\\poco\\bin64",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
+		   }
 
-       rebuildcommands {
-			"PATH=$(SolutionDir)deps\\poco\\bin64",
-            "{RMDIR} $(SolutionDir)tmp\codegen",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
-       }
+		   rebuildcommands {
+				"PATH=$(SolutionDir)deps\\poco\\bin64",
+				"{RMDIR} $(SolutionDir)tmp\codegen",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
+		   }
 
-       cleancommands {
-            "{RMDIR} $(SolutionDir)tmp\\codegen"
-       }
+		   cleancommands {
+				"{RMDIR} $(SolutionDir)tmp\\codegen"
+		   }
+		   
+		filter { "platforms:Win64", "system:linux" }				
+		   buildcommands {
+				"LD_LIBRARYPATH=${LD_LIBRARY_PATH}:deps/poco/lib/Linux/x86_64 & bin/%{cfg.platform}/%{cfg.buildcfg}/codegen /i:data/apis /o:tmp/codegen /n:trader /t:hyperschema"
+		   }
+
+		   rebuildcommands {
+				"{RMDIR} tmp/codegen",
+				"LD_LIBRARYPATH=${LD_LIBRARY_PATH}:deps/poco/lib/Linux/x86_64 & bin/%{cfg.platform}/%{cfg.buildcfg}/codegen /i:data/apis /o:tmp/codegen /n:trader /t:hyperschema"
+		   }
+
+		   cleancommands {
+				"{RMDIR} tmp/codegen"
+		   }		   
 
 	project "configs"
 		targetname  "configs"
@@ -296,21 +304,36 @@
             "data/configs/**.json"
 		}
 
-       buildcommands {
-			"PATH=$(SolutionDir)deps\\poco\\bin64",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\codegen /n:trader /t:jsonschema"
-       }
+		filter { "platforms:Win64", "system:windows" }
+		   buildcommands {
+				"PATH=$(SolutionDir)deps\\poco\\bin64",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\codegen /n:trader /t:jsonschema"
+		   }
 
-       rebuildcommands {
-			"PATH=$(SolutionDir)deps\\poco\\bin64",
-            "{RMDIR} $(SolutionDir)tmp\codegen",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\codegen /n:trader /t:jsonschema"
-       }
+		   rebuildcommands {
+				"PATH=$(SolutionDir)deps\\poco\\bin64",
+				"{RMDIR} $(SolutionDir)tmp\codegen",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\codegen /n:trader /t:jsonschema"
+		   }
 
-       cleancommands {
-            "{RMDIR} $(SolutionDir)tmp\\codegen"
-       }
+		   cleancommands {
+				"{RMDIR} $(SolutionDir)tmp\\codegen"
+		   }
 
+		filter { "platforms:Win64", "system:linux" }
+		   buildcommands {
+				"LD_LIBRARYPATH=${LD_LIBRARY_PATH}:deps/poco/lib/Linux/x86_64 & bin/%{cfg.platform}/%{cfg.buildcfg}/codegen /i:data/configs /o:tmp/codegen /n:trader /t:jsonschema"
+		   }
+
+		   rebuildcommands {
+				"{RMDIR} tmp/codegen",
+				"LD_LIBRARYPATH=${LD_LIBRARY_PATH}:deps/poco/lib/Linux/x86_64 &  bin/%{cfg.platform}/%{cfg.buildcfg}/codegen /i:data/configs /o:tmp/codegen /n:trader /t:jsonschema"
+		   }
+
+		   cleancommands {
+				"{RMDIR} tmp/codegen"
+		   }
+		   
 	project "databases"
 		targetname  "databases"
         dependson   { 
@@ -323,25 +346,42 @@
             "data/databases/**.json"
 		}
 
-       buildcommands {
-			"PATH=$(SolutionDir)deps\\poco\\bin64",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\codegen /n:trader /t:databaseschema"
-       }
+		filter { "platforms:Win64", "system:windows" }
+		   buildcommands {
+				"PATH=$(SolutionDir)deps\\poco\\bin64",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\codegen /n:trader /t:databaseschema"
+		   }
 
-       rebuildcommands {
-			"PATH=$(SolutionDir)deps\\poco\\bin64",
-            "{RMDIR} $(SolutionDir)tmp\codegen",
-            "$(SolutionDir)bin\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\codegen /n:trader /t:databaseschema"
-       }
+		   rebuildcommands {
+				"PATH=$(SolutionDir)deps\\poco\\bin64",
+				"{RMDIR} $(SolutionDir)tmp\codegen",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\codegen /n:trader /t:databaseschema"
+		   }
 
-       cleancommands {
-            "{RMDIR} $(SolutionDir)tmp\\codegen"
-       }
+		   cleancommands {
+				"{RMDIR} $(SolutionDir)tmp\\codegen"
+		   }
 
+		filter { "platforms:Win64", "system:linux" }
+		   buildcommands {
+				"LD_LIBRARYPATH=${LD_LIBRARY_PATH}:deps/poco/lib/Linux/x86_64 & bin/%{cfg.platform}/%{cfg.buildcfg}/codegen /i:data/databases /o:tmp/codegen /n:trader /t:databaseschema"
+		   }
+
+		   rebuildcommands {
+				"{RMDIR} tmp/codegen",
+				"LD_LIBRARYPATH=${LD_LIBRARY_PATH}:deps/poco/lib/Linux/x86_64 &  bin/%{cfg.platform}/%{cfg.buildcfg}/codegen /i:data/databases /o:tmp/codegen /n:trader /t:databaseschema"
+		   }
+
+		   cleancommands {
+				"{RMDIR} tmp/codegen"
+		   }	   
+	   
 	project "trader"
 		targetname  "trader"
 		language    "C++"
 		kind        "ConsoleApp"
+		targetdir   "bin/%{cfg.platform}/%{cfg.buildcfg}"
+		debugdir    "bin/%{cfg.platform}/%{cfg.buildcfg}"
         dependson   { 
             "apis",
 			"configs",
@@ -349,8 +389,8 @@
             }
 		includedirs {
             "src",
+            "src/trader",
             "deps/poco/Net/include",
-            "deps/poco/NetSSL_Win/include",
             "deps/poco/Crypto/include",
             "deps/poco/Foundation/include",
             "deps/poco/Util/include",
@@ -363,9 +403,18 @@
 		pchheader   "stdafx.h"
 		pchsource   "src/trader/stdafx.cpp"
 
-
-		filter { "system:windows"}
+		filter { "system:windows", "platforms:Linux"}
 			includedirs {
+				"deps/poco/NetSSL_OpenSSL/include",
+			}
+			files {
+				"deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
+			}
+		
+
+		filter { "system:windows", "platforms:Win64"}
+			includedirs {
+				"deps/poco/NetSSL_Win/include",
 				"deps/TaskScheduler/include",
 				"deps/intel_se_api/ittnotify/include",
 				"deps/cef/cef_binary_3.3163.1667.g88c82d2_windows64/include"
@@ -378,7 +427,9 @@
 			}
 			files {
 				"deps/intel_se_api/ittnotify/include/*.h", "deps/intel_se_api/ittnotify/include/*.hpp", "deps/intel_se_api/ittnotify/include/*.cpp",
-				"deps/TaskScheduler/include/**.h",			
+				"deps/TaskScheduler/include/**.h",
+				"deps/poco/NetSSL_Win/include/**.h", "deps/poco/NetSSL_Win/src/**.cpp"
+			
 			}
 
 		files
@@ -390,8 +441,6 @@
             "deps/poco/Foundation/include/**.h", "deps/poco/Foundation/src/**.cpp",
             "deps/poco/JSON/include/**.h", "deps/poco/JSON/src/**.cpp",
             "deps/poco/Net/include/**.h", "deps/poco/Net/src/**.cpp",
-            "deps/poco/NetSSL_Win/include/**.h", "deps/poco/NetSSL_Win/src/**.cpp",
-            "deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
             "deps/poco/Util/include/**.h", "deps/poco/Util/src/**.cpp",
             "deps/poco/Data/**.h", "deps/poco/Data/**.cpp",
             "tmp/codegen/**.h", "tmp/codegen/**.cpp",
@@ -405,9 +454,7 @@
 		{
 		}
 
-		filter "configurations:debug"
-			targetdir   "bin/debug"
-			debugdir    "bin/debug"
+		filter { "platforms:Win64", "system:windows", "configurations:debug" }		
 		    links       { 
                 "deps/poco/lib64/PocoFoundationmtd.lib",
                 "deps/poco/lib64/PocoNetmtd.lib",
@@ -422,24 +469,46 @@
 				"deps/poco/lib64/PocoXMLmtd.lib"
                 }
 
-		filter "configurations:release"
-			targetdir   "bin/release"
-			debugdir    "bin/release"
-		    links       { 
-                "deps/poco/lib64/PocoFoundationmt.lib",
-                "deps/poco/lib64/PocoNetmt.lib",
-                "deps/poco/lib64/PocoNetSSLWinmt.lib",
-                "deps/poco/lib64/PocoUtilmt.lib",
-                "deps/poco/lib64/PocoCryptomt.lib",
-                "deps/poco/lib64/ssleay64MT.lib",
-                "deps/poco/lib64/libeay64MT.lib",
-                "deps/poco/lib64/PocoJSONmt.lib",
-                "deps/poco/lib64/PocoDatamt.lib",
-                "deps/poco/lib64/PocoDataSQLitemt.lib",
+		filter { "platforms:Win64", "system:windows", "configurations:release" }
+			links       { 
+				"deps/poco/lib64/PocoFoundationmt.lib",
+				"deps/poco/lib64/PocoNetmt.lib",
+				"deps/poco/lib64/PocoNetSSLWinmt.lib",
+				"deps/poco/lib64/PocoUtilmt.lib",
+				"deps/poco/lib64/PocoCryptomt.lib",
+				"deps/poco/lib64/ssleay64MT.lib",
+				"deps/poco/lib64/libeay64MT.lib",
+				"deps/poco/lib64/PocoJSONmt.lib",
+				"deps/poco/lib64/PocoDatamt.lib",
+				"deps/poco/lib64/PocoDataSQLitemt.lib",
 				"deps/poco/lib64/PocoXMLmt.lib"
+				}
+
+			filter { "platforms:Linux64-clang", "system:linux", "configurations:debug"  }
+		    links       { 
+                "deps/poco/lib/Linux/x86_64/PocoFoundationd",
+                "deps/poco/lib/Linux/x86_64/PocoUtild",
+                "deps/poco/lib/Linux/x86_64/PocoJSONd",
+				"deps/poco/lib/Linux/x86_64/PocoXMLd",
+                "deps/poco/lib/Linux/x86_64/PocoNetd",
+                "deps/poco/lib/Linux/x86_64/PocoDatad",
+                "deps/poco/lib/Linux/x86_64/PocoDataSQLited",
+				"deps/poco/lib/Linux/x86_64/PocoXMLd"
+                }
+				
+		filter { "platforms:Linux64-clang", "system:linux", "configurations:release"  }
+		    links       { 
+                "deps/poco/lib/Linux/x86_64/PocoFoundation",
+                "deps/poco/lib/Linux/x86_64/PocoUtil",
+                "deps/poco/lib/Linux/x86_64/PocoJSON",
+				"deps/poco/lib/Linux/x86_64/PocoXML",
+                "deps/poco/lib/Linux/x86_64/PocoNet",
+                "deps/poco/lib/Linux/x86_64/PocoData",
+                "deps/poco/lib/Linux/x86_64/PocoDataSQLite",
+				"deps/poco/lib/Linux/x86_64/PocoXML"
                 }
 
-		filter { "configurations:release", "platforms:Win64" }
+		filter { "configurations:release", "system:windows", "platforms:Win64" }
 			debugenvs {
 				"PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release"
 			}
@@ -448,7 +517,7 @@
                 "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\cef_sandbox.lib"
                 }
 
-		filter { "configurations:debug", "platforms:Win64" }
+		filter { "configurations:debug", "system:windows", "platforms:Win64" }
 			debugenvs {
 				"PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug"
 			}
