@@ -6,8 +6,13 @@
 
 namespace trader {
 
-	class KrakenApi::EndPoints;
-    class KrakenDatabase::Tables;
+    namespace KrakenApi {
+        class EndPoints;
+    };
+
+    namespace KrakenDatabase {
+        class Tables;
+    };
 
 	class Kraken : public Api
 	{

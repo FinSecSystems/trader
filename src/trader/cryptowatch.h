@@ -6,8 +6,13 @@
 
 namespace trader {
 
-    class CryptowatchApi::EndPoints;
-    class CryptowatchDatabase::Tables;
+    namespace CryptowatchApi {
+        class EndPoints;
+    };
+
+    namespace CryptowatchDatabase {
+        class Tables;
+    };
 
     class Cryptowatch : public Api
     {

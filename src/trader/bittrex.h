@@ -6,8 +6,13 @@
 
 namespace trader {
 
-    class BittrexApi::EndPoints;
-    class BittrexDatabase::Tables;
+    namespace BittrexApi {
+        class EndPoints;
+    };
+
+    namespace BittrexDatabase {
+        class Tables;
+    };
 
     class Bittrex : public Api
     {

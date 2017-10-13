@@ -3,7 +3,7 @@
 namespace trader {
 
 	template <typename type>
-	inline bool equal(typename type left, typename type right)
+	inline bool equal(type left, type right)
 	{
 		return (left == right);
 	}

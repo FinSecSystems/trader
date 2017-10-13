@@ -185,7 +185,7 @@ namespace trader {
 
 			do {
 				Thread::sleep(10000);
-			} while (1);
+			} while (1); 
 		}
         catch (Exception& exc)
         {

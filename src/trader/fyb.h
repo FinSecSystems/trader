@@ -6,8 +6,13 @@
 
 namespace trader {
 
-	class FybApi::EndPoints;
-    class FybDatabase::Tables;
+    namespace FybApi {
+        class EndPoints;
+    };
+
+    namespace FybDatabase {
+        class Tables;
+    };
 
 	class Fyb : public Api
 	{

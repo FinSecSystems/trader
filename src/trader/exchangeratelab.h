@@ -5,7 +5,9 @@
 
 namespace trader {
 
-        class ExchangeratelabApi::EndPoints;
+        namespace ExchangeratelabApi {
+            class EndPoints;
+        };
 
         class Exchangeratelab : public Api
         {

@@ -11,9 +11,7 @@
 #include "Poco/JSON/ParseHandler.h"
 #include "Poco/JSON/JSONException.h"
 #include "Poco/Net/HTMLForm.h"
-#if defined(POCO_OS_FAMILY_WINDOWS) 
 #include "Poco/Net/HTTPSClientSession.h"
-#endif
 #include "Poco/Net/HTTPRequest.h"
 #include "Poco/Net/HTTPResponse.h"
 #include "Poco/Net/OAuth10Credentials.h"
@@ -54,6 +52,7 @@
 #include <ctime>
 #include <regex>
 #include <limits>
+#include <locale>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
