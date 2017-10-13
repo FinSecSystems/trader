@@ -34,7 +34,8 @@ namespace trader {
 
 	void Fyb::execute(Timer& timer)
 	{
-		static std::atomic_int32_t idx = 0;
+		static  std::atomic<std::int32_t> idx;
+        idx = 0;
 		serialExecutionList[ idx % serialExecutionList.size() ](timer);
 		++idx;
 	}

@@ -29,7 +29,8 @@ namespace trader {
 
 	void Kraken::execute(Timer& timer)
 	{
-		static std::atomic_int32_t idx = 0;
+        static  std::atomic<std::int32_t> idx;
+        idx = 0;
         if (serialExecutionList.size())
         {
             serialExecutionList[idx % serialExecutionList.size()](timer);

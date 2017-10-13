@@ -243,26 +243,26 @@
                 }
 
         filter { "platforms:Win64", "system:windows", "configurations:release" }		
-		    links       { 
-                "deps/poco/lib64/PocoFoundationmt.lib",
-                "deps/poco/lib64/PocoUtilmt.lib",
-                "deps/poco/lib64/PocoJSONmt.lib",
+			links	{ 
+				"deps/poco/lib64/PocoFoundationmt.lib",
+				"deps/poco/lib64/PocoUtilmt.lib",
+				"deps/poco/lib64/PocoJSONmt.lib",
 				"deps/poco/lib64/PocoXMLmt.lib"
-                }
+				}
 
 	project "apis"
 		targetname  "apis"
-        dependson   { 
-            "codegen"
-            }
-        kind "Makefile"
+		dependson   { 
+			"codegen"
+			}
+		kind "Makefile"
 
 		files
 		{
-            "data/apis/**.json"
+			"data/apis/**.json"
 		}
 
-		filter { "platforms:Win64", "system:windows" }				
+		filter { "platforms:Win64", "system:windows" }
 		   buildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
 				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
@@ -277,7 +277,7 @@
 		   cleancommands {
 				"{RMDIR} $(SolutionDir)tmp\\codegen"
 		   }
-		   
+
 		filter { "platforms:Win64", "system:linux" }				
 		   buildcommands {
 				"LD_LIBRARYPATH=${LD_LIBRARY_PATH}:deps/poco/lib/Linux/x86_64 & bin/%{cfg.platform}/%{cfg.buildcfg}/codegen /i:data/apis /o:tmp/codegen /n:trader /t:hyperschema"

@@ -44,12 +44,20 @@ namespace trader {
         {}
 
         void operator = (const std::string& str) {
+#if defined(POCO_OS_FAMILY_WINDOWS)
             std::tm t = {};
             std::istringstream ss(str);
             ss >> std::get_time(&t, format.c_str());
             if (!ss.fail()) {
                 time = mktime(&t);
             }
+#else
+            struct tm tm;
+            char buf[255];
+            memset(&tm, 0, sizeof(struct tm));
+            strptime(str.c_str(), "%Y-%m-%d %H:%M:%S", &tm);
+            time = mktime(&tm);
+#endif
         }
 
         void operator = (const FormattedTime& ft) {
