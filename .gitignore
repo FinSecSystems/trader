@@ -46,3 +46,9 @@ Premake5.log
 /*.make
 * - Copy.*
 Makefile
+*.config.json
+deps/*.build
+deps/*.make
+*.db
+*.log.txt*
+*.properties
