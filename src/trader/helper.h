@@ -39,8 +39,8 @@ namespace trader {
     {
     public:
         FormattedTime(const char* _format)
-            : format(_format)
-            , time(std::numeric_limits<time_t>::max())
+            : time(std::numeric_limits<time_t>::max())
+            , format(_format)
         {}
 
         void operator = (const std::string& str) {
@@ -53,7 +53,6 @@ namespace trader {
             }
 #else
             struct tm tm;
-            char buf[255];
             memset(&tm, 0, sizeof(struct tm));
             strptime(str.c_str(), "%Y-%m-%d %H:%M:%S", &tm);
             time = mktime(&tm);

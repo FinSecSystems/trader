@@ -1,27 +1,27 @@
 	workspace "trader"
-        editorintegration "On"
+		editorintegration "On"
 		configurations {
-                "release",
-                "debug"
-            }
+				"release",
+				"debug"
+			}
         platforms {
-                "Win64",
-                "Win64-Clang",
-                "Win64-MSClang",
+				"Win64",
+				"Win64-Clang",
+				"Win64-MSClang",
 				"Linux64-Clang",
 				"Linux64-gcc",
-            }
-        objdir "tmp"
+			}
+		objdir "tmp"
 
 		filter { "system:linux" }
 			removeplatforms {                
 				"Win64",
-                "Win64-Clang",
-                "Win64-MSClang"
+				"Win64-Clang",
+				"Win64-MSClang"
 				}
 			buildoptions    {
-                "-std=c++11"
-            }
+				"-std=c++11"
+			}
 
 		filter { "system:windows" }
 			removeplatforms {                
@@ -35,37 +35,37 @@
 		filter { "platforms:Linux64-clang", "system:linux" }
 			toolset "clang"
 
-        filter { "platforms:Win64", "system:windows" }
-            system "Windows"
-            architecture "x64"
-		    flags { 
-                "MultiProcessorCompile",
+		filter { "platforms:Win64", "system:windows" }
+			system "Windows"
+			architecture "x64"
+			flags { 
+				"MultiProcessorCompile",
 				"StaticRuntime"
-                }
-            buildoptions    {
-                "/GR-"
-                }
+				}
+			buildoptions {
+				"/GR-"
+				}
 			warnings "Extra"
 
 		filter { "platforms:Win64", "action:vs2015", "system:windows" }
-            toolset "v140"
+			toolset "v140"
 
 		filter { "platforms:Win64", "action:vs2017", "system:windows" }
-            toolset "v141"
+			toolset "v141"
 
-        filter { "platforms:Win64-Clang", "system:windows" }
-            system "Windows"
-            architecture "x64"
-            toolset "msc-llvm-vs2014"
+		filter { "platforms:Win64-Clang", "system:windows" }
+			system "Windows"
+			architecture "x64"
+			toolset "msc-llvm-vs2014"
 
-        filter { "platforms:Win64-MSClang", "system:windows" }
-            system "Windows"
-            architecture "x64"
-            toolset "v140_clang_c2"
-            buildoptions    {
-                "-frtti",
-                "-fms-compatibility"
-                }
+		filter { "platforms:Win64-MSClang", "system:windows" }
+			system "Windows"
+			architecture "x64"
+			toolset "v140_clang_c2"
+			buildoptions {
+				"-frtti",
+				"-fms-compatibility"
+			}
 
 		filter "configurations:debug"
 			defines     "_DEBUG"
@@ -75,17 +75,25 @@
 			optimize    "Full"
 
 		filter { "configurations:debug", "platforms:Win64" }
-			symbols		"On"
-            links { "MSVCRTD.LIB" }
-            linkoptions {
-                "/NODEFAULTLIB:msvcrt"
-                }
+			symbols "On"
+			links { 
+				"MSVCRTD.LIB"
+			}
+			linkoptions {
+				"/NODEFAULTLIB:msvcrt"
+			}
+
+		filter { "configurations:debug", "platforms:Linux64-clang" }
+			buildoptions {
+				"-ggdb",
+				"-Wall"
+			}
 
 		filter { "configurations:debug", "platforms:Win64-MSClang" }
-			buildoptions    {
-                "-g2",
-                "-Wall"
-                }
+			buildoptions {
+				"-g2",
+				"-Wall"
+			}				
 
 		filter { "configurations:release", "platforms:Win64" }
 			flags       {
@@ -105,6 +113,12 @@
                 "NoIncrementalLink",
                 "LinkTimeOptimization"
             }
+
+		filter { "platforms:Linux64-clang", "system:linux" }
+			buildoptions {
+				"-Wno-unknown-pragmas",
+				
+			}
 
         filter "files:premake5.lua"
            -- A message to display while this build step is running (optional)
@@ -325,11 +339,11 @@
 				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/codegen -n:trader -t:jsonschema"
 			}
 			rebuildcommands {
-				"{RMDIR} tmp/codegen/**api.*",
+				"{RMDIR} tmp/codegen/**config.*",
 				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/codegen -n:trader -t:jsonschema"
 			}
 			cleancommands {
-				"{RMDIR} tmp/codegen/**api.*",
+				"{RMDIR} tmp/codegen/**config.*",
 			}
 
 	project "databases"
@@ -367,11 +381,11 @@
 				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/databases -o:tmp/codegen -n:trader -t:databaseschema"
 			}
 			rebuildcommands {
-				"{RMDIR} tmp/codegen/**api.*",
+				"{RMDIR} tmp/codegen/**database.*",
 				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/databases -o:tmp/codegen -n:trader -t:databaseschema"
 			}
 			cleancommands {
-				"{RMDIR} tmp/codegen/**api.*",
+				"{RMDIR} tmp/codegen/**database.*",
 			}
 
 	project "trader"
