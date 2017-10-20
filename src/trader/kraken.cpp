@@ -13,9 +13,9 @@ namespace trader {
 
     Kraken::Kraken(AutoPtr<trader::App> _app)
 		: api(_app, this)
-		, app(_app)
-		, dataBase(new KrakenDatabase::Tables(_app->dbSession))
-		, executeTimer(0, 1000)
+        , executeTimer(0, 1000)
+        , dataBase(new KrakenDatabase::Tables(_app->dbSession))
+        , app(_app)
 	{
 	}
 

@@ -74,8 +74,8 @@ namespace trader {
 		};
 
 		ScopedStream(StreamType& stream, bool brackets = true, IndentType indent = INC)
-			: _stream(stream)
-			, _indent(indent)
+			: _indent(indent)
+            , _stream(stream)
 			, _brackets(brackets)
 		{
 			if (brackets) stream << "{" << endl;
@@ -99,10 +99,10 @@ namespace trader {
 	public:
 		template <typename ...T,
 			typename enable_if<sizeof...(T) == N, int>::type = 0>
-		ScopedClass(StreamType& stream, const string& className, T ...args) :
-			_className(className),
-			_stream(stream),
-			parentClasses{args...}
+		ScopedClass(StreamType& stream, const string& className, T ...args)
+            : parentClasses{ { args }... }
+            , _stream(stream)
+            , _className(className)
 		{
 			stream << "class " << className;
 			bool first = true;
@@ -147,10 +147,10 @@ namespace trader {
 	public:
 		template <typename ...T,
 			typename enable_if<sizeof...(T) == N, int>::type = 0>
-			ScopedStruct(StreamType& stream, const string& className, T ...args) :
-			_className(className),
-			_stream(stream),
-			parentClasses{ args... }
+			ScopedStruct(StreamType& stream, const string& className, T ...args)
+            : parentClasses{ args... }
+            , _stream(stream)
+            , _className(className)
 		{
 			stream << "struct " << className;
 			bool first = true;

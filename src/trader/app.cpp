@@ -54,6 +54,9 @@ namespace trader {
     int App::main(const std::vector<std::string>& args)
     {
 		(void)args;
+#if defined(__GNUC__)
+        std::set_terminate(__gnu_cxx::__verbose_terminate_handler);
+#endif
         try
         {
             //trader::FybApi fyb(this);

@@ -26,3 +26,4 @@
 #include <array>
 #include <algorithm>
 #include <functional>
+#include <stdarg.h>

@@ -72,8 +72,8 @@ namespace trader {
 		}
 
 		ApiFileOutputStream(const string& path, ios::openmode mode = ios::out | ios::trunc)
-			: stream(path, mode)
-			, indentation(0)
+			: indentation(0)
+            , stream(path, mode)
 		{}
 
 		friend ApiFileOutputStream& operator<<(ApiFileOutputStream& os, const char* text);
