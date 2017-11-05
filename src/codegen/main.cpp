@@ -9,6 +9,7 @@
 #include "app.h"
 #include "jsonschema.h"
 #include "databaseschema.h"
+#include "fixspec.h"
 
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -51,6 +52,13 @@ namespace trader {
 			.callback(OptionCallback<CodeGenApp>(this, &CodeGenApp::handleInputDir)));
 
 		options.addOption(
+			Option("file", "f", "Location of the spec file")
+			.required(false)
+			.repeatable(false)
+			.argument("input directory")
+			.callback(OptionCallback<CodeGenApp>(this, &CodeGenApp::handleInputFile)));
+
+		options.addOption(
 			Option("namespace", "n", "Namespace")
 			.required(false)
 			.repeatable(false)
@@ -76,6 +84,12 @@ namespace trader {
 	{
 		(void)name;
 		_inputDir = value;
+	}
+
+	void CodeGenApp::handleInputFile(const string& name, const string& value)
+	{
+		(void)name;
+		_inputFile = value;
 	}
 
 	void CodeGenApp::handleOutputDir(const string& name, const string& value)
@@ -134,11 +148,6 @@ namespace trader {
 		{
 			using namespace std::placeholders;
 
-			if (_inputDir.empty())
-			{
-				_inputDir = Path::current() + "apis" + Path::separator();
-			}
-
 			if (_outputDir.empty())
 			{
 				_outputDir = Path::current() + "codegen" + Path::separator();
@@ -147,17 +156,48 @@ namespace trader {
 			File outputDir(_outputDir);
 			outputDir.createDirectories();
 
-			if (_type.compare("hyperschema") == 0)
+			if (!_inputFile.empty())
 			{
-				processDirectory(_inputDir, std::bind(&HyperSchema::process, HyperSchema::instance.get(), _namespace, _1, _outputDir));
+				if (_type.compare("hyperschema") == 0)
+				{
+					HyperSchema::instance.get()->process(_namespace, _inputFile, _outputDir);
+				}
+				else if (_type.compare("jsonschema") == 0)
+				{
+					JsonSchema::instance.get()->process(_namespace, _inputFile, _outputDir);
+				}
+				else if (_type.compare("databaseschema") == 0)
+				{
+					DatabaseSchema::instance.get()->process(_namespace, _inputFile, _outputDir);
+				}
+				else if (_type.compare("xmlspec") == 0)
+				{
+					FixSpec::instance.get()->process(_namespace, _inputFile, _outputDir);
+				}
 			}
-			else if (_type.compare("jsonschema") == 0)
+			else
 			{
-				processDirectory(_inputDir, std::bind(&JsonSchema::process, JsonSchema::instance.get(), _namespace, _1, _outputDir));
-			}
-			else if (_type.compare("databaseschema") == 0)
-			{
-				processDirectory(_inputDir, std::bind(&DatabaseSchema::process, DatabaseSchema::instance.get(), _namespace, _1, _outputDir));
+				if (_inputDir.empty())
+				{
+					_inputDir = Path::current() + "apis" + Path::separator();
+				}
+
+				if (_type.compare("hyperschema") == 0)
+				{
+					processDirectory(_inputDir, std::bind(&HyperSchema::process, HyperSchema::instance.get(), _namespace, _1, _outputDir));
+				}
+				else if (_type.compare("jsonschema") == 0)
+				{
+					processDirectory(_inputDir, std::bind(&JsonSchema::process, JsonSchema::instance.get(), _namespace, _1, _outputDir));
+				}
+				else if (_type.compare("databaseschema") == 0)
+				{
+					processDirectory(_inputDir, std::bind(&DatabaseSchema::process, DatabaseSchema::instance.get(), _namespace, _1, _outputDir));
+				}
+				else if (_type.compare("xmlspec") == 0)
+				{
+					processDirectory(_inputDir, std::bind(&FixSpec::process, FixSpec::instance.get(), _namespace, _1, _outputDir));
+				}
 			}
 
 			ostringstream message;

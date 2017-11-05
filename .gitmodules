@@ -40,3 +40,6 @@
 [submodule "deps/bimg"]
 	path = deps/bimg
 	url = https://github.com/viknash/bimg.git
+[submodule "deps/quickfix"]
+	path = deps/quickfix
+	url = https://github.com/viknash/quickfix.git
