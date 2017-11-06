@@ -57,8 +57,9 @@
 			system "Windows"
 			architecture "x64"
 			flags { 
-				"MultiProcessorCompile",
-				"StaticRuntime"
+				"MultiProcessorCompile"
+				--,
+				--"StaticRuntime"
 				}
 			buildoptions {
 				"/GR-"

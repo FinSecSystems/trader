@@ -62,7 +62,9 @@ namespace trader {
 		AutoPtr<Document> pDoc = parser.parse(&src);
 
 		AutoPtr<Node> root = pDoc->firstChild();
-		AutoPtr<NodeList> fieldNodeList = pDoc->getElementsByTagName("field");
+		AutoPtr<NodeList> fieldElementsList = pDoc->getElementsByTagName("fields");
+        AutoPtr<Element> fieldsNode = (Element*)fieldElementsList->item(0);
+        AutoPtr<NodeList> fieldNodeList = fieldsNode->childNodes();
 
 		Config config;
 		config.outputDir = outputdirectory;

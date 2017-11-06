@@ -62,6 +62,7 @@
 #include <chrono>
 #include <map>
 #include <unordered_map>
+#include <exception>
 
 using Poco::Util::Application;
 using Poco::Util::Option;
