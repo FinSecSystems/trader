@@ -33,11 +33,16 @@ namespace trader {
 
 	const char* FixSpec::getCppType(const string& dbType)
 	{
-		if (dbType.compare("STRING") == 0 || dbType.compare("CHAR") == 0)
+		if (dbType.compare("STRING") == 0
+            || dbType.compare("CHAR") == 0
+            || dbType.compare("CURRENCY") == 0)
 		{
 			return "std::string";
 		}
-		else if (dbType.compare("PRICE") == 0 || dbType.compare("QTY") == 0 || dbType.compare("AMT") == 0)
+		else if (dbType.compare("PRICE") == 0
+            || dbType.compare("QTY") == 0
+            || dbType.compare("AMT") == 0
+            )
 		{
 			return "double";
 		}
@@ -52,7 +57,7 @@ namespace trader {
 		{
 			return "bool";
 		}
-		return nullptr;
+		return dbType.c_str();
 	}
 
 	void FixSpec::process(const string& namespacename, const string& filename, const string& outputdirectory)
@@ -61,10 +66,9 @@ namespace trader {
 		DOMParser parser;
 		AutoPtr<Document> pDoc = parser.parse(&src);
 
-		AutoPtr<Node> root = pDoc->firstChild();
-		AutoPtr<NodeList> fieldElementsList = pDoc->getElementsByTagName("fields");
-        AutoPtr<Element> fieldsNode = (Element*)fieldElementsList->item(0);
-        AutoPtr<NodeList> fieldNodeList = fieldsNode->childNodes();
+		Element* root = (Element*)pDoc->firstChild();
+		Element* fieldsNode = root->getChildElement("fields");
+        NodeList* fieldNodeList = fieldsNode->childNodes();
 
 		Config config;
 		config.outputDir = outputdirectory;
@@ -76,14 +80,26 @@ namespace trader {
 		ApiFileOutputStream header(config.headerFileName);
 		ApiFileOutputStream cpp(config.cppFileName);
 
-		for (UInt32 i = 0; i < fieldNodeList->length(); i++)
-		{
-			AutoPtr<Element> fieldNode = (Element*)fieldNodeList->item(i);
-			string name = fieldNode->getAttribute("name");
-			string type = fieldNode->getAttribute("type");
-			string cppType = getCppType(type);
-			header << "typename " << cppType << " " << name << endl;
-		}
+        startHeader(header, 0);
+        {
+            ScopedNamespace scopedNamespaceTrader(header, config.nameSpace);
+            {
+                ScopedNamespace scopedNamespaceInterface(header, std::string("Interface"));
+
+                for (UInt32 i = 0; i < fieldNodeList->length(); i++)
+                {
+                    Node* child = fieldNodeList->item(i);
+                    if (child->nodeType() == Node::ELEMENT_NODE)
+                    {
+                        Element* fieldNode = (Element*)child;
+                        string name = fieldNode->getAttribute("name");
+                        string type = fieldNode->getAttribute("type");
+                        string cppType = getCppType(type);
+                        header << "typename " << cppType << " " << name << cendl;
+                    }
+                }
+            }
+        }
 
 
 		//Write
