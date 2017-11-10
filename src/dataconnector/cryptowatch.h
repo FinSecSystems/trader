@@ -1,6 +1,7 @@
 #pragma once
 
-#include "api.h"
+#include "dataconnector/db.h"
+#include "dataconnector/api.h"
 #include "cryptowatchapi.h"
 #include "cryptowatchdatabase.h"
 
@@ -17,7 +18,7 @@ namespace trader {
     class Cryptowatch : public Api
     {
     public:
-        Cryptowatch(Poco::AutoPtr<trader::App> _app);
+        Cryptowatch(Poco::AutoPtr<trader::Db> _app);
 
         ~Cryptowatch();
 

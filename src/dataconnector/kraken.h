@@ -1,6 +1,7 @@
 #pragma once
 
-#include "api.h"
+#include "dataconnector/db.h"
+#include "dataconnector/api.h"
 #include "krakenapi.h"
 #include "krakendatabase.h"
 
@@ -17,7 +18,7 @@ namespace trader {
 	class Kraken : public Api
 	{
 	public:
-        Kraken(Poco::AutoPtr<trader::App> _app);
+        Kraken(Poco::AutoPtr<trader::Db> _app);
 
 		~Kraken();
 
@@ -37,7 +38,7 @@ namespace trader {
 	private:
 		Poco::Timer executeTimer;
 		Poco::AutoPtr<KrakenDatabase::Tables> dataBase;
-		Poco::AutoPtr<trader::App> app;
+		Poco::AutoPtr<trader::Db> app;
 		std::vector<std::function<void(Poco::Timer&)>> serialExecutionList;
 	};
 

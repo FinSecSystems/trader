@@ -10,7 +10,7 @@ namespace trader {
     using namespace FybApi;
     using namespace FybDatabase;
 
-	Fyb::Fyb(AutoPtr<trader::App> _app)
+	Fyb::Fyb(AutoPtr<trader::Db> _app)
 		: api(_app, this)
         , executeTimer(0, 1000)
 		, dataBase(new FybDatabase::Tables(_app->dbSession))

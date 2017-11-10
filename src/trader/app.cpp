@@ -1,10 +1,11 @@
 #include "stdafx.h"
-#include "fyb.h"
-#include "exchangeratelab.h"
+#include "dataconnector/db.h"
 #include "app.h"
-#include "cryptowatch.h"
-#include "kraken.h"
-#include "bittrex.h"
+//#include "fyb.h"
+//#include "exchangeratelab.h"
+//#include "cryptowatch.h"
+//#include "kraken.h"
+//#include "bittrex.h"
 
 namespace trader {
 
@@ -133,15 +134,15 @@ namespace trader {
 
             HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
 
-			Exchangeratelab exchangeRateLab(this);
-			Fyb fyb(this);
+			//Exchangeratelab exchangeRateLab(this);
+			//Fyb fyb(this);
 			//fyb.run();
 			//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.api.GetUSDToSGD();
 
-            Cryptowatch cryptowatch(this);
+            //Cryptowatch cryptowatch(this);
             //Poco::AutoPtr<AssetList> assetList = cryptowatch.api.GetAssetList();
 
-            Kraken kraken(this);
+            //Kraken kraken(this);
             //kraken.run();
             //Poco::AutoPtr<AssetInfoParams> assetInfoParams = new AssetInfoParams();
             //AutoPtr<AssetInfo> assetInfo = kraken.api.GetAssetInfo(assetInfoParams);
@@ -174,17 +175,17 @@ namespace trader {
             //orderBookParams->dataObject.pair = "XZECZUSD";
             //AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
 
-            Bittrex bittrex(this);
-            while (1)
-            {
-                bittrex.run();
-                break;
-            }
+            //Bittrex bittrex(this);
+            //while (1)
+            //{
+            //    bittrex.run();
+            //    break;
+            //}
             //AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
 
-			AutoPtr<BittrexApi::BalanceParams> balanceParam = new BittrexApi::BalanceParams();
-			balanceParam->dataObject.SetCurrency("BTC");
-			AutoPtr<BittrexApi::Balance> balance = bittrex.api.GetBalance(balanceParam);
+			//AutoPtr<BittrexApi::BalanceParams> balanceParam = new BittrexApi::BalanceParams();
+			//balanceParam->dataObject.SetCurrency("BTC");
+			//AutoPtr<BittrexApi::Balance> balance = bittrex.api.GetBalance(balanceParam);
 
 			do {
 				Thread::sleep(10000);

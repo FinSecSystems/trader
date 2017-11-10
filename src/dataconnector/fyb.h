@@ -1,6 +1,7 @@
 #pragma once
 
-#include "api.h"
+#include "dataconnector/db.h"
+#include "dataconnector/api.h"
 #include "fybapi.h"
 #include "fybdatabase.h"
 
@@ -17,7 +18,7 @@ namespace trader {
 	class Fyb : public Api
 	{
 	public:
-		Fyb(Poco::AutoPtr<trader::App> _app);
+		Fyb(Poco::AutoPtr<trader::Db> _app);
 
 		~Fyb();
 
@@ -44,7 +45,7 @@ namespace trader {
 	private:
 		Poco::Timer executeTimer;
 		Poco::AutoPtr<FybDatabase::Tables> dataBase;
-		Poco::AutoPtr<trader::App> app;
+		Poco::AutoPtr<trader::Db> app;
 		std::vector<std::function<void(Poco::Timer&)>> serialExecutionList;
 	};
 

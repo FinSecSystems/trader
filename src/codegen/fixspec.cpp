@@ -88,17 +88,18 @@ namespace trader {
 		config.outputDir = outputdirectory;
 		config.nameSpace = namespacename;
 		config.headerFileName = outputdirectory + Path::separator() + "interface.h";
-		config.cppFileName = outputdirectory + Path::separator() + "interface.cpp";
+		//config.cppFileName = outputdirectory + Path::separator() + "interface.cpp";
 	
 
 		ApiFileOutputStream header(config.headerFileName);
-		ApiFileOutputStream cpp(config.cppFileName);
+		//ApiFileOutputStream cpp(config.cppFileName);
 
         startHeader(header, 0);
         {
             ScopedNamespace scopedNamespaceTrader(header, config.nameSpace);
             {
-                ScopedNamespace scopedNamespaceInterface(header, std::string("Interface"));
+                std::string interfaceName = "Interface";
+                ScopedNamespace scopedNamespaceInterface(header, interfaceName);
 
                 Element* fieldsNode = root->getChildElement("fields");
                 NodeList* fieldNodeList = fieldsNode->childNodes();
@@ -159,30 +160,30 @@ namespace trader {
                             {
                                 Element* groupOrField = (Element*)componentChildNode;
                                 std::string tagName = groupOrField->tagName();
-                                string name = groupOrField->getAttribute("name");
+                                string groupOrFieldName = groupOrField->getAttribute("name");
                                 if (tagName.compare("group") == 0)
                                 {
                                     {
-                                        ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, name.c_str());
-                                        NodeList* fieldNodeList = componentChildNode->childNodes();
+                                        ScopedStruct<0, ApiFileOutputStream> scopedStructGroup(header, groupOrFieldName.c_str());
+                                        NodeList* componentChildNodeList2 = componentChildNode->childNodes();
                                         {
-                                            for (UInt32 k = 0; k < fieldNodeList->length(); k++)
+                                            for (UInt32 k = 0; k < componentChildNodeList2->length(); k++)
                                             {
-                                                Node* fieldChildNode = fieldNodeList->item(k);
+                                                Node* fieldChildNode = componentChildNodeList2->item(k);
                                                 if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
                                                 {
                                                     Element* field = (Element*)fieldChildNode;
-                                                    string name = field->getAttribute("name");
-                                                    header << name << " " << var_name(name) << cendl;
+                                                    string fieldName = field->getAttribute("name");
+                                                    header << fieldName << " " << var_name(fieldName) << cendl;
                                                 }
                                             }
                                         }
                                     }
-                                    header << "std::vector<" << name << "> " << var_name(name) << cendl;
+                                    header << "std::vector<" << groupOrFieldName << "> " << var_name(groupOrFieldName) << cendl;
                                 }
                                 else
                                 {
-                                    header << name << " " << var_name(name) << cendl;
+                                    header << groupOrFieldName << " " << var_name(groupOrFieldName) << cendl;
                                 }
                             }
                         }
@@ -190,16 +191,17 @@ namespace trader {
                 }
 
                 {
-                    ScopedClass<1> scopedClass(header, "IMessageData", "Poco::RefCountedObject");
-                    header << "virtual ProcessMessage(Poco::AutoPtr<IMessageData>> _messageData) = 0" << cendl;
+                    ScopedClass<0> scopedClass(header, "IConnection");
+                    header << "virtual void ProcessMessage(Poco::AutoPtr<IMessageData>> _messageData) = 0" << cendl;
                 }
 
                 {
-                    ScopedClass<1> scopedClass(header, "Connection", "Poco::RefCountedObject");
+                    ScopedClass<1> scopedConnectionClass(header, "Connection", "IConnection, public Poco::RefCountedObject");
 
                     Element* messagesNode = root->getChildElement("messages");
                     NodeList* messagesNodelist = messagesNode->childNodes();
 
+                    header << comment("Messages Enum") << endl;
                     header << "enum MESSAGES ";
                     {
                         ScopedStream<ApiFileOutputStream> enumScope(header);
@@ -210,23 +212,34 @@ namespace trader {
                             {
                                 Element* message = (Element*)messageNode;
                                 string name = message->getAttribute("name");
-                                header << name;
+                                header << name << "_TYPE ," << endl;
                             }
                         }
                         header << "NUM_MESSAGES" << cendl;
                     }
                     header << cendl;
 
+                    {
+                        ScopedClass<0> scopedMessageDataClass(header, "IMessageData");
+                        header << "virtual enum MESSAGES GetType() = 0" << cendl;
+                    }
+
+                    header << comment("Message Data") << endl;
                     for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                     {
                         Node* messageNode = messagesNodelist->item(i);
                         if (messageNode->nodeType() == Node::ELEMENT_NODE)
                         {
                             Element* message = (Element*)messageNode;
-                            string name = message->getAttribute("name");
+                            string attribName = message->getAttribute("name");
                             ostringstream className;
-                            className << name << "Data";
+                            className << attribName << "Data";
                             ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, className.str().c_str());
+                            header << "virtual enum MESSAGES GetType()" << endl;
+                            {
+                                ScopedStream<ApiFileOutputStream> funcScope(header);
+                                header << "return MESSAGES::" << attribName << "_TYPE" << cendl;
+                            }
                             NodeList* messageChildNodeList = messageNode->childNodes();
                             for (UInt32 j = 0; j < messageChildNodeList->length(); j++)
                             {
@@ -235,30 +248,30 @@ namespace trader {
                                 {
                                     Element* groupOrField = (Element*)messageChildNode;
                                     std::string tagName = groupOrField->tagName();
-                                    string name = groupOrField->getAttribute("name");
+                                    string attribName2 = groupOrField->getAttribute("name");
                                     if (tagName.compare("group") == 0)
                                     {
                                         {
-                                            ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, name.c_str());
-                                            NodeList* fieldNodeList = messageChildNode->childNodes();
+                                            ScopedStruct<0, ApiFileOutputStream> scopedStruct3(header, attribName2.c_str());
+                                            NodeList* fieldNodeList2 = messageChildNode->childNodes();
                                             {
-                                                for (UInt32 k = 0; k < fieldNodeList->length(); k++)
+                                                for (UInt32 k = 0; k < fieldNodeList2->length(); k++)
                                                 {
-                                                    Node* fieldChildNode = fieldNodeList->item(k);
+                                                    Node* fieldChildNode = fieldNodeList2->item(k);
                                                     if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
                                                     {
                                                         Element* field = (Element*)fieldChildNode;
-                                                        string name = field->getAttribute("name");
-                                                        header << name << " " << var_name(name) << cendl;
+                                                        string name3 = field->getAttribute("name");
+                                                        header << name3 << " " << var_name(name3) << cendl;
                                                     }
                                                 }
                                             }
                                         }
-                                        header << "std::vector<" << name << "> " << var_name(name) << cendl;
+                                        header << "std::vector<" << attribName2 << "> " << var_name(attribName2) << cendl;
                                     }
                                     else
                                     {
-                                        header << name << " " << var_name(name) << cendl;
+                                        header << attribName2 << " " << var_name(attribName2) << cendl;
                                     }
                                 }
                             }
@@ -280,12 +293,37 @@ namespace trader {
                         }
                     }
 
-                    header << "vitual void SetReceivingConnection(Connection* _connection)";
+                    header << "void ProcessMessage(Poco::AutoPtr<IMessageData>> _messageData)" << endl;
+                    {
+                        ScopedStream<ApiFileOutputStream> funcScope(header);
+                        header << "switch (_messageData->GetType())";
+                        {
+                            ScopedStream<ApiFileOutputStream> switchScope(header);
+                            for (UInt32 i = 0; i < messagesNodelist->length(); i++)
+                            {
+                                Node* messageNode = messagesNodelist->item(i);
+                                if (messageNode->nodeType() == Node::ELEMENT_NODE)
+                                {
+                                    Element* message = (Element*)messageNode;
+                                    string name = message->getAttribute("name");
+                                    header << "case MESSAGES::" << name << "_TYPE: ";
+                                    {
+                                        ScopedStream<ApiFileOutputStream> caseScope(header);
+                                        header << name << "(_messageData)" << cendl;
+                                        header << "break" << cendl;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    header << "virtual void SetReceivingConnection(Connection* _connection)";
                     {
                         ScopedStream<ApiFileOutputStream> enumScope(header);
                         header << "connection = _connection" << cendl;
                     }
-                    header << "Connection* connection" << endl;
+                    header << endl;
+                    header << "Connection* connection" << cendl;
 
                 }
 
@@ -298,7 +336,7 @@ namespace trader {
 
 		header << endl;
 
-		cpp << endl;
+		//cpp << endl;
 	}
 
 }

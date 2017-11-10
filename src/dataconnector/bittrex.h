@@ -1,6 +1,7 @@
 #pragma once
 
-#include "api.h"
+#include "dataconnector/db.h"
+#include "dataconnector/api.h"
 #include "bittrexapi.h"
 #include "bittrexdatabase.h"
 
@@ -17,7 +18,7 @@ namespace trader {
     class Bittrex : public Api
     {
     public:
-        Bittrex(Poco::AutoPtr<trader::App> _app);
+        Bittrex(Poco::AutoPtr<trader::Db> _app);
 
         void run();
 

@@ -2,7 +2,7 @@
 
 namespace trader {
 
-	class App : public Poco::Util::Application
+	class App : public Db
 	{
 	public:
 		App()
@@ -11,20 +11,9 @@ namespace trader {
 
 		~App()
 		{
-			if (dbSession)
-			{
-				delete dbSession;
-				dbSession = nullptr;
-			}
 		}
 
-		bool findFile(Poco::Path& path) const;
-
-		friend class Fyb;
-		friend class Exchangeratelab;
-		friend class Cryptowatch;
-        friend class Kraken;
-        friend class Bittrex;
+		bool findFile(Poco::Path& path) const override;
 
 	protected:
 		void defineOptions(Poco::Util::OptionSet& options);
@@ -33,7 +22,5 @@ namespace trader {
         Poco::Util::AbstractConfiguration& appConfig();
 		int main(const std::vector<std::string>& args);
 
-	private:
-		Poco::Data::Session* dbSession;
 	};
 }

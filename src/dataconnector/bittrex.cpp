@@ -9,7 +9,7 @@ namespace trader {
     using namespace BittrexApi;
     using namespace BittrexDatabase;
 
-    Bittrex::Bittrex(Poco::AutoPtr<trader::App> _app)
+    Bittrex::Bittrex(Poco::AutoPtr<trader::Db> _app)
         : api(_app, this)
         , dataBase(new BittrexDatabase::Tables(_app->dbSession))
     {

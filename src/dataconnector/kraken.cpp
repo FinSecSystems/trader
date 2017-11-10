@@ -11,7 +11,7 @@ namespace trader {
     using namespace KrakenApi;
     using namespace KrakenDatabase;
 
-    Kraken::Kraken(AutoPtr<trader::App> _app)
+    Kraken::Kraken(AutoPtr<trader::Db> _app)
 		: api(_app, this)
         , executeTimer(0, 1000)
         , dataBase(new KrakenDatabase::Tables(_app->dbSession))

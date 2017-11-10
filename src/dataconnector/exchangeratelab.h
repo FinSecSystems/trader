@@ -1,6 +1,7 @@
 #pragma once
 
-#include "api.h"
+#include "dataconnector/db.h"
+#include "dataconnector/api.h"
 #include "exchangeratelabapi.h"
 
 namespace trader {
@@ -12,7 +13,7 @@ namespace trader {
         class Exchangeratelab : public Api
         {
         public:
-            Exchangeratelab(Poco::AutoPtr<trader::App> _app);
+            Exchangeratelab(Poco::AutoPtr<trader::Db> _app);
 
             ~Exchangeratelab();
 
