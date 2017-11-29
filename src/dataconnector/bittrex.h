@@ -4,6 +4,7 @@
 #include "dataconnector/api.h"
 #include "bittrexapi.h"
 #include "bittrexdatabase.h"
+#include "interface.h"
 
 namespace trader {
 
@@ -14,6 +15,17 @@ namespace trader {
     namespace BittrexDatabase {
         class Tables;
     };
+
+    class BittrexConnection : public Connection
+    {
+    public:
+        BittrexConnection(const std::string& connectionid)
+        {
+
+        }
+    private:
+        Bittrex exchange;
+    }
 
     class Bittrex : public Api
     {
@@ -41,6 +53,9 @@ namespace trader {
         };
 
         std::unordered_map<std::string, MarketData> marketToTradeHistoryMap;
+
+        static AutoPtr<Connection> getConnection(const std::string& connectionId);
+
     protected:
         Bittrex(const Bittrex&);
         Bittrex& operator = (const Bittrex&);

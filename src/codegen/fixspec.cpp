@@ -67,7 +67,7 @@ namespace trader {
             || dbType.compare("NUMINGROUP") == 0
             )
 		{
-			return "POCO::Int32";
+			return "Poco::Int32";
 		}
 		else if (dbType.compare("BOOLEAN") == 0)
 		{

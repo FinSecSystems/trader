@@ -9,6 +9,11 @@ namespace trader {
     using namespace BittrexApi;
     using namespace BittrexDatabase;
 
+    static AutoPtr<Connection> getConnection(const std::string& connectionId)
+    {
+        return new BittrexConnection(connectionId);
+    }
+
     Bittrex::Bittrex(Poco::AutoPtr<trader::Db> _app)
         : api(_app, this)
         , dataBase(new BittrexDatabase::Tables(_app->dbSession))
