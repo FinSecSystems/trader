@@ -40,7 +40,9 @@ namespace trader {
             || dbType.compare("MULTIPLECHARVALUE") == 0
             || dbType.compare("MULTIPLESTRINGVALUE") == 0
             || dbType.compare("COUNTRY") == 0
-            || dbType.compare("DATA") == 0)
+            || dbType.compare("DATA") == 0
+            || dbType.compare("XMLDATA") == 0
+            )
 		{
 			return "std::string";
 		}
@@ -65,6 +67,11 @@ namespace trader {
             || dbType.compare("LOCALMKTDATE") == 0
             || dbType.compare("MONTHYEAR") == 0
             || dbType.compare("NUMINGROUP") == 0
+            || dbType.compare("UTCDATEONLY") == 0
+            || dbType.compare("UTCTIMEONLY") == 0
+            || dbType.compare("TZTIMEONLY") == 0
+            || dbType.compare("TZTIMESTAMP") == 0
+            || dbType.compare("LANGUAGE") == 0
             )
 		{
 			return "Poco::Int32";
@@ -124,7 +131,7 @@ namespace trader {
                                     {
                                         Element* value = (Element*)valueNode;
                                         string description = value->getAttribute("description");
-                                        header << description << "," << endl;
+                                        header << name << "_" << description << "," << endl;
                                     }
                                 }
                                 header << "NUM_" << name << endl;
@@ -135,7 +142,7 @@ namespace trader {
                         {
                             string type = fieldNode->getAttribute("type");
                             string cppType = getCppType(type);
-                            header << "typename " << cppType << " " << name << cendl;
+                            header << "typedef " << cppType << " " << name << cendl;
                         }
                         header << endl;
                     }
@@ -143,6 +150,17 @@ namespace trader {
 
                 Element* componentsNode = root->getChildElement("components");
                 NodeList* componentsNodeList = componentsNode->childNodes();
+
+                for (UInt32 i = 0; i < componentsNodeList->length(); i++)
+                {
+                    Node* componentNode = componentsNodeList->item(i);
+                    if (componentNode->nodeType() == Node::ELEMENT_NODE)
+                    {
+                        Element* component = (Element*)componentNode;
+                        string name = component->getAttribute("name");
+                        header << "struct " << name << cendl;
+                    }
+                }
 
                 for (UInt32 i = 0; i < componentsNodeList->length(); i++)
                 {
