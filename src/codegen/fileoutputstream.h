@@ -124,6 +124,9 @@ namespace trader {
 		os.stream << std::endl;
 		os.stream << tabs(os.indentation);
 		os.stream << os.tempStream.str();
+#ifdef DEBUG
+        cout << os.tempStream.str() << std::endl;
+#endif
 		os.tempStream.str("");
 		os.tempStream.clear();
 		return os;
@@ -135,6 +138,9 @@ namespace trader {
 		os.stream << tabs(os.indentation);
 		os.stream << os.tempStream.str();
 		os.stream << ";";
+#ifdef DEBUG
+        cout << os.tempStream.str() << std::endl;
+#endif
 		os.tempStream.str("");
 		os.tempStream.clear();
 		return os;
