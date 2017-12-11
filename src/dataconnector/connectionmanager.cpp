@@ -1,23 +1,24 @@
 #include "stdafx.h"
 #include "connectionmanager.h"
+#include "bittrex.h"
 
 namespace trader {
 
-    ConnectionManager ConnectionManager::instance;
+    //ConnectionManager ConnectionManager::instance;
 
-    ConnectionManager::ConnectionMananger()
+    ConnectionManager::ConnectionManager()
     {}
 
-    ConnectionManager::~ConnectionMananger()
+    ConnectionManager::~ConnectionManager()
     {}
 
-    AutoPtr<Connection> ConnectionMananger::getConnection(const std::string& connectionString)
+    AutoPtr<Interface::Connection> ConnectionManager::getConnection(const std::string& connectionString)
     {
-        if (connectionString.find("bittrex") != std::npos)
+        if (connectionString.find("bittrex") != std::string::npos)
         {
             return Bittrex::getConnection(connectionString);
         }
-        return new Connection();
+        return new Interface::Connection();
         //else if (connectionString.find("fyb") != std::npos)
         //{
         //    return Fyb::getConnection(connectionString);

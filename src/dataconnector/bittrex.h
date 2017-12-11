@@ -16,21 +16,24 @@ namespace trader {
         class Tables;
     };
 
-    class BittrexConnection : public Connection
+    class Bittrex;
+
+    class BittrexConnection : public Interface::Connection
     {
     public:
-        BittrexConnection(const std::string& connectionid)
+        BittrexConnection(const std::string& connectionid, Bittrex* _exchange)
+            : exchange(_exchange)
         {
-
+            (void)connectionid;
         }
     private:
-        Bittrex exchange;
-    }
+        Bittrex* exchange;
+    };
 
     class Bittrex : public Api
     {
     public:
-        Bittrex(Poco::AutoPtr<trader::Db> _app);
+        //Bittrex(Poco::AutoPtr<trader::Db> _app);
 
         void run();
 
@@ -40,8 +43,8 @@ namespace trader {
 
         BittrexApi::EndPoints api;
 
-        Poco::AutoPtr<BittrexDatabase::Tables> dataBase;
-
+        //Poco::AutoPtr<BittrexDatabase::Tables> dataBase;
+        /*
         struct MarketData
         {
             MarketData()
@@ -53,8 +56,8 @@ namespace trader {
         };
 
         std::unordered_map<std::string, MarketData> marketToTradeHistoryMap;
-
-        static AutoPtr<Connection> getConnection(const std::string& connectionId);
+        */
+        static AutoPtr<Interface::Connection> getConnection(const std::string& connectionId);
 
     protected:
         Bittrex(const Bittrex&);

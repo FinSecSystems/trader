@@ -90,7 +90,10 @@ namespace trader {
         typedef std::map < Vertex, std::list<Vertex> > AdjMat;
         AdjMat adjMat;
 
-        void topologicalSortUtil(Vertex v, std::map<Vertex, bool> visited, std::stack<Vertex> &Stack);
+        void topologicalSortUtil(Vertex v, std::map<Vertex, bool>& visited, std::stack<Vertex>& resultStack);
+
+        bool hasCycleUtil(Vertex v, std::vector<Vertex> &traversedVertices);
+
     public:
 
         void addEdge(Vertex v, Vertex w);
@@ -98,6 +101,9 @@ namespace trader {
         void addVertex(Vertex v);
 
         void topologicalSort(std::stack<Vertex>& Stack);
+
+        bool findCycles(std::vector<Vertex>& traversedVertices);
+
     };
 
     template<class Vertex>
@@ -111,20 +117,22 @@ namespace trader {
     void Graph<Vertex>::addEdge(Vertex v, Vertex w)
     {
         AdjMat::iterator it = adjMat.find(v);
-        if (it == adjMat.end())
+        poco_assert(it != adjMat.end());
+        /*if (it == adjMat.end())
         {
             std::list<Vertex> dummy;
             dummy.push_back(w);
             adjMat.insert({ v, dummy });
         }
         else
+        */
         {
             it->second.push_back(w); // Add w to v’s list.
         }
     }
 
     template<class Vertex>
-    void Graph<Vertex>::topologicalSortUtil(Vertex v, std::map<Vertex, bool> visited , std::stack<Vertex> &Stack)
+    void Graph<Vertex>::topologicalSortUtil(Vertex v, std::map<Vertex, bool>& visited , std::stack<Vertex> &resultStack)
     {
         // Mark the current node as visited.
         visited[v] = true;
@@ -133,14 +141,52 @@ namespace trader {
         std::list<Vertex>::iterator it;
         for (it = adjMat[v].begin(); it != adjMat[v].end(); ++it)
             if (!visited[*it])
-                topologicalSortUtil(*it, visited, Stack);
+                topologicalSortUtil(*it, visited, resultStack);
 
         // Push current vertex to stack which stores result
-        Stack.push(v);
+        resultStack.push(v);
     }
 
     template<class Vertex>
-    void Graph<Vertex>::topologicalSort(std::stack<Vertex>& Stack)
+    bool Graph<Vertex>::hasCycleUtil(Vertex v, std::vector<Vertex> &traversedVertices)
+    {
+        // Recur for all the vertices adjacent to this vertex
+        std::list<Vertex>::iterator it;
+        for (it = adjMat[v].begin(); it != adjMat[v].end(); ++it)
+        {
+            std::vector<Vertex>::iterator itVertex = std::find(traversedVertices.begin(), traversedVertices.end(), *it);
+            if (itVertex != traversedVertices.end())
+            {
+                traversedVertices.push_back(*it);
+                return true;
+            }
+            traversedVertices.push_back(*it);
+            if (hasCycleUtil(*it, traversedVertices))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    template<class Vertex>
+    bool Graph<Vertex>::findCycles(std::vector<Vertex>& traversedVertices)
+    {
+        traversedVertices.clear();
+        for (AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
+        {
+            traversedVertices.push_back(it->first);
+            if (hasCycleUtil(it->first, traversedVertices))
+            {
+                return true;
+            }
+            traversedVertices.clear();
+        }
+        return false;
+    }
+
+    template<class Vertex>
+    void Graph<Vertex>::topologicalSort(std::stack<Vertex>& resultStack)
     {
         // Mark all the vertices as not visited
         std::map<Vertex, bool> visited;
@@ -155,7 +201,7 @@ namespace trader {
         {
             if (visited[it->first] == false)
             {
-                topologicalSortUtil(it->first, visited, Stack);
+                topologicalSortUtil(it->first, visited, resultStack);
             }
         }
 
@@ -256,6 +302,10 @@ namespace trader {
                         string name = component->getAttribute("name");
                         ostringstream structName;
                         structName << name << "Object";
+                        {
+                            std::map<std::string, Node*>::iterator it = nodeNameToVertexMap.find(structName.str());
+                            poco_assert(it != nodeNameToVertexMap.end());
+                        }
                         NodeList* componentChildNodeList = componentNode->childNodes();
                         for (UInt32 j = 0; j < componentChildNodeList->length(); j++)
                         {
@@ -283,9 +333,14 @@ namespace trader {
                                                     {
                                                         structName2 << fieldName << "Object";
                                                         std::map<std::string, Node*>::iterator it = nodeNameToVertexMap.find(structName2.str());
+                                                        poco_assert(it != nodeNameToVertexMap.end());
                                                         if (it != nodeNameToVertexMap.end())
                                                         {
-                                                            nodeGraph.addEdge(componentChildNode, it->second);
+                                                            nodeGraph.addEdge(componentNode, it->second);
+
+                                                            ostringstream debugStr;
+                                                            debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() << std::endl;
+                                                            Debugger::message(debugStr.str());
                                                         }
                                                     }
                                                 }
@@ -295,15 +350,37 @@ namespace trader {
                                 }
                                 else if (tagName.compare("field") != 0)
                                 {
-                                    std::map<std::string, Node*>::iterator it = nodeNameToVertexMap.find(structName.str());
+                                    ostringstream structName2;
+                                    structName2 << groupOrFieldName << "Object";
+                                    std::map<std::string, Node*>::iterator it = nodeNameToVertexMap.find(structName2.str());
+                                    poco_assert(it != nodeNameToVertexMap.end());
                                     if (it != nodeNameToVertexMap.end())
                                     {
-                                        nodeGraph.addEdge(componentChildNode, it->second);
+                                        nodeGraph.addEdge(componentNode, it->second);
+
+                                        ostringstream debugStr;
+                                        debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() << std::endl;
+                                        Debugger::message(debugStr.str());
                                     }
                                 }
                             }
                         }
                     }
+                }
+
+                std::vector<Node*> traversedVertices;
+                if (nodeGraph.findCycles(traversedVertices))
+                {
+                    for (std::vector<Node*>::iterator itVertices = traversedVertices.begin(); itVertices != traversedVertices.end(); itVertices++)
+                    {
+                        Element* component = (Element*)*itVertices;
+                        string name = component->getAttribute("name");
+                        ostringstream structName;
+                        structName << name << "Object";
+                        std::cout << structName.str() << ",";
+                    }
+                    std::cout << std::endl;
+                    poco_assert(0);
                 }
 
                 std::stack<Node*> nodeStack;
@@ -377,39 +454,39 @@ namespace trader {
                     }
                 }
 
+                Element* messagesNode = root->getChildElement("messages");
+                NodeList* messagesNodelist = messagesNode->childNodes();
+
+                header << comment("Messages Enum") << endl;
+                header << "enum MESSAGES ";
+                {
+                    ScopedStream<ApiFileOutputStream> enumScope(header);
+                    for (UInt32 i = 0; i < messagesNodelist->length(); i++)
+                    {
+                        Node* messageNode = messagesNodelist->item(i);
+                        if (messageNode->nodeType() == Node::ELEMENT_NODE)
+                        {
+                            Element* message = (Element*)messageNode;
+                            string name = message->getAttribute("name");
+                            header << name << "_TYPE ," << endl;
+                        }
+                    }
+                    header << "NUM_MESSAGES" << endl;
+                }
+                header << cendl;
+
+                {
+                    ScopedClass<1> scopedMessageDataClass(header, "IMessageData", "Poco::RefCountedObject");
+                    header << "virtual enum MESSAGES GetType() = 0" << cendl;
+                }
+
                 {
                     ScopedClass<0> scopedClass(header, "IConnection");
-                    header << "virtual void ProcessMessage(Poco::AutoPtr<IMessageData>> _messageData) = 0" << cendl;
+                    header << "virtual void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData) = 0" << cendl;
                 }
 
                 {
                     ScopedClass<1> scopedConnectionClass(header, "Connection", "IConnection, public Poco::RefCountedObject");
-
-                    Element* messagesNode = root->getChildElement("messages");
-                    NodeList* messagesNodelist = messagesNode->childNodes();
-
-                    header << comment("Messages Enum") << endl;
-                    header << "enum MESSAGES ";
-                    {
-                        ScopedStream<ApiFileOutputStream> enumScope(header);
-                        for (UInt32 i = 0; i < messagesNodelist->length(); i++)
-                        {
-                            Node* messageNode = messagesNodelist->item(i);
-                            if (messageNode->nodeType() == Node::ELEMENT_NODE)
-                            {
-                                Element* message = (Element*)messageNode;
-                                string name = message->getAttribute("name");
-                                header << name << "_TYPE ," << endl;
-                            }
-                        }
-                        header << "NUM_MESSAGES" << cendl;
-                    }
-                    header << cendl;
-
-                    {
-                        ScopedClass<0> scopedMessageDataClass(header, "IMessageData");
-                        header << "virtual enum MESSAGES GetType() = 0" << cendl;
-                    }
 
                     header << comment("Message Data") << endl;
                     for (UInt32 i = 0; i < messagesNodelist->length(); i++)
@@ -421,7 +498,7 @@ namespace trader {
                             string attribName = message->getAttribute("name");
                             ostringstream className;
                             className << attribName << "Data";
-                            ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, className.str().c_str());
+                            ScopedStruct<1, ApiFileOutputStream> scopedStruct(header, className.str().c_str(), "IMessageData");
                             header << "virtual enum MESSAGES GetType()" << endl;
                             {
                                 ScopedStream<ApiFileOutputStream> funcScope(header);
@@ -456,9 +533,13 @@ namespace trader {
                                         }
                                         header << "std::vector<" << attribName2 << "> " << var_name(attribName2) << cendl;
                                     }
-                                    else
+                                    else if (tagName.compare("field") == 0)
                                     {
                                         header << attribName2 << " " << var_name(attribName2) << cendl;
+                                    }
+                                    else
+                                    {
+                                        header << attribName2 << "Object " << var_name(attribName2) << cendl;
                                     }
                                 }
                             }
@@ -472,7 +553,7 @@ namespace trader {
                         {
                             Element* message = (Element*)messageNode;
                             string name = message->getAttribute("name");
-                            header << "virtual " << name << "(Poco::AutoPtr<" << name << "Data>> " << var_name(name) << "Data)";
+                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name) << "Data)";
                             {
                                 ScopedStream<ApiFileOutputStream> funcScope(header);
                                 header << "poco_bugcheck_msg(\"" << name << " not supported.\")" << cendl;
@@ -480,7 +561,7 @@ namespace trader {
                         }
                     }
 
-                    header << "void ProcessMessage(Poco::AutoPtr<IMessageData>> _messageData)" << endl;
+                    header << "void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData)" << endl;
                     {
                         ScopedStream<ApiFileOutputStream> funcScope(header);
                         header << "switch (_messageData->GetType())";
@@ -496,7 +577,8 @@ namespace trader {
                                     header << "case MESSAGES::" << name << "_TYPE: ";
                                     {
                                         ScopedStream<ApiFileOutputStream> caseScope(header);
-                                        header << name << "(_messageData)" << cendl;
+                                        header << "Poco::AutoPtr<" << name << "Data> ptr = _messageData.unsafeCast<" << name << "Data>()" << cendl;
+                                        header << name << "(ptr)" << cendl;
                                         header << "break" << cendl;
                                     }
                                 }

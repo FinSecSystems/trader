@@ -10,15 +10,9 @@ namespace trader {
 
         ~ConnectionManager();
 
-        AutoPtr<Connection> getConnection(const std::string& connectionString);
+        Poco::AutoPtr<Interface::Connection> getConnection(const std::string& connectionString);
 
-        static ConnectionManager& get()
-        {
-            return instance;
-        }
-
-    private:
-        static ConnectionManager instance;
+        //static ConnectionManager instance;
     };
 
-}
+};

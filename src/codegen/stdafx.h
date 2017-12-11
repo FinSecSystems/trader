@@ -25,6 +25,7 @@
 #include "Poco/DOM/AutoPtr.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/Exception.h"
+#include "Poco/Debugger.h"
 #pragma warning( pop ) 
 
 
