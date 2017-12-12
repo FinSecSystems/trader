@@ -12,9 +12,9 @@ configuration:
   - release-static
 
 install:
-  git submodule update deps\poco
-  build\deploy_poco.cmd
-  build\genproj.cmd
+  - cmd: git submodule update deps\poco
+  - cmd: build\deploy_poco.cmd
+  - cmd: build\genproj.cmd
 
 build:
   project: trader.sln
