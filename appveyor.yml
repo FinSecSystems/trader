@@ -12,6 +12,7 @@ configuration:
   - release-static
 
 install:
+  git submodule update deps\poco
   build\deploy_poco.cmd
   build\genproj.cmd
 
