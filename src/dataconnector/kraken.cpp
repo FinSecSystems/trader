@@ -11,11 +11,15 @@ namespace trader {
     using namespace KrakenApi;
     using namespace KrakenDatabase;
 
-    Kraken::Kraken(AutoPtr<trader::Db> _app)
-		: api(_app, this)
+    AutoPtr<Interface::Connection> Kraken::getConnection(const std::string& connectionId)
+    {
+        return new KrakenConnection(connectionId, new Kraken());
+    }
+
+    Kraken::Kraken()
+		: api(AppManager::instance.get()->getApp(), this)
         , executeTimer(0, 1000)
-        , dataBase(new KrakenDatabase::Tables(_app->dbSession))
-        , app(_app)
+        , dataBase(new KrakenDatabase::Tables(DbManager::instance.get()->getDb()->getDbSession()))
 	{
 	}
 

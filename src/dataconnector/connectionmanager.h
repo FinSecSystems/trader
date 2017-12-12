@@ -12,7 +12,6 @@ namespace trader {
 
         Poco::AutoPtr<Interface::Connection> getConnection(const std::string& connectionString);
 
-        //static ConnectionManager instance;
     };
 
 };

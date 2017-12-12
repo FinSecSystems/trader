@@ -2,24 +2,54 @@
 
 namespace trader {
 
-	class Db : public Poco::Util::Application
-	{
-	public:
+    class Db : public Poco::RefCountedObject
+    {
+    public:
         Db()
-		{
-		}
+        {
+        }
 
-		virtual ~Db()
-		{
-			if (dbSession)
-			{
-				delete dbSession;
-				dbSession = nullptr;
-			}
-		}
+        virtual ~Db()
+        {
+            if (dbSession)
+            {
+                delete dbSession;
+                dbSession = nullptr;
+            }
+        }
 
-		virtual bool findFile(Poco::Path& path) const = 0;
+        Poco::Data::Session* getDbSession()
+        {
+            return dbSession;
+        }
 
-		Poco::Data::Session* dbSession;
-	};
+    private:
+        Poco::Data::Session* dbSession;
+    };
+
+    class DbManager : public SingletonHolder<DbManager>
+    {
+    public:
+        DbManager()
+        {}
+
+        ~DbManager()
+        {}
+
+        void setDb(Poco::AutoPtr<Db> _db)
+        {
+            database = _db;
+        }
+
+        Poco::AutoPtr<Db> getDb()
+        {
+            return database;
+        }
+
+        static DbManager instance;
+
+    private:
+        Poco::AutoPtr<Db> database;
+    };
+
 }

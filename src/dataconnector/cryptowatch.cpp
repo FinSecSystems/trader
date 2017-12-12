@@ -9,9 +9,14 @@ namespace trader {
     using namespace CryptowatchApi;
     using namespace CryptowatchDatabase;
 
-    Cryptowatch::Cryptowatch(Poco::AutoPtr<trader::Db> _app)
-        : api(_app, this)
-		, dataBase(new CryptowatchDatabase::Tables(_app->dbSession))
+    AutoPtr<Interface::Connection> Cryptowatch::getConnection(const std::string& connectionId)
+    {
+        return new CryptowatchConnection(connectionId, new Cryptowatch());
+    }
+
+    Cryptowatch::Cryptowatch()
+        : api(AppManager::instance.get()->getApp(), this)
+		, dataBase(new CryptowatchDatabase::Tables(DbManager::instance.get()->getDb()->getDbSession()))
     {
 		dataBase->init();
     }

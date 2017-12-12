@@ -4,6 +4,7 @@
 #include "dataconnector/api.h"
 #include "krakenapi.h"
 #include "krakendatabase.h"
+#include "interface.h"
 
 namespace trader {
 
@@ -15,10 +16,24 @@ namespace trader {
         class Tables;
     };
 
+    class Kraken;
+
+    class KrakenConnection : public Interface::Connection
+    {
+    public:
+        KrakenConnection(const std::string& connectionid, Kraken* _exchange)
+            : exchange(_exchange)
+        {
+            (void)connectionid;
+        }
+    private:
+        Kraken* exchange;
+    };
+
 	class Kraken : public Api
 	{
 	public:
-        Kraken(Poco::AutoPtr<trader::Db> _app);
+        Kraken();
 
 		~Kraken();
 
@@ -29,6 +44,8 @@ namespace trader {
 
         KrakenApi::EndPoints api;
 
+        static AutoPtr<Interface::Connection> getConnection(const std::string& connectionId);
+
 	protected:
         Kraken(const Kraken&);
         Kraken& operator = (const Kraken&);
@@ -38,7 +55,7 @@ namespace trader {
 	private:
 		Poco::Timer executeTimer;
 		Poco::AutoPtr<KrakenDatabase::Tables> dataBase;
-		Poco::AutoPtr<trader::Db> app;
+		//Poco::AutoPtr<trader::Db> app;
 		std::vector<std::function<void(Poco::Timer&)>> serialExecutionList;
 	};
 

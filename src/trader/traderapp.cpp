@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "dataconnector/db.h"
 #include "app.h"
+#include "db.h"
+#include "traderapp.h"
 //#include "fyb.h"
 //#include "exchangeratelab.h"
 //#include "cryptowatch.h"
@@ -9,7 +11,7 @@
 
 namespace trader {
 
-    void App::defineOptions(OptionSet& options)
+    void TraderApp::defineOptions(OptionSet& options)
     {
         Application::defineOptions(options);
 
@@ -21,7 +23,7 @@ namespace trader {
 
     }
 
-    void App::handleHelp(const string& name, const string& value)
+    void TraderApp::handleHelp(const string& name, const string& value)
     {
 		(void)name;
 		(void)value;
@@ -29,7 +31,7 @@ namespace trader {
         stopOptionsProcessing();
     }
 
-     void App::displayHelp()
+     void TraderApp::displayHelp()
     {
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
@@ -38,7 +40,7 @@ namespace trader {
         helpFormatter.format(cout);
     }
 
-     Poco::Util::AbstractConfiguration& App::appConfig()
+     Poco::Util::AbstractConfiguration& TraderApp::appConfig()
      {
          try
          {
@@ -52,7 +54,7 @@ namespace trader {
          }
      }
 
-    int App::main(const std::vector<std::string>& args)
+    int TraderApp::main(const std::vector<std::string>& args)
     {
 		(void)args;
 #if defined(__GNUC__)
@@ -134,6 +136,11 @@ namespace trader {
 
             HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
 
+            AppManager::instance.get()->setApp(this);
+            DbManager::instance.get()->setDb(this);
+
+            Connection* bittrex = ConnectionManager::instance.get()->getConnection("bittrex");
+
 			//Exchangeratelab exchangeRateLab(this);
 			//Fyb fyb(this);
 			//fyb.run();
@@ -200,11 +207,11 @@ namespace trader {
         return Application::EXIT_OK;
     }
 
-	bool App::findFile(Path& path) const
+	bool TraderApp::findFile(Path& path) const
 	{
 		return Util::Application::findFile(path);
 	}
 
 }
 
-POCO_APP_MAIN(trader::App) 
+POCO_APP_MAIN(trader::TraderApp)

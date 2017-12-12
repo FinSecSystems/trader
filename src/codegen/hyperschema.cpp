@@ -85,7 +85,7 @@ namespace trader {
 		configHeaderName << configHeaderStr << ".h";
 
 		ostringstream appPtrStream;
-		appPtrStream << "Poco::AutoPtr<" << namespacename << "::Db>";
+		appPtrStream << "Poco::AutoPtr<" << namespacename << "::App>";
 
 		ostringstream baseUrlStream;
 		baseUrlStream << "\"" << config.baseUrl << "\"";
@@ -93,7 +93,7 @@ namespace trader {
 		if (config.useConfig)
 		{
 			startHeader(header, 4,
-				"dataconnector/db.h",
+				"dataconnector/app.h",
 				"dataconnector/api.h",
 				configHeaderName.str().c_str(),
                 "dataconnector/helper.h"
@@ -102,7 +102,7 @@ namespace trader {
 		else
 		{
 			startHeader(header, 3,
-				"dataconnector/db.h",
+				"dataconnector/app.h",
 				"dataconnector/api.h",
                 "dataconnector/helper.h"
 			);
@@ -136,7 +136,7 @@ namespace trader {
 						header << configClassName << tabs(1) << "config" << cendl;
 					}
 					header << endl;
-					header << "Poco::AutoPtr<" << namespacename << "::Db>" << tabs(1) << "_app" << cendl;
+					header << "Poco::AutoPtr<" << namespacename << "::App>" << tabs(1) << "_app" << cendl;
 					header << "Api*" << tabs(1) << "_api" << cendl;
 					header << "std::string _uri" << cendl;
 				}
@@ -146,7 +146,7 @@ namespace trader {
 		startCpp(cpp, 3,
 			config.headerFileName.c_str(),
 			"dataconnector/api.h",
-			"dataconnector/db.h"
+			"dataconnector/app.h"
 		);
 		{
 			ScopedNamespace scopedNamesapce(cpp, config.nameSpace);

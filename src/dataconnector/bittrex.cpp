@@ -3,23 +3,24 @@
 #include "bittrexapi.h"
 #include "helper.h"
 #include "shautils.h"
+#include "app.h"
 
 namespace trader {
 
     using namespace BittrexApi;
     using namespace BittrexDatabase;
 
-    static AutoPtr<Interface::Connection> getConnection(const std::string& connectionId)
+    AutoPtr<Interface::Connection> Bittrex::getConnection(const std::string& connectionId)
     {
-        return new BittrexConnection(connectionId, this);
+        return new BittrexConnection(connectionId, new Bittrex());
     }
 
-    Bittrex::Bittrex(Poco::AutoPtr<trader::Db> _app)
-        : api(_app, this)
-        , dataBase(new BittrexDatabase::Tables(_app->dbSession))
+    Bittrex::Bittrex()
+        : api(AppManager::instance.get()->getApp(), this)
+        , dataBase(new BittrexDatabase::Tables(DbManager::instance.get()->getDb()->getDbSession()))
     {
     }
-
+    
     void Bittrex::run()
     {
         static bool useStorage = false;
@@ -44,8 +45,6 @@ namespace trader {
                 }
             }
         }
-
-
 
         //Populate Trade History
         for (auto& market : marketToTradeHistoryMap)
@@ -147,7 +146,7 @@ namespace trader {
                 printf("%s: Price Increase %2.2f\n", marketName.c_str(), priceIncrease*100.0);
             }
 
-//            break;
+            break;
 
             if (useStorage)
             {

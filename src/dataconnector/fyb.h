@@ -4,6 +4,7 @@
 #include "dataconnector/api.h"
 #include "fybapi.h"
 #include "fybdatabase.h"
+#include "interface.h"
 
 namespace trader {
 
@@ -15,10 +16,24 @@ namespace trader {
         class Tables;
     };
 
+    class Fyb;
+
+    class FybConnection : public Interface::Connection
+    {
+    public:
+        FybConnection(const std::string& connectionid, Fyb* _exchange)
+            : exchange(_exchange)
+        {
+            (void)connectionid;
+        }
+    private:
+        Fyb* exchange;
+    };
+
 	class Fyb : public Api
 	{
 	public:
-		Fyb(Poco::AutoPtr<trader::Db> _app);
+		Fyb();
 
 		~Fyb();
 
@@ -35,6 +50,8 @@ namespace trader {
 		void executeOrderHistory(Poco::Timer& timer);
 
         FybApi::EndPoints api;
+
+        static AutoPtr<Interface::Connection> getConnection(const std::string& connectionId);
 
 	protected:
 		Fyb(const Fyb&);

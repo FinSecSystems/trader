@@ -10,11 +10,15 @@ namespace trader {
     using namespace FybApi;
     using namespace FybDatabase;
 
-	Fyb::Fyb(AutoPtr<trader::Db> _app)
-		: api(_app, this)
+    AutoPtr<Interface::Connection> Fyb::getConnection(const std::string& connectionId)
+    {
+        return new FybConnection(connectionId, new Fyb());
+    }
+
+	Fyb::Fyb()
+		: api(AppManager::instance.get()->getApp(), this)
         , executeTimer(0, 1000)
-		, dataBase(new FybDatabase::Tables(_app->dbSession))
-        , app(_app)
+		, dataBase(new FybDatabase::Tables(DbManager::instance.get()->getDb()->getDbSession()))
     {
 	}
 

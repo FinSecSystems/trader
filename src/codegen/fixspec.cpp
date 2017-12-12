@@ -478,6 +478,7 @@ namespace trader {
                 {
                     ScopedClass<1> scopedMessageDataClass(header, "IMessageData", "Poco::RefCountedObject");
                     header << "virtual enum MESSAGES GetType() = 0" << cendl;
+                    header << "Poco::UInt64 messageId" << cendl;
                 }
 
                 {

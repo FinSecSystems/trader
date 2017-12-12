@@ -4,6 +4,7 @@
 #include "dataconnector/api.h"
 #include "cryptowatchapi.h"
 #include "cryptowatchdatabase.h"
+#include "interface.h"
 
 namespace trader {
 
@@ -15,14 +16,31 @@ namespace trader {
         class Tables;
     };
 
+
+    class Cryptowatch;
+
+    class CryptowatchConnection : public Interface::Connection
+    {
+    public:
+        CryptowatchConnection(const std::string& connectionid, Cryptowatch* _exchange)
+            : exchange(_exchange)
+        {
+            (void)connectionid;
+        }
+    private:
+        Cryptowatch* exchange;
+    };
+
     class Cryptowatch : public Api
     {
     public:
-        Cryptowatch(Poco::AutoPtr<trader::Db> _app);
+        Cryptowatch();
 
         ~Cryptowatch();
 
         Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
+
+        static AutoPtr<Interface::Connection> getConnection(const std::string& connectionId);
 
         CryptowatchApi::EndPoints api;
 

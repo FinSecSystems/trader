@@ -7,8 +7,13 @@ namespace trader {
 
     using namespace ExchangeratelabApi;
 
-	Exchangeratelab::Exchangeratelab(AutoPtr<Db> _app)
-		: api(_app, this)
+    AutoPtr<Interface::Connection> Exchangeratelab::getConnection(const std::string& connectionId)
+    {
+        return new ExchangeratelabConnection(connectionId, new Exchangeratelab());
+    }
+
+	Exchangeratelab::Exchangeratelab()
+		: api(AppManager::instance.get()->getApp(), this)
 	{
 	}
 

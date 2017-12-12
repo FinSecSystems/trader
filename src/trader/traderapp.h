@@ -2,14 +2,14 @@
 
 namespace trader {
 
-	class App : public Db
+	class TraderApp : public App, Db
 	{
 	public:
-		App()
+        TraderApp()
 		{
 		}
 
-		~App()
+		~TraderApp()
 		{
 		}
 
