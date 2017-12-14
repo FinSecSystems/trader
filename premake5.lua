@@ -547,6 +547,9 @@
 				"deps/poco/lib64/PocoDataSQLitemtd.lib",
 				"deps/poco/lib64/PocoXMLmtd.lib"
 			}
+			postbuildcommands {
+				"{COPY} %{wks.location}/deps/poco/lib64/openssl64mtd.pdb %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}",		
+			}
 
 		filter { "platforms:Win64", "system:windows", "configurations:debug-shared" }
 			links { 
@@ -636,7 +639,9 @@
 			"apis",
 			"configs",
 			"databases",
-			"interface",
+			"interface"
+		}
+		links {
 			"dataconnector"
 		}
 		includedirs {

@@ -5,7 +5,8 @@ namespace trader {
     class Db : public Poco::RefCountedObject
     {
     public:
-        Db()
+        Db(Poco::Data::Session* _dbSession)
+            : dbSession(_dbSession)
         {
         }
 

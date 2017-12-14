@@ -2,7 +2,7 @@
 
 namespace trader {
 
-	class TraderApp : public App, Db
+	class TraderApp : public App
 	{
 	public:
         TraderApp()
@@ -14,6 +14,8 @@ namespace trader {
 		}
 
 		bool findFile(Poco::Path& path) const override;
+
+        Poco::AutoPtr<Db> dB;
 
 	protected:
 		void defineOptions(Poco::Util::OptionSet& options);

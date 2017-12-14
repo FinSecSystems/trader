@@ -90,7 +90,7 @@ namespace trader {
 			//Initialize DB
 			ostringstream dbNameStream;
 			dbNameStream << commandName() << ".db";
-			dbSession = new Data::Session("SQLite", dbNameStream.str());
+            dB = new Db(new Data::Session("SQLite", dbNameStream.str()));
 
             loadConfiguration();
             AutoPtr<AbstractConfiguration> proxyProperties(appConfig().createView("proxy"));
@@ -109,12 +109,12 @@ namespace trader {
 
             HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
 
+            
             AppManager::instance.get()->setApp(this);
-            DbManager::instance.get()->setDb(this);
+            DbManager::instance.get()->setDb(dB);
 
             AutoPtr<trader::Interface::Connection> bittrex = ConnectionManager::instance.get()->getConnection("bittrex");
-
-            bittrex->MarketDataRequest()
+            
 
 			do {
 				Thread::sleep(10000);

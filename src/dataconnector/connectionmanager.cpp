@@ -8,7 +8,7 @@
 
 namespace trader {
 
-    //ConnectionManager ConnectionManager::instance;
+    ConnectionManager ConnectionManager::instance;
 
     ConnectionManager::ConnectionManager()
     {}
