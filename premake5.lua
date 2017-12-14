@@ -661,6 +661,7 @@
 			"src/trader/**.h", "src/trader/**.cpp",
 			"include/**.h",
 			"tmp/codegen/interface*.h", "tmp/codegen/interface*.cpp",
+			"tmp/codegen/generic*.h", "tmp/codegen/generic*.cpp",
 			"bin/**.json", "bin/**.properties"
 		}
 

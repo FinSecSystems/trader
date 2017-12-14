@@ -1,15 +1,18 @@
 #include "stdafx.h"
 #include "dataconnector/db.h"
-#include "app.h"
-#include "db.h"
+#include "dataconnector/app.h"
+#include "dataconnector/connectionmanager.h"
 #include "traderapp.h"
-//#include "fyb.h"
-//#include "exchangeratelab.h"
-//#include "cryptowatch.h"
-//#include "kraken.h"
-//#include "bittrex.h"
+#include "interface.h"
 
 namespace trader {
+
+    class AppConnection : public Interface::Connection
+    {
+    public:
+        AppConnection();
+
+    };
 
     void TraderApp::defineOptions(OptionSet& options)
     {
@@ -19,7 +22,7 @@ namespace trader {
             Option("help", "h", "Display help information on command line arguments.")
             .required(false)
             .repeatable(false)
-            .callback(OptionCallback<App>(this, &App::handleHelp)));
+            .callback(OptionCallback<TraderApp>(this, &TraderApp::handleHelp)));
 
     }
 
@@ -62,36 +65,6 @@ namespace trader {
 #endif
         try
         {
-            //trader::FybApi fyb(this);
-            //Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
-            //std::cout << tickerDetailedData->ask << std::endl;
-			//Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
-			//std::cout << tickerDetailedData->ask << std::endl;
-			//Poco::AutoPtr<trader::TradesInput> tradesInputData = new trader::TradesInput();
-			//tradesInputData->object.since = 2095573;
-			//Poco::AutoPtr<trader::Trades> tradesData = fyb.GetTrades(tradesInputData);
-			//Poco::AutoPtr<trader::TimestampInput> timeStampInputData = new trader::TimestampInput();
-			//timeStampInputData->object.timestamp = std::time(nullptr);
-			//Poco::AutoPtr<trader::ErrorMessage> errorMsg = fyb.Test(timeStampInputData);
-			//Poco::AutoPtr<trader::AccountInfo> accountInfo = fyb.GetAccountInfo(timeStampInputData);
-			//Poco::AutoPtr<trader::PendingOrders> pendingOrders = fyb.GetPendingOrders();
-			//Poco::AutoPtr<trader::OrderHistoryParams> orderHistoryInputData = new trader::OrderHistoryParams();
-			//orderHistoryInputData->object.timestamp = std::time(nullptr);
-			//orderHistoryInputData->object.limit = 10;
-			//Poco::AutoPtr<trader::OrderHistory> orderHistory = fyb.GetOrderHistory(orderHistoryInputData);
-			//Poco::AutoPtr<trader::OrderParams> orderParams = new trader::OrderParams();
-			//orderParams->object.SetPrice(.1);
-			//orderParams->object.SetQty(.2);
-			//orderParams->object.SetTimestamp(std::time(nullptr));
-			//orderParams->object.SetType('B');
-			//Poco::AutoPtr<trader::OrderStatus> orderStatus = fyb.PlaceOrder(orderParams);
-			//Poco::AutoPtr<trader::CancelOrderParams> cancelOrderParams = new trader::CancelOrderParams();
-			//cancelOrderParams->object.SetOrderNo(2129260);
-			//cancelOrderParams->object.SetTimestamp(std::time(nullptr));
-			//Poco::AutoPtr<trader::ErrorNumber> errorNumber = fyb.CancelOrder(cancelOrderParams);
-			//trader::ExchangeratelabApi exchangeRateLab(this);
-			//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.GetUSDToSGD();
-
 			//Initialize logs
 			AutoPtr<SplitterChannel> splitterChannel(new SplitterChannel());
 			ostringstream logNameStream;
@@ -139,60 +112,9 @@ namespace trader {
             AppManager::instance.get()->setApp(this);
             DbManager::instance.get()->setDb(this);
 
-            Connection* bittrex = ConnectionManager::instance.get()->getConnection("bittrex");
+            AutoPtr<trader::Interface::Connection> bittrex = ConnectionManager::instance.get()->getConnection("bittrex");
 
-			//Exchangeratelab exchangeRateLab(this);
-			//Fyb fyb(this);
-			//fyb.run();
-			//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.api.GetUSDToSGD();
-
-            //Cryptowatch cryptowatch(this);
-            //Poco::AutoPtr<AssetList> assetList = cryptowatch.api.GetAssetList();
-
-            //Kraken kraken(this);
-            //kraken.run();
-            //Poco::AutoPtr<AssetInfoParams> assetInfoParams = new AssetInfoParams();
-            //AutoPtr<AssetInfo> assetInfo = kraken.api.GetAssetInfo(assetInfoParams);
-
-            //AutoPtr<ServerTime> assetInfo = kraken.api.GetServerTime();
-
-            //AutoPtr<AccountBalance> accountBalance = kraken.api.GetAccountBalance();
-
-            //Poco::AutoPtr<AssetPairsParams> assetPairsParams = new AssetPairsParams();
-            //assetPairsParams->dataObject.pair = "XZECZUSD";
-            //AutoPtr<AssetPairs> assetPairs = kraken.api.GetAssetPairs(assetPairsParams);
-
-            //Poco::AutoPtr<TickerInformationParams> tickerInformationParams = new TickerInformationParams();
-            //tickerInformationParams->dataObject.pair = "XZECZUSD";
-            //AutoPtr<TickerInformation> tickerInformation = kraken.api.GetTickerInformation(tickerInformationParams);
-
-            //Poco::AutoPtr<KrakenApi::OHLCDataParams> ohlcDataParams = new KrakenApi::OHLCDataParams();
-            //ohlcDataParams->dataObject.pair = "XZECZUSD";
-            //AutoPtr<KrakenApi::OHLCData> ohlcData = kraken.api.GetOHLCData(ohlcDataParams);
-
-            //Poco::AutoPtr<KrakenApi::OrderBookParams> orderBookParams = new KrakenApi::OrderBookParams();
-            //orderBookParams->dataObject.pair = "XZECZUSD";
-            //AutoPtr<KrakenApi::OrderBook> orderBook = kraken.api.GetOrderBook(orderBookParams);
-
-            //Poco::AutoPtr<KrakenApi::RecentTradesParams> orderBookParams = new KrakenApi::RecentTradesParams();
-            //orderBookParams->dataObject.pair = "XZECZUSD";
-            //AutoPtr<KrakenApi::RecentTrades> orderBook = kraken.api.GetRecentTrades(orderBookParams);
-
-            //Poco::AutoPtr<KrakenApi::RecentSpreadParams> orderBookParams = new KrakenApi::RecentSpreadParams();
-            //orderBookParams->dataObject.pair = "XZECZUSD";
-            //AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
-
-            //Bittrex bittrex(this);
-            //while (1)
-            //{
-            //    bittrex.run();
-            //    break;
-            //}
-            //AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
-
-			//AutoPtr<BittrexApi::BalanceParams> balanceParam = new BittrexApi::BalanceParams();
-			//balanceParam->dataObject.SetCurrency("BTC");
-			//AutoPtr<BittrexApi::Balance> balance = bittrex.api.GetBalance(balanceParam);
+            bittrex->MarketDataRequest()
 
 			do {
 				Thread::sleep(10000);
@@ -215,3 +137,89 @@ namespace trader {
 }
 
 POCO_APP_MAIN(trader::TraderApp)
+
+
+//Sample Code
+
+//trader::FybApi fyb(this);
+//Poco::AutoPtr<trader::TickerDetailed> tickerDetailedData = fyb.GetTickerDetailed();
+//std::cout << tickerDetailedData->ask << std::endl;
+//Poco::AutoPtr<trader::OrderBook> orderBookData = fyb.GetOrderBook();
+//std::cout << tickerDetailedData->ask << std::endl;
+//Poco::AutoPtr<trader::TradesInput> tradesInputData = new trader::TradesInput();
+//tradesInputData->object.since = 2095573;
+//Poco::AutoPtr<trader::Trades> tradesData = fyb.GetTrades(tradesInputData);
+//Poco::AutoPtr<trader::TimestampInput> timeStampInputData = new trader::TimestampInput();
+//timeStampInputData->object.timestamp = std::time(nullptr);
+//Poco::AutoPtr<trader::ErrorMessage> errorMsg = fyb.Test(timeStampInputData);
+//Poco::AutoPtr<trader::AccountInfo> accountInfo = fyb.GetAccountInfo(timeStampInputData);
+//Poco::AutoPtr<trader::PendingOrders> pendingOrders = fyb.GetPendingOrders();
+//Poco::AutoPtr<trader::OrderHistoryParams> orderHistoryInputData = new trader::OrderHistoryParams();
+//orderHistoryInputData->object.timestamp = std::time(nullptr);
+//orderHistoryInputData->object.limit = 10;
+//Poco::AutoPtr<trader::OrderHistory> orderHistory = fyb.GetOrderHistory(orderHistoryInputData);
+//Poco::AutoPtr<trader::OrderParams> orderParams = new trader::OrderParams();
+//orderParams->object.SetPrice(.1);
+//orderParams->object.SetQty(.2);
+//orderParams->object.SetTimestamp(std::time(nullptr));
+//orderParams->object.SetType('B');
+//Poco::AutoPtr<trader::OrderStatus> orderStatus = fyb.PlaceOrder(orderParams);
+//Poco::AutoPtr<trader::CancelOrderParams> cancelOrderParams = new trader::CancelOrderParams();
+//cancelOrderParams->object.SetOrderNo(2129260);
+//cancelOrderParams->object.SetTimestamp(std::time(nullptr));
+//Poco::AutoPtr<trader::ErrorNumber> errorNumber = fyb.CancelOrder(cancelOrderParams);
+//trader::ExchangeratelabApi exchangeRateLab(this);
+//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.GetUSDToSGD();
+
+//Exchangeratelab exchangeRateLab(this);
+//Fyb fyb(this);
+//fyb.run();
+//Poco::AutoPtr<trader::SingleExchangeRate> singleExchangeRate = exchangeRateLab.api.GetUSDToSGD();
+
+//Cryptowatch cryptowatch(this);
+//Poco::AutoPtr<AssetList> assetList = cryptowatch.api.GetAssetList();
+
+//Kraken kraken(this);
+//kraken.run();
+//Poco::AutoPtr<AssetInfoParams> assetInfoParams = new AssetInfoParams();
+//AutoPtr<AssetInfo> assetInfo = kraken.api.GetAssetInfo(assetInfoParams);
+
+//AutoPtr<ServerTime> assetInfo = kraken.api.GetServerTime();
+
+//AutoPtr<AccountBalance> accountBalance = kraken.api.GetAccountBalance();
+
+//Poco::AutoPtr<AssetPairsParams> assetPairsParams = new AssetPairsParams();
+//assetPairsParams->dataObject.pair = "XZECZUSD";
+//AutoPtr<AssetPairs> assetPairs = kraken.api.GetAssetPairs(assetPairsParams);
+
+//Poco::AutoPtr<TickerInformationParams> tickerInformationParams = new TickerInformationParams();
+//tickerInformationParams->dataObject.pair = "XZECZUSD";
+//AutoPtr<TickerInformation> tickerInformation = kraken.api.GetTickerInformation(tickerInformationParams);
+
+//Poco::AutoPtr<KrakenApi::OHLCDataParams> ohlcDataParams = new KrakenApi::OHLCDataParams();
+//ohlcDataParams->dataObject.pair = "XZECZUSD";
+//AutoPtr<KrakenApi::OHLCData> ohlcData = kraken.api.GetOHLCData(ohlcDataParams);
+
+//Poco::AutoPtr<KrakenApi::OrderBookParams> orderBookParams = new KrakenApi::OrderBookParams();
+//orderBookParams->dataObject.pair = "XZECZUSD";
+//AutoPtr<KrakenApi::OrderBook> orderBook = kraken.api.GetOrderBook(orderBookParams);
+
+//Poco::AutoPtr<KrakenApi::RecentTradesParams> orderBookParams = new KrakenApi::RecentTradesParams();
+//orderBookParams->dataObject.pair = "XZECZUSD";
+//AutoPtr<KrakenApi::RecentTrades> orderBook = kraken.api.GetRecentTrades(orderBookParams);
+
+//Poco::AutoPtr<KrakenApi::RecentSpreadParams> orderBookParams = new KrakenApi::RecentSpreadParams();
+//orderBookParams->dataObject.pair = "XZECZUSD";
+//AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
+
+//Bittrex bittrex(this);
+//while (1)
+//{
+//    bittrex.run();
+//    break;
+//}
+//AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
+
+//AutoPtr<BittrexApi::BalanceParams> balanceParam = new BittrexApi::BalanceParams();
+//balanceParam->dataObject.SetCurrency("BTC");
+//AutoPtr<BittrexApi::Balance> balance = bittrex.api.GetBalance(balanceParam);

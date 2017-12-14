@@ -23,7 +23,7 @@ namespace trader {
             return dbSession;
         }
 
-    private:
+    protected:
         Poco::Data::Session* dbSession;
     };
 
