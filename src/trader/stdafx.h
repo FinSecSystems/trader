@@ -48,6 +48,7 @@
 #include "Poco/Data/Session.h"
 #include "Poco/Data/SQLite/Connector.h"
 #include "Poco/Data/TypeHandler.h"
+#include "Poco/FIFOEvent.h"
 #pragma warning(pop)
 #include <ctime>
 #include <regex>
