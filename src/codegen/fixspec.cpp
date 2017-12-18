@@ -475,10 +475,12 @@ namespace trader {
                 }
                 header << cendl;
 
+                header << "typedef Poco::UInt64 MessageId" << cendl;
+
                 {
                     ScopedClass<1> scopedMessageDataClass(header, "IMessageData", "Poco::RefCountedObject");
                     header << "virtual enum MESSAGES GetType() = 0" << cendl;
-                    header << "Poco::UInt64 messageId" << cendl;
+                    header << "MessageId messageId" << cendl;
                 }
 
                 {
@@ -587,13 +589,13 @@ namespace trader {
                         }
                     }
 
-                    header << "virtual void SetReceivingConnection(Connection* _connection)";
+                    header << "virtual void SetReceivingConnection(Poco::AutoPtr<Connection> _connection)";
                     {
                         ScopedStream<ApiFileOutputStream> enumScope(header);
-                        header << "connection = _connection" << cendl;
+                        header << "receivingConnection = _connection" << cendl;
                     }
                     header << endl;
-                    header << "Connection* connection" << cendl;
+                    header << "Poco::AutoPtr<Connection> receivingConnection" << cendl;
 
                 }
 

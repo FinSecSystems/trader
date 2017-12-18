@@ -96,7 +96,7 @@ namespace trader {
             AutoPtr<AbstractConfiguration> proxyProperties(appConfig().createView("proxy"));
 
             HTTPSClientSession::ProxyConfig proxyConfig;
-			if (proxyProperties->hasProperty("hostname"))
+			if (proxyProperties->hasProperty("hostname")) 
 				proxyConfig.host = proxyProperties->getString("hostname");
 			if (proxyProperties->hasProperty("port"))
 				proxyConfig.port = (UInt16)proxyProperties->getUInt("port");
@@ -114,7 +114,9 @@ namespace trader {
             DbManager::instance.get()->setDb(dB);
 
             AutoPtr<trader::Interface::Connection> bittrex = ConnectionManager::instance.get()->getConnection("bittrex");
-            
+
+            AutoPtr<trader::Interface::Connection> appConnection = new AppConnection();
+            bittrex->SetReceivingConnection(appConnection);
 
 			do {
 				Thread::sleep(10000);
