@@ -2,6 +2,17 @@
 
 namespace trader {
 
+    class AppConnectionCallbackInterface
+    {
+    public:
+        void* NotifyMethod(const Poco::AutoPtr< Interface::IMessageData > messageData)
+        {
+            this->OnSuccess(messageData);
+        }
+
+        virtual void OnSuccess(const Poco::AutoPtr< Interface::IMessageData > messageData) = 0;
+    };
+
 	class AppConnection : public Interface::Connection
 	{
 	public:
@@ -17,9 +28,9 @@ namespace trader {
 
         void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData) override;
 
-        void RegisterCallback(Poco::AutoPtr<Interface::IMessageData> _messageData, AppConnectionCallback callback);
+        void RegisterCallback(Interface::MessageId messageId, const AppConnectionCallbackInterface& callback);
 
-        void UnregisterCallback(Poco::AutoPtr<Interface::IMessageData> _messageData, AppConnectionCallback callback);
+        void UnregisterCallback(Interface::MessageId messageId, const AppConnectionCallbackInterface& callback);
 
         MessageMap messageMap;
 
