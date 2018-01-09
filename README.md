@@ -1,6 +1,6 @@
 # trader
 
-Setup:
+Setup: 
 Windows
 - In build\shell.cmd, build poco with deploy_poco.cmd
 - Run build\genproj.cmd
