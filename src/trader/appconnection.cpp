@@ -40,13 +40,13 @@ namespace trader {
         if (it != messageMap.end())
         {
             MessageEvent& evt = it->second;
-            evt += Delegate<AppConnectionCallbackInterface, Interface::MessageId>(&callback, &AppConnectionCallbackInterface::NotifyMethod);
+           // evt += Delegate<AppConnectionCallbackInterface, Interface::MessageId>(&callback, &AppConnectionCallbackInterface::NotifyMethod);
         }
         else
         {
             MessageEvent evt;
-            evt += Delegate<AppConnectionCallbackInterface, MessageId >(&callback, &AppConnectionCallbackInterface::NotifyMethod);
-            messageMap.insert(std::make_pair(messageId, evt));
+          //  evt += Delegate<AppConnectionCallbackInterface, MessageId >(&callback, &AppConnectionCallbackInterface::NotifyMethod);
+          //  messageMap.insert(std::make_pair(messageId, evt));
         }
     }
 
@@ -57,10 +57,10 @@ namespace trader {
         if (it != messageMap.end())
         {
             MessageEvent& evt = it->second;
-            evt -= Delegate<AppConnectionCallbackInterface, Interface::MessageId >(&callback, &AppConnectionCallbackInterface::NotifyMethod);
+         //   evt -= Delegate<AppConnectionCallbackInterface, Interface::MessageId >(&callback, &AppConnectionCallbackInterface::NotifyMethod);
             if (!evt.hasDelegates())
             {
-                messageMap.erase(it);
+              //  messageMap.erase(it);
             }
         }
         else

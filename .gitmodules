@@ -19,9 +19,6 @@
 [submodule "deps/poco"]
 	path = deps/poco
 	url = http://github.com/viknash/poco.git
-[submodule "deps/imgui"]
-	path = deps/imgui
-	url = http://github.com/viknash/imgui.git
 [submodule "deps/krakenapi"]
 	path = deps/krakenapi
 	url = http://github.com/viknash/krakenapi

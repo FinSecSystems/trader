@@ -689,9 +689,8 @@
 		filter { "system:windows", "platforms:Win64" }
 			includedirs {
 				"deps/poco/NetSSL_Win/include",
-				"deps/TaskScheduler/include",
 				"deps/intel_se_api/ittnotify/include",
-				"deps/cef/cef_binary_3.3163.1667.g88c82d2_windows64/include"
+				-- "deps/cef/cef_binary_3.3163.1667.g88c82d2_windows64/include"
 				}
 			links {
 				"deps/intel_se_api/bin/ittnotify64.lib",
@@ -703,7 +702,6 @@
 				"deps/intel_se_api/ittnotify/include/*.h",
 				"deps/intel_se_api/ittnotify/include/*.hpp",
 				"deps/intel_se_api/ittnotify/include/*.cpp",
-				"deps/TaskScheduler/include/**.h",
 			}
 
 		filter { "platforms:Win64", "system:windows", "configurations:debug-static" }
@@ -801,20 +799,22 @@
 
 		filter { "configurations:release", "system:windows", "platforms:Win64" }
 			debugenvs {
-				"PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release"
+				"PATH=$(SolutionDir)deps\\poco\\bin64"
+				-- "PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release"
 			}
 			links {
-				"deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\libcef.lib",
-				"deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\cef_sandbox.lib"
+				-- "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\libcef.lib",
+				-- "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\cef_sandbox.lib"
 			}
 
 		filter { "configurations:debug", "system:windows", "platforms:Win64" }
 			debugenvs {
-				"PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug"
+				"PATH=$(SolutionDir)deps\\poco\\bin64"
+				-- "PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug"
 			}
 			links {
-				"deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug\\libcef.lib",
-				"deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug\\cef_sandbox.lib"
+				-- "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug\\libcef.lib",
+				-- "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug\\cef_sandbox.lib"
 			}
 
 group "Tools"
