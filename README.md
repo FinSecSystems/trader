@@ -1,45 +1,44 @@
 # trader
 
-Setup: 
-Windows
-- In build\shell.cmd, build poco with deploy_poco.cmd
-- Run build\genproj.cmd
-- Copy bin\*.json & bin\*.properties to bin\debug on bin\release and modify the config with api keys and proxy settings
+This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.
 
-Todo:
+## Build & Run Instructions
 
-High Priority
-1. Cryptowatch
-	- Implement all other cryptowatch api endpoints
-	- Automatic allowance recording to database
-	- Modify invoke to introspect allowance and remove allowance from hyperschema for endpoints
+### Windows
 
-2. Kraken
-	- Prototype Websockets
-	- Implement kraken api
-	- Implement kraken database
-	
-3. Compile on Linux
-	- Compile on WSL
-	
-4. Integrate CI on Appveyor
+#### Setup Instructions 
 
-5. Integrate CI on Travis
+- Run build\shell.cmd
+- Build poco with deploy_poco.cmd
+- Run build\genproj.cmd once to generate Visual Studio 2015 or Visual Studio 2017 projects
 
-6. Integrate with task management/chat tools, i.e. Slack
+## Compilation
+- Open trader.sln
+- Build solution
 
-7. Investigate sqlitefs master/slave replication
+## Running
+- Copy bin\*.json & bin\*.properties to bin\debug on bin\release and modify the config with the relevant api keys and proxy settings
+- Right-click trader project and Set as StartUp Project
+- Press F5 to run/debug in Visual Studio
 
-8. Investigate Mathlab integration for visualization (ODBC/JDBC)
+### Linux/WSL
 
-9. Investigate Excel integration for visualization (ODBC)
+#### Setup Instructions
+- Run build\shell.cmd
+- Build poco with deploy_poco.sh
+- Run build\genproj.sh once to generate makefiles for the project
+- Copy bin\*.json & bin\*.properties to bin\debug on bin\release and modify the config with the relevant api keys and proxy settings
 
-10. Deploy on Google App/EC2
+## Compilation
+- Run make
 
-Medium Priority
-1. Integrate valijson to validate hyperschema, databaseschema and configschema
-2. Windows run as a service
+## Running
+- Run using script build\run_debug_<compiler>.sh
 
+## Debug
+- Run build\debug_<compiler>.sh
 
-Low Priority
-1. More versatile #ref implementation in objectschemadefinition, must be able to nest multiple #refs
+### MacOS X
+~This has not been tested~
+~Will be supported in the near future~
+
