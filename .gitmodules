@@ -10,9 +10,6 @@
 [submodule "tools/src/cmake"]
 	path = tools/src/cmake
 	url = http://github.com/viknash/cmake.git
-[submodule "tools/src/js2model"]
-	path = tools/src/js2model
-	url = http://github.com/viknash/js2model.git
 [submodule "deps/krakenapi"]
 	path = deps/krakenapi
 	url = http://github.com/viknash/krakenapi
