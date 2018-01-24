@@ -22,3 +22,6 @@
 [submodule "deps/quickfix"]
 	path = deps/quickfix
 	url = https://github.com/viknash/quickfix.git
+[submodule "deps/poco"]
+	path = deps/poco
+	url = https://github.com/viknash/poco.git
