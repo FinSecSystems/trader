@@ -1,24 +1,24 @@
 [submodule "deps/intel_se_api"]
 	path = deps/intel_se_api
-	url = http://github.com/viknash/IntelSEAPI.git
+	url = http://github.com/FinSecSystems/IntelSEAPI.git
 [submodule "tools/src/vswhere"]
 	path = tools/src/vswhere
-	url = http://github.com/viknash/vswhere.git
+	url = http://github.com/FinSecSystems/vswhere.git
 [submodule "tools/src/premake-core"]
 	path = tools/src/premake-core
-	url = http://github.com/viknash/premake-core.git
+	url = http://github.com/FinSecSystems/premake-core.git
 [submodule "tools/src/cmake"]
 	path = tools/src/cmake
-	url = http://github.com/viknash/cmake.git
+	url = http://github.com/FinSecSystems/cmake.git
 [submodule "deps/krakenapi"]
 	path = deps/krakenapi
-	url = http://github.com/viknash/krakenapi
+	url = http://github.com/FinSecSystems/krakenapi
 [submodule "deps/optmarket-bittrex"]
 	path = deps/optmarket-bittrex
 	url = https://github.com/vncoelho/optmarket-bittrex
 [submodule "deps/quickfix"]
 	path = deps/quickfix
-	url = https://github.com/viknash/quickfix.git
+	url = https://github.com/FinSecSystems/quickfix.git
 [submodule "deps/poco"]
 	path = deps/poco
-	url = https://github.com/viknash/poco.git
+	url = https://github.com/FinSecSystems/poco.git
