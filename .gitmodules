@@ -15,7 +15,7 @@
 	url = http://github.com/FinSecSystems/krakenapi
 [submodule "deps/optmarket-bittrex"]
 	path = deps/optmarket-bittrex
-	url = https://github.com/vncoelho/optmarket-bittrex
+	url = https://github.com/FinSecSystems/optmarket-bittrex
 [submodule "deps/quickfix"]
 	path = deps/quickfix
 	url = https://github.com/FinSecSystems/quickfix.git
