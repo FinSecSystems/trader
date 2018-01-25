@@ -52,3 +52,4 @@ deps/*.make
 *.db
 *.log.txt*
 *.properties
+/*.tss
