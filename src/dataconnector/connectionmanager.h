@@ -3,7 +3,7 @@
 
 namespace trader {
 
-    class ConnectionManager : public SingletonHolder<ConnectionManager>
+    class DATACONNECTOR_DLL ConnectionManager : public SingletonHolder<ConnectionManager>
     {
     public:
         ConnectionManager();

@@ -2,13 +2,13 @@
 
 namespace trader {
 
-    class App : public Poco::Util::Application
+    class DATACONNECTOR_DLL App : public Poco::Util::Application
     {
     public:
         virtual bool findFile(Poco::Path& path) const = 0;
     };
 
-    class AppManager : public SingletonHolder<AppManager>
+    class DATACONNECTOR_DLL AppManager : public SingletonHolder<AppManager>
     {
     public:
         AppManager()

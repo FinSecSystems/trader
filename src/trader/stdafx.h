@@ -65,6 +65,8 @@
 #include <unordered_map>
 #include <exception>
 
+#include <dataconnector.h>
+
 using Poco::Util::Application;
 using Poco::Util::Option;
 using Poco::Util::OptionSet;

@@ -3,7 +3,6 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4251)
 #include "Poco/Poco.h"
-#include "targetver.h"
 #include "Poco/Net/HTMLForm.h"
 #include "Poco/Util/AbstractConfiguration.h"
 #include "Poco/AutoPtr.h"
@@ -64,6 +63,8 @@
 #include <unordered_map>
 #include <exception>
 
+#include <dataconnector.h>
+
 using Poco::Util::Application;
 using Poco::Util::Option;
 using Poco::Util::OptionSet;
@@ -97,4 +98,3 @@ using namespace Poco;
 using namespace Poco::Data::Keywords;
 using namespace Poco::Net;
 using namespace std::placeholders;
-

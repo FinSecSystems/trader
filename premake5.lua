@@ -62,9 +62,10 @@
 				"MultiProcessorCompile"
 				}
 			buildoptions {
-				"/GR-"
+				-- "/GR-"  //Keep rtti enabled because Poco uses dynamic cast
 				}
 			warnings "Extra"
+			disablewarnings { "4251" }
 
 		filter { "platforms:Win64", "system:windows", "configurations:*static" }
 			flags { 
@@ -153,6 +154,12 @@
 
            -- One or more outputs resulting from the build (required)
            buildoutputs { '$(SolutionDir)trader.sln' }
+
+		filter { "configurations:*static" }
+			defines "USE_SHARED_LIBS"
+
+		filter { "configurations:*shared" }
+			defines "USE_DYNAMIC_LIBS"
 
     project "genproj"
 		targetname  "genproj"
@@ -471,8 +478,9 @@
 		}
 		includedirs {
 			".",
+			"sdk/include",
 			"src",
-			"src/trader",
+			"src/dataconnector",
 			"deps/poco/Net/include",
 			"deps/poco/Crypto/include",
 			"deps/poco/Foundation/include",
@@ -487,6 +495,7 @@
 		pchsource	"src/dataconnector/stdafx.cpp"
 		files
 		{
+			"sdk/include/**.h",
 			"src/dataconnector/**.h", "src/dataconnector/**.cpp",
 			"include/**.h",	
 			"tmp/codegen/**.h", "tmp/codegen/**.cpp"
@@ -504,6 +513,7 @@
 
 		filter { "configurations:*shared" }
 			kind "SharedLib"
+			defines "EXPORT_DATACONNECTOR"
 
 		filter { "platforms:Linux64*", "system:linux" }
 			includedirs {
@@ -646,6 +656,7 @@
 		}
 		includedirs {
 			".",
+			"sdk/include",
 			"src",
 			"src/trader",
 			"deps/poco/Net/include",
@@ -663,6 +674,7 @@
 		files
 		{
 			"*.txt", "*.md",
+			"sdk/include/**.h",
 			"src/trader/**.h", "src/trader/**.cpp",
 			"include/**.h",
 			"tmp/codegen/interface*.h", "tmp/codegen/interface*.cpp",
@@ -677,6 +689,9 @@
 		{
 		}
 
+		filter { "configurations:*shared" }
+			defines "IMPORT_DATACONNECTOR"
+
 		filter { "platforms:Linux64*", "system:linux" }
 			includedirs {
 				"deps/poco/NetSSL_OpenSSL/include",
@@ -690,7 +705,6 @@
 			includedirs {
 				"deps/poco/NetSSL_Win/include",
 				"deps/intel_se_api/ittnotify/include",
-				-- "deps/cef/cef_binary_3.3163.1667.g88c82d2_windows64/include"
 				}
 			links {
 				"deps/intel_se_api/bin/ittnotify64.lib",
@@ -797,24 +811,9 @@
 				"deps/poco/lib/Linux/x86_64/PocoCrypto"
 				}
 
-		filter { "configurations:release", "system:windows", "platforms:Win64" }
+		filter { "system:windows" }
 			debugenvs {
 				"PATH=$(SolutionDir)deps\\poco\\bin64"
-				-- "PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release"
-			}
-			links {
-				-- "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\libcef.lib",
-				-- "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Release\\cef_sandbox.lib"
-			}
-
-		filter { "configurations:debug", "system:windows", "platforms:Win64" }
-			debugenvs {
-				"PATH=$(SolutionDir)deps\\poco\\bin64"
-				-- "PATH=$(SolutionDir)deps\\poco\\bin64;$(SolutionDir)\\deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug"
-			}
-			links {
-				-- "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug\\libcef.lib",
-				-- "deps\\cef\\cef_binary_3.3163.1667.g88c82d2_windows64\\Debug\\cef_sandbox.lib"
 			}
 
 group "Tools"

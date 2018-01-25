@@ -126,6 +126,7 @@ namespace trader {
         {
             cerr << exc.displayText() << std::endl;
 			Logger::get("Logs").information("Application Error: %s", exc.displayText());
+            poco_debugger();
             return Application::EXIT_SOFTWARE;
         }
         return Application::EXIT_OK;

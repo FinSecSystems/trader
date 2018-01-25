@@ -2,7 +2,7 @@
 
 namespace trader {
 
-    class Db : public Poco::RefCountedObject
+    class DATACONNECTOR_DLL Db : public Poco::RefCountedObject
     {
     public:
         Db(Poco::Data::Session* _dbSession)
@@ -28,7 +28,7 @@ namespace trader {
         Poco::Data::Session* dbSession;
     };
 
-    class DbManager : public SingletonHolder<DbManager>
+    class DATACONNECTOR_DLL DbManager : public SingletonHolder<DbManager>
     {
     public:
         DbManager()
