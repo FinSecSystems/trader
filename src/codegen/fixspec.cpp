@@ -116,29 +116,19 @@ namespace trader {
     template<class Vertex>
     void Graph<Vertex>::addEdge(Vertex v, Vertex w)
     {
-        AdjMat::iterator it = adjMat.find(v);
+        typename AdjMat::iterator it = adjMat.find(v);
         poco_assert(it != adjMat.end());
-        /*if (it == adjMat.end())
-        {
-            std::list<Vertex> dummy;
-            dummy.push_back(w);
-            adjMat.insert({ v, dummy });
-        }
-        else
-        */
-        {
-            it->second.push_back(w); // Add w to v’s list.
-        }
+        it->second.push_back(w); // Add w to v’s list.
     }
 
     template<class Vertex>
-    void Graph<Vertex>::topologicalSortUtil(Vertex v, std::map<Vertex, bool>& visited , std::stack<Vertex> &resultStack)
+    void Graph<Vertex>::topologicalSortUtil(Vertex v, typename std::map<Vertex, bool>& visited , typename std::stack<Vertex> &resultStack)
     {
         // Mark the current node as visited.
         visited[v] = true;
 
         // Recur for all the vertices adjacent to this vertex
-        std::list<Vertex>::iterator it;
+        typename std::list<Vertex>::iterator it;
         for (it = adjMat[v].begin(); it != adjMat[v].end(); ++it)
             if (!visited[*it])
                 topologicalSortUtil(*it, visited, resultStack);
@@ -148,13 +138,13 @@ namespace trader {
     }
 
     template<class Vertex>
-    bool Graph<Vertex>::hasCycleUtil(Vertex v, std::vector<Vertex> &traversedVertices)
+    bool Graph<Vertex>::hasCycleUtil(Vertex v, typename std::vector<Vertex> &traversedVertices)
     {
         // Recur for all the vertices adjacent to this vertex
-        std::list<Vertex>::iterator it;
+        typename std::list<Vertex>::iterator it;
         for (it = adjMat[v].begin(); it != adjMat[v].end(); ++it)
         {
-            std::vector<Vertex>::iterator itVertex = std::find(traversedVertices.begin(), traversedVertices.end(), *it);
+            typename std::vector<Vertex>::iterator itVertex = std::find(traversedVertices.begin(), traversedVertices.end(), *it);
             if (itVertex != traversedVertices.end())
             {
                 traversedVertices.push_back(*it);
@@ -170,10 +160,10 @@ namespace trader {
     }
 
     template<class Vertex>
-    bool Graph<Vertex>::findCycles(std::vector<Vertex>& traversedVertices)
+    bool Graph<Vertex>::findCycles(typename std::vector<Vertex>& traversedVertices)
     {
         traversedVertices.clear();
-        for (AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
+        for (typename AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
         {
             traversedVertices.push_back(it->first);
             if (hasCycleUtil(it->first, traversedVertices))
@@ -186,18 +176,18 @@ namespace trader {
     }
 
     template<class Vertex>
-    void Graph<Vertex>::topologicalSort(std::stack<Vertex>& resultStack)
+    void Graph<Vertex>::topologicalSort(typename std::stack<Vertex>& resultStack)
     {
         // Mark all the vertices as not visited
-        std::map<Vertex, bool> visited;
-        for (std::map<Vertex, bool>::iterator it = visited.begin(); it != visited.end(); it++)
+        typename std::map<Vertex, bool> visited;
+        for (typename std::map<Vertex, bool>::iterator it = visited.begin(); it != visited.end(); it++)
         {
             it->second = false;
         }
 
         // Call the recursive helper function to store Topological
         // Sort starting from all vertices one by one
-        for (AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
+        for (typename AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
         {
             if (visited[it->first] == false)
             {
@@ -220,11 +210,9 @@ namespace trader {
 		config.outputDir = outputdirectory;
 		config.nameSpace = namespacename;
 		config.headerFileName = outputdirectory + Path::separator() + "interface.h";
-		//config.cppFileName = outputdirectory + Path::separator() + "interface.cpp";
 	
 
 		ApiFileOutputStream header(config.headerFileName);
-		//ApiFileOutputStream cpp(config.cppFileName);
 
         startHeader(header, 0);
         {

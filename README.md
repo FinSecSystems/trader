@@ -39,8 +39,7 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 ### Linux/WSL
 
 #### Setup Instructions
-- Run build\shell.cmd
-- Build poco with deploy_poco.sh
+- Build poco with build\deploy_poco.sh
 - Run build\genproj.sh once to generate makefiles for the project
 - Copy bin\*.json & bin\*.properties to bin\debug on bin\release and modify the config with the relevant api keys and proxy settings
 

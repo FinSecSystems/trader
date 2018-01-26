@@ -245,7 +245,7 @@
 		pchsource   "src/codegen/stdafx.cpp"
 		debugargs {
 			"/f:$(SolutionDir)deps\\quickfix\\spec\\FIX50SP2.xml",
-			"/o:$(SolutionDir)tmp\\codegen",
+			"/o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen",
 			"/n:trader",
 			"/t:xmlspec"
         }
@@ -282,15 +282,15 @@
 		{
 		}
 
-		filter { "platforms:Linux64*", "system:linux", "configurations:debug*"  }
+		filter { "platforms:Linux64*", "system:linux", "configurations:debug"  }
 		    links       { 
                 "deps/poco/lib/Linux/x86_64/PocoFoundationd",
                 "deps/poco/lib/Linux/x86_64/PocoUtild",
                 "deps/poco/lib/Linux/x86_64/PocoJSONd",
 				"deps/poco/lib/Linux/x86_64/PocoXMLd"
                 }
-				
-		filter { "platforms:Linux64*", "system:linux", "configurations:release*"  }
+							
+		filter { "platforms:Linux64*", "system:linux", "configurations:release"  }
 		    links       { 
                 "deps/poco/lib/Linux/x86_64/PocoFoundation",
                 "deps/poco/lib/Linux/x86_64/PocoUtil",
@@ -305,12 +305,6 @@
                 "deps/poco/lib64/PocoJSONd.lib",
 				"deps/poco/lib64/PocoXMLd.lib"
             }
-			postbuildcommands {
-				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-static",
-				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-shared",
-				"{COPY} %{wks.location}bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}.exe %{wks.location}/bin/%{cfg.platform}/debug-static",
-				"{COPY} %{wks.location}bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}.exe %{wks.location}/bin/%{cfg.platform}/debug-shared"
-			}
 
         filter { "platforms:Win64", "system:windows", "configurations:release" }		
 			links	{ 
@@ -319,20 +313,29 @@
 				"deps/poco/lib64/PocoJSON.lib",
 				"deps/poco/lib64/PocoXML.lib"
 			}
+
+		filter { "configurations:debug"  }
+			postbuildcommands {
+				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-static",
+				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-shared",
+				"{COPY} %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.targetname}%{cfg.linktarget.extension} %{wks.location}/bin/%{cfg.platform}/debug-static",
+				"{COPY} %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.targetname}%{cfg.linktarget.extension} %{wks.location}/bin/%{cfg.platform}/debug-shared"
+			}
+
+        filter { "configurations:release" }		
 			postbuildcommands {
 				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-static",
 				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-shared",
-				"{COPY} %{wks.location}bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}.exe %{wks.location}/bin/%{cfg.platform}/release-static",
-				"{COPY} %{wks.location}bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}.exe %{wks.location}/bin/%{cfg.platform}/release-shared"
+				"{COPY} %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.targetname}%{cfg.linktarget.extension} %{wks.location}/bin/%{cfg.platform}/release-static",
+				"{COPY} %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.targetname}%{cfg.linktarget.extension} %{wks.location}/bin/%{cfg.platform}/release-shared"
 			}
-
 
 	project "apis"
 		targetname "fybapi.h"
 		dependson { 
 			"codegen"
 		}
-		targetdir "tmp/codegen"
+		targetdir "tmp/%{cfg.platform}/codegen"
 		kind "Utility"
 
 		files
@@ -341,29 +344,29 @@
 		}
 
 		filter { "platforms:Linux64*", "system:linux" }
-			buildcommands {
-				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/apis -o:tmp/codegen -n:trader -t:hyperschema"
+			prebuildcommands {
+				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/apis -o:tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
 			}		
 			rebuildcommands {
-				"{RMDIR} tmp/codegen/**api.*",
-				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/apis -o:tmp/codegen -n:trader -t:hyperschema"
+				"{RMDIR} tmp/%{cfg.platform}/codegen/**api.*",
+				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/apis -o:tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
 			}
 			cleancommands {
-				"{RMDIR} tmp/codegen/**api.*",
+				"{RMDIR} tmp/%{cfg.platform}/codegen/**api.*",
 			}		
 		
 		filter { "platforms:Win64", "system:windows" }
 			prebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
-				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen /n:trader /t:hyperschema"
 			}
 			rebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
-				"{RMDIR} $(SolutionDir)tmp\codegen",
-				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\codegen /n:trader /t:hyperschema"
+				"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\apis /o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen /n:trader /t:hyperschema"
 			}
 			cleancommands {
-				"{RMDIR} $(SolutionDir)tmp\\codegen"
+				"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen"
 			}
 
 	project "configs"
@@ -372,7 +375,7 @@
 			"codegen"
 		}
 		kind "Utility"
-		targetdir "tmp/codegen"
+		targetdir "tmp/%{cfg.platform}/codegen"
 
 		files
 		{
@@ -382,29 +385,27 @@
 		filter { "platforms:Win64", "system:windows" }
 			prebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
-				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\codegen /n:trader /t:jsonschema"
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen /n:trader /t:jsonschema"
 			}
-
 			rebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
-				"{RMDIR} $(SolutionDir)tmp\codegen",
-				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\codegen /n:trader /t:jsonschema"
+				"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\configs /o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen /n:trader /t:jsonschema"
 			}
-
 		   cleancommands {
-				"{RMDIR} $(SolutionDir)tmp\\codegen"
+				"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen"
 		   }
 
 		filter { "platforms:Linux64*", "system:linux" }
-			buildcommands {
-				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/codegen -n:trader -t:jsonschema"
+			prebuildcommands {
+				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
 			}
 			rebuildcommands {
-				"{RMDIR} tmp/codegen/**config.*",
-				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/codegen -n:trader -t:jsonschema"
+				"{RMDIR} tmp/%{cfg.platform}/codegen/**config.*",
+				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
 			}
 			cleancommands {
-				"{RMDIR} tmp/codegen/**config.*",
+				"{RMDIR} tmp/%{cfg.platform}/codegen/**config.*",
 			}
 
 	project "databases"
@@ -412,7 +413,7 @@
 			"codegen"
 		}
 		kind		"Utility"
-		targetdir	"tmp/codegen"
+		targetdir	"tmp/%{cfg.platform}/codegen"
 		targetname	"fybdatabase.h"
 
 		files
@@ -423,29 +424,29 @@
 		filter { "platforms:Win64", "system:windows" }
 		   prebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
-				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\codegen /n:trader /t:databaseschema"
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen /n:trader /t:databaseschema"
 		   }
 
 		   rebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
-				"{RMDIR} $(SolutionDir)tmp\codegen",
-				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\codegen /n:trader /t:databaseschema"
+				"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /i:$(SolutionDir)data\\databases /o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen /n:trader /t:databaseschema"
 		   }
 
 		   cleancommands {
-				"{RMDIR} $(SolutionDir)tmp\\codegen"
+				"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen"
 		   }
 
 		filter { "platforms:Linux64*", "system:linux" }
-			buildcommands {
-				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/databases -o:tmp/codegen -n:trader -t:databaseschema"
+			prebuildcommands {
+				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/databases -o:tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
 			}
 			rebuildcommands {
-				"{RMDIR} tmp/codegen/**database.*",
-				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/databases -o:tmp/codegen -n:trader -t:databaseschema"
+				"{RMDIR} tmp/%{cfg.platform}/codegen/**database.*",
+				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/databases -o:tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
 			}
 			cleancommands {
-				"{RMDIR} tmp/codegen/**database.*",
+				"{RMDIR} tmp/%{cfg.platform}/codegen/**database.*",
 			}
 
 	project "interface"
@@ -454,7 +455,7 @@
 		}
 		kind		"Utility"
 		targetname	"interface.h"
-		targetdir	"tmp/codegen"
+		targetdir	"tmp/%{cfg.platform}/codegen"
 
 		files {
             "deps/quickfix/spec/FIX50SP2.xml"
@@ -463,27 +464,27 @@
 		filter { "platforms:Win64", "system:windows" }
 		   prebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
-				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /f:$(SolutionDir)deps/quickfix/spec/FIX50SP2.xml /o:$(SolutionDir)tmp\\codegen /n:trader /t:xmlspec"
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /f:$(SolutionDir)deps/quickfix/spec/FIX50SP2.xml /o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen /n:trader /t:xmlspec"
 		   }
 		   rebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
-				"{RMDIR} $(SolutionDir)tmp\codegen",
-				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /f:$(SolutionDir)deps/quickfix/spec/FIX50SP2.xml /o:$(SolutionDir)tmp\\codegen /n:trader /t:xmlspec"
+				"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen",
+				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /f:$(SolutionDir)deps/quickfix/spec/FIX50SP2.xml /o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen /n:trader /t:xmlspec"
 		   }
 		   cleancommands {
-				"{RMDIR} $(SolutionDir)tmp\\codegen"
+				"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen"
 		   }
 
 		filter { "platforms:Linux64*", "system:linux" }
-			buildcommands {
-				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:deps/quickfix/spec/FIX50SP2.xml -o:tmp/codegen -n:trader -t:xmlspec"
+			prebuildcommands {
+				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:deps/quickfix/spec/FIX50SP2.xml -o:tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
 			}
 			rebuildcommands {
-				"{RMDIR} tmp/codegen/**database.*",
-				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:deps/quickfix/spec/FIX50SP2.xml -o:tmp/codegen -n:trader -t:xmlspec"
+				"{RMDIR} tmp/%{cfg.platform}/codegen/**database.*",
+				"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:deps/quickfix/spec/FIX50SP2.xml -o:tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
 			}
 			cleancommands {
-				"{RMDIR} tmp/codegen/**interface.*",
+				"{RMDIR} tmp/%{cfg.platform}/codegen/**interface.*",
 			}
 
 	project "dataconnector"
@@ -510,7 +511,7 @@
 			"deps/poco/JSON/include",
 			"deps/poco/Data/include",
 			"deps/poco/Data/SQLite/include",
-			"tmp/codegen"
+			"tmp/%{cfg.platform}/codegen"
 		}
 		pchheader	"stdafx.h"
 		pchsource	"src/dataconnector/stdafx.cpp"
@@ -518,7 +519,7 @@
 			"sdk/include/**.h",
 			"src/dataconnector/**.h", "src/dataconnector/**.cpp",
 			"include/**.h",	
-			"tmp/codegen/**.h", "tmp/codegen/**.cpp"
+			"tmp/%{cfg.platform}/codegen/**.h", "tmp/%{cfg.platform}/codegen/**.cpp"
 		}
 
 		filter "files:deps/**.*"
@@ -688,7 +689,7 @@
 			"deps/poco/JSON/include",
 			"deps/poco/Data/include",
 			"deps/poco/Data/SQLite/include",
-			"tmp/codegen"
+			"tmp/%{cfg.platform}/codegen"
 		}
 		pchheader	"stdafx.h"
 		pchsource	"samples/trader/stdafx.cpp"
@@ -697,8 +698,8 @@
 			"sdk/include/**.h",
 			"samples/trader/**.h", "samples/trader/**.cpp",
 			"include/**.h",
-			"tmp/codegen/interface*.h", "tmp/codegen/interface*.cpp",
-			"tmp/codegen/generic*.h", "tmp/codegen/generic*.cpp",
+			"tmp/%{cfg.platform}/codegen/interface*.h", "tmp/%{cfg.platform}/codegen/interface*.cpp",
+			"tmp/%{cfg.platform}/codegen/generic*.h", "tmp/%{cfg.platform}/codegen/generic*.cpp",
 			"bin/**.json", "bin/**.properties"
 		}
 
