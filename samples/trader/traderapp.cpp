@@ -1,7 +1,7 @@
 #include "stdafx.h"
-#include "dataconnector/db.h"
-#include "dataconnector/app.h"
-#include "dataconnector/connectionmanager.h"
+#include "db.h"
+#include "app.h"
+#include "connectionmanager.h"
 #include "traderapp.h"
 #include "interface.h"
 
@@ -96,16 +96,23 @@ namespace trader {
             AutoPtr<AbstractConfiguration> proxyProperties(appConfig().createView("proxy"));
 
             HTTPSClientSession::ProxyConfig proxyConfig;
-			if (proxyProperties->hasProperty("hostname")) 
-				proxyConfig.host = proxyProperties->getString("hostname");
-			if (proxyProperties->hasProperty("port"))
-				proxyConfig.port = (UInt16)proxyProperties->getUInt("port");
-			if (proxyProperties->hasProperty("username"))
-				proxyConfig.username = proxyProperties->getString("username");
-			if (proxyProperties->hasProperty("password"))
-				proxyConfig.password = proxyProperties->getString("password");
-			if (proxyProperties->hasProperty("nonproxyhosts"))
-				proxyConfig.nonProxyHosts = proxyProperties->getString("nonproxyhosts");
+            try {
+                if (proxyProperties->hasProperty("hostname"))
+                    proxyConfig.host = proxyProperties->getString("hostname");
+                if (proxyProperties->hasProperty("port"))
+                    proxyConfig.port = (UInt16)proxyProperties->getUInt("port");
+                if (proxyProperties->hasProperty("username"))
+                    proxyConfig.username = proxyProperties->getString("username");
+                if (proxyProperties->hasProperty("password"))
+                    proxyConfig.password = proxyProperties->getString("password");
+                if (proxyProperties->hasProperty("nonproxyhosts"))
+                    proxyConfig.nonProxyHosts = proxyProperties->getString("nonproxyhosts");
+            }
+            catch (Exception& exc)
+            {
+                Logger::get("Logs").information("Bad Application configuration: Missing or invalid %s.properties", commandName().c_str());
+                Logger::get("Logs").information("Application Error: %s", exc.displayText());
+            }
 
             HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
 

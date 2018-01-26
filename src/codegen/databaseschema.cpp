@@ -366,7 +366,7 @@ namespace trader {
 
 		startCpp(cpp, 2,
 			config.headerFileName.c_str(),
-			"dataconnector/helper.h"
+			"helper.h"
 		);
         {
             ScopedNamespace scopedNamespace(cpp, config.nameSpace);

@@ -93,18 +93,18 @@ namespace trader {
 		if (config.useConfig)
 		{
 			startHeader(header, 4,
-				"dataconnector/app.h",
-				"dataconnector/api.h",
+				"app.h",
+				"api.h",
 				configHeaderName.str().c_str(),
-                "dataconnector/helper.h"
+                "helper.h"
 			);
 		}
 		else
 		{
 			startHeader(header, 3,
-				"dataconnector/app.h",
-				"dataconnector/api.h",
-                "dataconnector/helper.h"
+				"app.h",
+				"api.h",
+                "helper.h"
 			);
 		}
 		{
@@ -145,8 +145,8 @@ namespace trader {
 
 		startCpp(cpp, 3,
 			config.headerFileName.c_str(),
-			"dataconnector/api.h",
-			"dataconnector/app.h"
+			"api.h",
+			"app.h"
 		);
 		{
 			ScopedNamespace scopedNamesapce(cpp, config.nameSpace);

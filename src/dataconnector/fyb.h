@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dataconnector/db.h"
-#include "dataconnector/api.h"
+#include "db.h"
+#include "api.h"
 #include "fybapi.h"
 #include "fybdatabase.h"
 #include "interface.h"

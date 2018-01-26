@@ -161,6 +161,26 @@
 		filter { "configurations:*shared" }
 			defines "USE_DYNAMIC_LIBS"
 
+	group "Tools"
+		project "codegen"
+		project "genproj"
+
+	group "Generators"
+		project "apis"
+		project "configs"
+		project "databases"
+		project "interface"
+
+	group "Modules"
+		project "dataconnector"
+
+	group "Samples"
+		project "trader"
+
+	group "Apps"
+	
+	group ""
+
     project "genproj"
 		targetname  "genproj"
         kind "Makefile"
@@ -286,6 +306,8 @@
 				"deps/poco/lib64/PocoXMLd.lib"
             }
 			postbuildcommands {
+				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-static",
+				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-shared",
 				"{COPY} %{wks.location}bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}.exe %{wks.location}/bin/%{cfg.platform}/debug-static",
 				"{COPY} %{wks.location}bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}.exe %{wks.location}/bin/%{cfg.platform}/debug-shared"
 			}
@@ -298,6 +320,8 @@
 				"deps/poco/lib64/PocoXML.lib"
 			}
 			postbuildcommands {
+				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-static",
+				"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-shared",
 				"{COPY} %{wks.location}bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}.exe %{wks.location}/bin/%{cfg.platform}/release-static",
 				"{COPY} %{wks.location}bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.name}.exe %{wks.location}/bin/%{cfg.platform}/release-shared"
 			}
@@ -384,12 +408,12 @@
 			}
 
 	project "databases"
-		targetname "fybdatabase.h"
 		dependson { 
 			"codegen"
 		}
-		kind "Utility"
+		kind		"Utility"
 		targetdir	"tmp/codegen"
+		targetname	"fybdatabase.h"
 
 		files
 		{
@@ -425,15 +449,14 @@
 			}
 
 	project "interface"
-		targetname  "interface.h"
 		dependson { 
 			"codegen"
 		}
-		kind "Utility"
+		kind		"Utility"
+		targetname	"interface.h"
 		targetdir	"tmp/codegen"
 
-		files
-		{
+		files {
             "deps/quickfix/spec/FIX50SP2.xml"
 		}
 
@@ -442,13 +465,11 @@
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
 				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /f:$(SolutionDir)deps/quickfix/spec/FIX50SP2.xml /o:$(SolutionDir)tmp\\codegen /n:trader /t:xmlspec"
 		   }
-
 		   rebuildcommands {
 				"PATH=$(SolutionDir)deps\\poco\\bin64",
 				"{RMDIR} $(SolutionDir)tmp\codegen",
 				"$(SolutionDir)bin\\%{cfg.platform}\\%{cfg.buildcfg}\\codegen.exe /f:$(SolutionDir)deps/quickfix/spec/FIX50SP2.xml /o:$(SolutionDir)tmp\\codegen /n:trader /t:xmlspec"
 		   }
-
 		   cleancommands {
 				"{RMDIR} $(SolutionDir)tmp\\codegen"
 		   }
@@ -493,8 +514,7 @@
 		}
 		pchheader	"stdafx.h"
 		pchsource	"src/dataconnector/stdafx.cpp"
-		files
-		{
+		files {
 			"sdk/include/**.h",
 			"src/dataconnector/**.h", "src/dataconnector/**.cpp",
 			"include/**.h",	
@@ -504,16 +524,18 @@
 		filter "files:deps/**.*"
 			flags { "ExcludeFromBuild" }
 
-		excludes
-		{
+		excludes {
 		}
 
 		filter { "configurations:*static" }
-			kind "StaticLib"
+			kind		"StaticLib"
+			targetdir	"lib/%{cfg.platform}/%{cfg.buildcfg}"
 
 		filter { "configurations:*shared" }
-			kind "SharedLib"
-			defines "EXPORT_DATACONNECTOR"
+			defines		"EXPORT_DATACONNECTOR"
+			kind		"SharedLib"
+			implibdir	"lib/%{cfg.platform}/%{cfg.buildcfg}"
+			targetdir	"bin/%{cfg.platform}/%{cfg.buildcfg}"
 
 		filter { "platforms:Linux64*", "system:linux" }
 			includedirs {
@@ -527,7 +549,7 @@
 		filter { "system:windows", "platforms:Win64" }
 			includedirs {
 				"deps/poco/NetSSL_Win/include",
-				}
+			}
 			links {
 				"Iphlpapi.lib",
 				"ws2_32.lib",
@@ -589,7 +611,7 @@
 				"deps/poco/lib64/PocoDatamt.lib",
 				"deps/poco/lib64/PocoDataSQLitemt.lib",
 				"deps/poco/lib64/PocoXMLmt.lib"
-				}
+			}
 
 		filter { "platforms:Win64", "system:windows", "configurations:release-shared" }
 			links { 
@@ -604,7 +626,7 @@
 				"deps/poco/lib64/PocoData.lib",
 				"deps/poco/lib64/PocoDataSQLite.lib",
 				"deps/poco/lib64/PocoXML.lib"
-				}
+			}
 
 		filter { "platforms:Linux64*", "system:linux" }
 			links { 
@@ -637,7 +659,7 @@
 				"deps/poco/lib/Linux/x86_64/PocoDataSQLite",
 				"deps/poco/lib/Linux/x86_64/PocoNetSSL",
 				"deps/poco/lib/Linux/x86_64/PocoCrypto"
-				}
+			}
 
 	project "trader"
 		targetname	"trader"
@@ -645,7 +667,7 @@
 		kind		"ConsoleApp"
 		targetdir	"bin/%{cfg.platform}/%{cfg.buildcfg}"
 		debugdir	"bin/%{cfg.platform}/%{cfg.buildcfg}"
-		dependson { 
+		dependson {
 			"apis",
 			"configs",
 			"databases",
@@ -657,8 +679,7 @@
 		includedirs {
 			".",
 			"sdk/include",
-			"src",
-			"src/trader",
+			"samples/trader",
 			"deps/poco/Net/include",
 			"deps/poco/Crypto/include",
 			"deps/poco/Foundation/include",
@@ -670,12 +691,11 @@
 			"tmp/codegen"
 		}
 		pchheader	"stdafx.h"
-		pchsource	"src/trader/stdafx.cpp"
-		files
-		{
+		pchsource	"samples/trader/stdafx.cpp"
+		files {
 			"*.txt", "*.md",
 			"sdk/include/**.h",
-			"src/trader/**.h", "src/trader/**.cpp",
+			"samples/trader/**.h", "samples/trader/**.cpp",
 			"include/**.h",
 			"tmp/codegen/interface*.h", "tmp/codegen/interface*.cpp",
 			"tmp/codegen/generic*.h", "tmp/codegen/generic*.cpp",
@@ -685,8 +705,7 @@
 		filter "files:deps/**.*"
 			flags { "ExcludeFromBuild" }
 
-		excludes
-		{
+		excludes {
 		}
 
 		filter { "configurations:*shared" }
@@ -746,7 +765,7 @@
 				"deps/poco/lib64/PocoDatamt.lib",
 				"deps/poco/lib64/PocoDataSQLitemt.lib",
 				"deps/poco/lib64/PocoXMLmt.lib"
-				}
+			}
 
 		filter { "platforms:Win64", "system:windows", "configurations:debug-shared" }
 			links { 
@@ -770,13 +789,13 @@
 				"deps/poco/lib64/PocoNetSSLWin.lib",
 				"deps/poco/lib64/PocoUtil.lib",
 				"deps/poco/lib64/PocoCrypto.lib",
-				"deps/poco/lib64/ssleay64.lib",
-				"deps/poco/lib64/libeay64.lib",
+				"deps/poco/lib64/ssleay64MT.lib",
+				"deps/poco/lib64/libeay64MT.lib",
 				"deps/poco/lib64/PocoJSON.lib",
 				"deps/poco/lib64/PocoData.lib",
 				"deps/poco/lib64/PocoDataSQLite.lib",
 				"deps/poco/lib64/PocoXML.lib"
-				}
+			}
 
 		filter { "platforms:Linux64*", "system:linux" }
 			links { 
@@ -815,22 +834,3 @@
 			debugenvs {
 				"PATH=$(SolutionDir)deps\\poco\\bin64"
 			}
-
-group "Tools"
-	project "codegen"
-
-group "Generators"
-	project "apis"
-	project "configs"
-	project "databases"
-	project "interface"
-
-group "Modules"
-	project "dataconnector"
-
-group "Apps"
-	project "trader"
-	
-group ""
-
-

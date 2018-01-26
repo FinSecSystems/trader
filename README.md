@@ -31,7 +31,8 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 - trader - This is a sample application to interact with dataconnector
 
 ## Running
-- Copy bin\*.json & bin\*.properties to bin\debug on bin\release and modify the config with the relevant api keys and proxy settings
+- Copy bin\*.json & bin\*.properties to bin\debug or bin\release and modify the config with the relevant api keys and proxy settings
+- Comment of delete the proxy settings if you do not require them
 - Right-click trader project and Set as StartUp Project
 - Press F5 to run/debug in Visual Studio
 

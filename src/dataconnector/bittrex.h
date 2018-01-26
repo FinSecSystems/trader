@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dataconnector/db.h"
-#include "dataconnector/api.h"
+#include "db.h"
+#include "api.h"
 #include "bittrexapi.h"
 #include "bittrexdatabase.h"
 #include "interface.h"

@@ -338,9 +338,9 @@ namespace trader {
                                                         {
                                                             nodeGraph.addEdge(componentNode, it->second);
 
-                                                            ostringstream debugStr;
-                                                            debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() << std::endl;
-                                                            Debugger::message(debugStr.str());
+                                                            //ostringstream debugStr;
+                                                            //debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() << std::endl;
+                                                            //Debugger::message(debugStr.str());
                                                         }
                                                     }
                                                 }
@@ -358,9 +358,9 @@ namespace trader {
                                     {
                                         nodeGraph.addEdge(componentNode, it->second);
 
-                                        ostringstream debugStr;
-                                        debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() << std::endl;
-                                        Debugger::message(debugStr.str());
+                                        //ostringstream debugStr;
+                                        //debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() << std::endl;
+                                        //Debugger::message(debugStr.str());
                                     }
                                 }
                             }
