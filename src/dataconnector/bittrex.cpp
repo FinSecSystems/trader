@@ -271,4 +271,118 @@ namespace trader {
             throw ApplicationException("Bittrex Error", "");
         }
     }
+
+    void BittrexConnection::SecurityListRequest(Poco::AutoPtr<SecurityListRequestData> securityListRequestData)
+    {
+        // [Server-Side]
+        // Returns a Security List Data of the of the securities traded on the exchange that match the criteria provided.
+        // SecurityReqID - Unique identifier of the Security List Request <x> that solicited this response.
+        // SecurityResponseID - Identifier for this message.
+        // TotNoRelatedSym- Number of securities returned for the request.
+        // SecurityRequestResult - The result of this request.Valid values :
+        //                                          0 = Valid Request, 2 = Invalid Request
+        // NoRelatedSym - Specifies the number of returned securities.
+        //                Symbol - Symbol of exchange - traded security.
+        // Example:
+        // Poco::AutoPtr<SecurityListData> securityListData = new SecurityListData();
+        // receivingConnection->SecurityListRequest(securityListData);
+
+        poco_bugcheck_msg("SecurityListRequest not implemented.");
+    }
+
+    void BittrexConnection::MarketDataRequest(Poco::AutoPtr<MarketDataRequestData> marketDataRequestData)
+    {
+        // [Server-Side]
+        // Returns either MarketDataSnapshotFullRefreshData, MarketDataIncrementalRefresh or MarketDataRequestReject
+
+        // MarketDataSnapshotFullRefresh
+        // MDReqID - Unique identifier of the Market Data Request this message is in response to.
+        // Symbol - Symbol of market data entry.
+        // NoMDEntries - Number of entries in this message.
+        //             - MDEntryType - Type of market data update.
+        //                           - Valid values : 0 = Bid
+        //                                            1 = Offer
+        //                                            2 = Trade
+        //              - MDEntryPx	- Price of market data entry.
+        //              - MDEntrySize - Quantity of market data entry.
+        // Example:
+        // Poco::AutoPtr<MarketDataSnapshotFullRefresh> marketDataSnapshotFullRefreshData = new MarketDataSnapshotFullRefresh();
+        // receivingConnection->MarketDataSnapshotFullRefresh(marketDataSnapshotFullRefreshData);
+
+        // MarketDataIncrementalRefresh
+        // MDReqID - Unique identifier of the Market Data Request this message is in response to.
+        // Symbol - Symbol of market data entry.
+        // NoMDEntries - Number of entries in this message.
+        //             - MDUpdateAction - Type of market data update.
+        //                              - Valid values : 0 = New
+        //                                               1 = Change
+        //                                               2 = Delete
+        //             - MDEntryType - Type of market data update.
+        //                           - Valid values : 0 = Bid
+        //                                            1 = Offer
+        //                                            2 = Trade
+        //             - MDEntryPx	- Price of market data entry.
+        //             - MDEntrySize - Quantity of market data entry.
+        // Example:
+        // Poco::AutoPtr<MarketDataIncrementalRefreshData> marketDataIncrementalRefreshData = new MarketDataIncrementalRefreshData();
+        // receivingConnection->MarketDataIncrementalRefresh(marketDataIncrementalRefreshData);
+
+        // MarketDataRequestReject
+        // MDReqID - Unique identifier of the Market Data Request this message is in response to.
+        // MDReqRejReason - Reason why Market Data Request was rejected.
+        //                - Valid values : 0 = Unknown Symbol
+        //                                 1 = Duplicate MDReqID
+        //                                 4 = Unsupported SubscriptionRequestType
+        //                                 5 = Unsupported MarketDepth
+        //                                 8 = Unsupported MDEntryType
+        // Example:
+        // Poco::AutoPtr<MarketDataRequestRejectData> marketDataRequestRejectData = new MarketDataRequestReject();
+        // receivingConnection->MarketDataRequestReject(marketDataRequestRejectData);
+
+        poco_bugcheck_msg("MarketDataRequest not implemented.");
+    }
+
+
+    void BittrexConnection::NewOrderSingle(Poco::AutoPtr<NewOrderSingleData> newOrderSingleData)
+    {
+        // [Server-Side]
+        // Returns  TradeCaptureReport and/or ExecutionReport
+        // TODO: Documentation
+
+        // Example:
+
+        // Poco::AutoPtr<ExecutionReportData> executionReportData = new ExecutionReportData();
+        // receivingConnection->ExecutionReport(executionReportData);
+
+        poco_bugcheck_msg("NewOrderSingle not implemented.");
+    }
+
+    void BittrexConnection::OrderCancelRequest(Poco::AutoPtr<OrderCancelRequestData> orderCancelRequestData)
+    {
+        // [Server-Side]
+        // Returns ExecutionReport or OrderCancelReject
+        // TODO: Documentation
+
+        // Example:
+        // Poco::AutoPtr<ExecutionReportData> executionReportData = new ExecutionReportData();
+        // clientConnection->ExecutionReport(executionReportData);
+        // Poco::AutoPtr<OrderCancelRejectData> orderCancelRejectData = new OrderCancelRejectData();
+        // receivingConnection->OrderCancelReject(orderCancelRejectData);
+
+        poco_bugcheck_msg("OrderCancelRequest not implemented.");
+    }
+
+    void BittrexConnection::TradeCaptureReportRequest(Poco::AutoPtr<TradeCaptureReportRequestData> tradeCaptureReportRequestData)
+    {
+        // [Server-Side]
+        // Returns TradeCaptureReport
+        // TODO: Documentation
+
+        // Example:
+        // Poco::AutoPtr<TradeCaptureReportData> tradeCaptureReportData = new TradeCaptureReportData();
+        // receivingConnection->TradeCaptureReport(TradeCaptureReportData);
+
+        poco_bugcheck_msg("TradeCaptureReportRequest not implemented.");
+    }
+
 }
