@@ -4,6 +4,7 @@
 #include "connectionmanager.h"
 #include "traderapp.h"
 #include "interface.h"
+#include "marketdatasubsystem.h"
 
 namespace trader {
 
@@ -119,6 +120,9 @@ namespace trader {
             
             AppManager::instance.get()->setApp(this);
             DbManager::instance.get()->setDb(dB);
+
+            AutoPtr<trader::MarketDataSubSystem> marketDataSubsystem = new MarketDataSubSystem();
+            addSubsystem(marketDataSubsystem);
 
             AutoPtr<trader::Interface::Connection> bittrex = ConnectionManager::instance.get()->getConnection("bittrex");
 

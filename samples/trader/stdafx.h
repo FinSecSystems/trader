@@ -44,6 +44,7 @@
 #include "Poco/Logger.h"
 #include "Poco/Timer.h"
 #include "Poco/Thread.h"
+#include "Poco/ThreadPool.h"
 #include "Poco/Stopwatch.h"
 #include "Poco/Data/Session.h"
 #include "Poco/Data/SQLite/Connector.h"

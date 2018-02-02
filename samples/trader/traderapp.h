@@ -1,5 +1,8 @@
 #pragma once
 
+#include "db.h"
+#include "app.h"
+
 namespace trader {
 
 	class TraderApp : public App
@@ -16,7 +19,7 @@ namespace trader {
 		bool findFile(Poco::Path& path) const override;
 
         Poco::AutoPtr<Db> dB;
-
+        ThreadPool pool;
 	protected:
 		void defineOptions(Poco::Util::OptionSet& options);
 		void handleHelp(const std::string& name, const std::string& value);

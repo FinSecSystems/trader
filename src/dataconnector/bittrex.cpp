@@ -274,20 +274,38 @@ namespace trader {
 
     void BittrexConnection::SecurityListRequest(Poco::AutoPtr<SecurityListRequestData> securityListRequestData)
     {
-        // [Server-Side]
-        // Returns a Security List Data of the of the securities traded on the exchange that match the criteria provided.
-        // SecurityReqID - Unique identifier of the Security List Request <x> that solicited this response.
-        // SecurityResponseID - Identifier for this message.
-        // TotNoRelatedSym- Number of securities returned for the request.
-        // SecurityRequestResult - The result of this request.Valid values :
-        //                                          0 = Valid Request, 2 = Invalid Request
-        // NoRelatedSym - Specifies the number of returned securities.
-        //                Symbol - Symbol of exchange - traded security.
-        // Example:
-        // Poco::AutoPtr<SecurityListData> securityListData = new SecurityListData();
-        // receivingConnection->SecurityListRequest(securityListData);
+        static  std::atomic<std::int32_t> idx = 0;
 
-        poco_bugcheck_msg("SecurityListRequest not implemented.");
+        Poco::AutoPtr<SecurityListData> securityListData = new SecurityListData();
+        securityListData->securityListType = Interface::SecurityListType_MARKET;
+        securityListData->securityReqID = securityListRequestData->securityReqID;
+        securityListData->totNoRelatedSym = 0;
+        securityListData->securityRequestResult = Interface::SecurityRequestResult_INVALID_OR_UNSUPPORTED_REQUEST;
+
+        ostringstream str;
+        str << "SLR" << ++idx << endl;
+        securityListData->securityResponseID = str.str();
+
+        //Get Markets and create tables
+        Poco::AutoPtr<BittrexApi::Markets> markets = exchange->api.GetMarkets();
+
+        for (auto& market : markets->dataObject.result)
+        {
+            if (market.isActive && market.isSetMarketName())
+            {
+                securityListData->secListGrp.noRelatedSym.emplace_back();
+                Interface::SecListGrpObject::NoRelatedSym& newMarket = securityListData->secListGrp.noRelatedSym.back();
+                newMarket.instrument.symbol = market.marketName;
+                securityListData->totNoRelatedSym++;
+            }
+        }
+
+        if (securityListData->totNoRelatedSym != 0)
+        {
+            securityListData->securityRequestResult = Interface::SecurityRequestResult_VALID_REQUEST;
+        }
+
+        receivingConnection->SecurityList(securityListData);
     }
 
     void BittrexConnection::MarketDataRequest(Poco::AutoPtr<MarketDataRequestData> marketDataRequestData)
