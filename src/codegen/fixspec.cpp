@@ -468,6 +468,13 @@ namespace trader {
                 {
                     ScopedClass<1> scopedMessageDataClass(header, "IMessageData", "Poco::RefCountedObject");
                     header << "virtual enum MESSAGES GetType() = 0" << cendl;
+                    header << endl;
+                    header << "MessageId getUniqueMessageId()" << endl;
+                    {
+                        ScopedStream<ApiFileOutputStream> funcScope(header);
+                        header << "static std::atomic<MessageId> nextMessageId" << cendl;
+                        header << "return ++nextMessageId" << cendl;
+                    }
                     header << "MessageId messageId" << cendl;
                 }
 
@@ -490,6 +497,15 @@ namespace trader {
                             ostringstream className;
                             className << attribName << "Data";
                             ScopedStruct<1, ApiFileOutputStream> scopedStruct(header, className.str().c_str(), "IMessageData");
+                            if (className.str().find("Request") != std::string::npos)
+                            {
+                                header << className.str().c_str() << "()" << endl;
+                                {
+                                    ScopedStream<ApiFileOutputStream> funcScope(header);
+                                    header << "messageId = getUniqueMessageId()" << cendl;
+                                }
+                            }
+
                             header << "virtual enum MESSAGES GetType()" << endl;
                             {
                                 ScopedStream<ApiFileOutputStream> funcScope(header);

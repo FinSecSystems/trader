@@ -283,7 +283,7 @@ namespace trader {
         securityListData->securityRequestResult = Interface::SecurityRequestResult_INVALID_OR_UNSUPPORTED_REQUEST;
 
         ostringstream str;
-        str << "SLR" << ++idx << endl;
+        str << "SL" << ++idx << endl;
         securityListData->securityResponseID = str.str();
 
         //Get Markets and create tables

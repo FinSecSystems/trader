@@ -689,7 +689,8 @@
 			"deps/poco/JSON/include",
 			"deps/poco/Data/include",
 			"deps/poco/Data/SQLite/include",
-			"tmp/%{cfg.platform}/codegen"
+			"tmp/%{cfg.platform}/codegen",
+			"deps/tinyfsm/include"
 		}
 		pchheader	"stdafx.h"
 		pchsource	"samples/trader/stdafx.cpp"

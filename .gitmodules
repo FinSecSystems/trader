@@ -22,3 +22,6 @@
 [submodule "deps/poco"]
 	path = deps/poco
 	url = https://github.com/FinSecSystems/poco.git
+[submodule "deps/tinyfsm"]
+	path = deps/tinyfsm
+	url = https://github.com/FinSecSystems/tinyfsm.git

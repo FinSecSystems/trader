@@ -12,10 +12,9 @@
 namespace trader {
 
 
-    AppConnection::AppConnection()
-    {
-
-    }
+    AppConnection::AppConnection(TraderApp* _app)
+        : app(_app)
+    {}
 
     AppConnection::~AppConnection()
     {
@@ -24,49 +23,19 @@ namespace trader {
 
     void AppConnection::ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData)
     {
-        Poco::FIFOEvent<const Poco::AutoPtr< Interface::IMessageData >, Poco::FastMutex > evt;
-        MessageMap::iterator it;
-        it = messageMap.find(_messageData->messageId);
-        if (it != messageMap.end())
+        Poco::UInt32 skip = 1; //1st entry in the list is the application
+        for (auto& subSystem : app->subsystems())
         {
-            (it->second)(_messageData);
-        }
-    }
-
-    void AppConnection::RegisterCallback(Interface::MessageId messageId, const AppConnectionCallbackInterface& callback)
-    {
-        MessageMap::iterator it;
-        it = messageMap.find(messageId);
-        if (it != messageMap.end())
-        {
-            MessageEvent& evt = it->second;
-           // evt += Delegate<AppConnectionCallbackInterface, Interface::MessageId>(&callback, &AppConnectionCallbackInterface::NotifyMethod);
-        }
-        else
-        {
-            MessageEvent evt;
-          //  evt += Delegate<AppConnectionCallbackInterface, MessageId >(&callback, &AppConnectionCallbackInterface::NotifyMethod);
-          //  messageMap.insert(std::make_pair(messageId, evt));
-        }
-    }
-
-    void AppConnection::UnregisterCallback(Interface::MessageId messageId, const AppConnectionCallbackInterface& callback)
-    {
-        MessageMap::iterator it;
-        it = messageMap.find(messageId);
-        if (it != messageMap.end())
-        {
-            MessageEvent& evt = it->second;
-         //   evt -= Delegate<AppConnectionCallbackInterface, Interface::MessageId >(&callback, &AppConnectionCallbackInterface::NotifyMethod);
-            if (!evt.hasDelegates())
+            if (!skip--)
             {
-              //  messageMap.erase(it);
+                subSystem.unsafeCast<TraderSubsystem>()->eventProcessor->ProcessMessage(_messageData);
             }
         }
-        else
-        {
-            poco_unexpected();
-        }
+    }
+
+    void AppConnection::SecurityList(Poco::AutoPtr<SecurityListData> securityListData)
+    {
+        ProcessMessage(securityListData);
     }
 
 }

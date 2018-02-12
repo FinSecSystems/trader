@@ -4,16 +4,10 @@
 #include "connectionmanager.h"
 #include "traderapp.h"
 #include "interface.h"
+#include "appconnection.h"
 #include "marketdatasubsystem.h"
 
 namespace trader {
-
-    class AppConnection : public Interface::Connection
-    {
-    public:
-        AppConnection();
-
-    };
 
     void TraderApp::defineOptions(OptionSet& options)
     {
@@ -117,18 +111,20 @@ namespace trader {
 
             HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
 
-            
             AppManager::instance.get()->setApp(this);
             DbManager::instance.get()->setDb(dB);
 
-            AutoPtr<trader::MarketDataSubSystem> marketDataSubsystem = new MarketDataSubSystem();
-            addSubsystem(marketDataSubsystem);
+            addSubsystem(new MarketDataSubSystem());
+            connections.push_back(ConnectionManager::instance.get()->getConnection("bittrex"));
 
-            AutoPtr<trader::Interface::Connection> bittrex = ConnectionManager::instance.get()->getConnection("bittrex");
+            appConnection = new AppConnection(this);
 
-            AutoPtr<trader::Interface::Connection> appConnection = new AppConnection();
-            bittrex->SetReceivingConnection(appConnection);
+            for (auto& connection : connections)
+            {
+                connection->SetReceivingConnection(appConnection);
+            }
 
+            this->initialize(*this);
 			do {
 				Thread::sleep(10000);
 			} while (1); 
