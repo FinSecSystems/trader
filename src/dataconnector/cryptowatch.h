@@ -19,7 +19,7 @@ namespace trader {
 
     class Cryptowatch;
 
-    class CryptowatchConnection : public Interface::Connection
+    class CryptowatchConnection : public Interface::CallConnection, public Poco::Runnable
     {
     public:
         CryptowatchConnection(const std::string& connectionid, Cryptowatch* _exchange)
@@ -27,6 +27,9 @@ namespace trader {
         {
             (void)connectionid;
         }
+
+        void run() {}
+
     private:
         Cryptowatch* exchange;
     };

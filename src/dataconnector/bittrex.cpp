@@ -4,6 +4,7 @@
 #include "helper.h"
 #include "shautils.h"
 #include "app.h"
+#include "connectionmanager.h"
 
 namespace trader {
 
@@ -272,7 +273,13 @@ namespace trader {
         }
     }
 
-    void BittrexConnection::SecurityListRequest(Poco::AutoPtr<SecurityListRequestData> securityListRequestData)
+    void BittrexConnection::run()
+    {
+        processingConnection.Run();
+        ConnectionManager::instance.get()->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
+    }
+
+    void BittrexProcessingConnection::SecurityListRequest(Poco::AutoPtr<SecurityListRequestData> securityListRequestData)
     {
         static  std::atomic<std::int32_t> idx = 0;
 
@@ -308,7 +315,7 @@ namespace trader {
         receivingConnection->SecurityList(securityListData);
     }
 
-    void BittrexConnection::MarketDataRequest(Poco::AutoPtr<MarketDataRequestData> marketDataRequestData)
+    void BittrexProcessingConnection::MarketDataRequest(Poco::AutoPtr<MarketDataRequestData> marketDataRequestData)
     {
         // [Server-Side]
         // Returns either MarketDataSnapshotFullRefreshData, MarketDataIncrementalRefresh or MarketDataRequestReject
@@ -361,7 +368,7 @@ namespace trader {
     }
 
 
-    void BittrexConnection::NewOrderSingle(Poco::AutoPtr<NewOrderSingleData> newOrderSingleData)
+    void BittrexProcessingConnection::NewOrderSingle(Poco::AutoPtr<NewOrderSingleData> newOrderSingleData)
     {
         // [Server-Side]
         // Returns  TradeCaptureReport and/or ExecutionReport
@@ -375,7 +382,7 @@ namespace trader {
         poco_bugcheck_msg("NewOrderSingle not implemented.");
     }
 
-    void BittrexConnection::OrderCancelRequest(Poco::AutoPtr<OrderCancelRequestData> orderCancelRequestData)
+    void BittrexProcessingConnection::OrderCancelRequest(Poco::AutoPtr<OrderCancelRequestData> orderCancelRequestData)
     {
         // [Server-Side]
         // Returns ExecutionReport or OrderCancelReject
@@ -390,7 +397,7 @@ namespace trader {
         poco_bugcheck_msg("OrderCancelRequest not implemented.");
     }
 
-    void BittrexConnection::TradeCaptureReportRequest(Poco::AutoPtr<TradeCaptureReportRequestData> tradeCaptureReportRequestData)
+    void BittrexProcessingConnection::TradeCaptureReportRequest(Poco::AutoPtr<TradeCaptureReportRequestData> tradeCaptureReportRequestData)
     {
         // [Server-Side]
         // Returns TradeCaptureReport

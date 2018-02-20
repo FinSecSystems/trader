@@ -16,6 +16,7 @@
 #include "bittrexapi.h"
 #include "bittrexdatabase.h"
 #include "interface.h"
+#include "interfacehelper.h"
 
 namespace trader {
 
@@ -29,13 +30,12 @@ namespace trader {
 
     class Bittrex;
 
-    class BittrexConnection : public Interface::Connection
+    class BittrexProcessingConnection : public Interface::MessageReceivingConnection
     {
     public:
-        BittrexConnection(const std::string& connectionid, Bittrex* _exchange)
-            : exchange(_exchange)
+        BittrexProcessingConnection()
         {
-            (void)connectionid;
+
         }
 
         /// <summary>
@@ -102,8 +102,37 @@ namespace trader {
         // TODO: Documentation
         void TradeCaptureReportRequest(Poco::AutoPtr<TradeCaptureReportRequestData> tradeCaptureReportRequestData) override;
 
-    private:
+        void SetExchange(Bittrex* _exchange)
+        {
+            exchange = _exchange;
+        }
+
         Bittrex* exchange;
+    };
+
+    class BittrexConnection : public Interface::CallConnection, public Poco::Runnable
+    {
+    public:
+        BittrexConnection(const std::string& connectionid, Bittrex* _exchange)
+            : processingConnection(10)
+        {
+            (void)connectionid;
+            processingConnection.SetExchange(_exchange);
+        }
+
+        void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData) override
+        {
+            processingConnection.ProcessMessage(_messageData);
+        }
+
+        void SetReceivingConnection(Poco::AutoPtr<Interface::Connection> _connection) override
+        {
+            processingConnection.SetReceivingConnection(_connection);
+        }
+
+        void run() override;
+
+        BufferedConnection<BittrexProcessingConnection> processingConnection;
     };
 
     class Bittrex : public Api

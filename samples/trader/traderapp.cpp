@@ -125,6 +125,9 @@ namespace trader {
             }
 
             this->initialize(*this);
+
+            ConnectionManager::instance.get()->start();
+
 			do {
 				Thread::sleep(10000);
 			} while (1); 

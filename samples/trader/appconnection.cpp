@@ -28,14 +28,9 @@ namespace trader {
         {
             if (!skip--)
             {
-                subSystem.unsafeCast<TraderSubsystem>()->eventProcessor->ProcessMessage(_messageData);
+                subSystem.unsafeCast<TraderSubsystem>()->ProcessMessage(_messageData);
             }
         }
-    }
-
-    void AppConnection::SecurityList(Poco::AutoPtr<SecurityListData> securityListData)
-    {
-        ProcessMessage(securityListData);
     }
 
 }

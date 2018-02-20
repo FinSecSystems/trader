@@ -13,7 +13,7 @@ namespace trader {
 
         class Exchangeratelab;
 
-        class ExchangeratelabConnection : public Interface::Connection
+        class ExchangeratelabConnection : public Interface::CallConnection, public Poco::Runnable
         {
         public:
             ExchangeratelabConnection(const std::string& connectionid, Exchangeratelab* _exchange)
@@ -21,6 +21,9 @@ namespace trader {
             {
                 (void)connectionid;
             }
+
+            void run() {}
+
         private:
             Exchangeratelab* exchange;
         };

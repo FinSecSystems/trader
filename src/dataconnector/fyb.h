@@ -18,7 +18,7 @@ namespace trader {
 
     class Fyb;
 
-    class FybConnection : public Interface::Connection
+    class FybConnection : public Interface::CallConnection, public Poco::Runnable
     {
     public:
         FybConnection(const std::string& connectionid, Fyb* _exchange)
@@ -26,6 +26,9 @@ namespace trader {
         {
             (void)connectionid;
         }
+
+        void run() {}
+
     private:
         Fyb* exchange;
     };

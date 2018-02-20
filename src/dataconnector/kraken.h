@@ -18,7 +18,7 @@ namespace trader {
 
     class Kraken;
 
-    class KrakenConnection : public Interface::Connection
+    class KrakenConnection : public Interface::CallConnection, public Poco::Runnable
     {
     public:
         KrakenConnection(const std::string& connectionid, Kraken* _exchange)
@@ -26,6 +26,9 @@ namespace trader {
         {
             (void)connectionid;
         }
+
+        void run() {}
+
     private:
         Kraken* exchange;
     };

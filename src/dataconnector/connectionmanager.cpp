@@ -10,39 +10,43 @@ namespace trader {
 
     ConnectionManager ConnectionManager::instance;
 
-    ConnectionManager::ConnectionManager()
-    {}
-
-    ConnectionManager::~ConnectionManager()
-    {}
-
-    AutoPtr<Interface::Connection> ConnectionManager::getConnection(const std::string& connectionString)
+    AutoPtr<Interface::Connection> ConnectionData::getConnection(const std::string& connectionString)
     {
+        AutoPtr<Interface::Connection> connection = nullptr;
         if (connectionString.find("bittrex") != std::string::npos)
         {
-            return Bittrex::getConnection(connectionString);
+            connection = Bittrex::getConnection(connectionString);
         }
         else if (connectionString.find("cryptowatch") != std::string::npos)
         {
-            return Cryptowatch::getConnection(connectionString);
+            connection = Cryptowatch::getConnection(connectionString);
         }
         else if (connectionString.find("kraken") != std::string::npos)
         {
-            return Kraken::getConnection(connectionString);
+            connection = Kraken::getConnection(connectionString);
         }
         else if (connectionString.find("fyb") != std::string::npos)
         {
-            return Kraken::getConnection(connectionString);
+            connection = Kraken::getConnection(connectionString);
         }
         else if (connectionString.find("exchangeratelab") != std::string::npos)
         {
-            return Exchangeratelab::getConnection(connectionString);
+            connection = Exchangeratelab::getConnection(connectionString);
         }
-        return new Interface::Connection();
-        //else if (connectionString.find("fyb") != std::npos)
-        //{
-        //    return Fyb::getConnection(connectionString);
-        //}
+        else
+        {
+            return new Interface::CallConnection();
+        }
+        connections.push_back(connection);
+        return connection;
+    }
+
+    void ConnectionData::start()
+    {
+        for (auto& connection : connections)
+        {
+            pool.startWithPriority(Thread::PRIO_LOWEST, *(Poco::Runnable*)connection.get() );
+        }
     }
 
 }

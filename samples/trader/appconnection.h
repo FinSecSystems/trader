@@ -2,7 +2,7 @@
 
 namespace trader {
 
-	class AppConnection : public Interface::Connection
+	class AppConnection : public Interface::CallConnection
 	{
 	public:
 
@@ -11,8 +11,6 @@ namespace trader {
         ~AppConnection();
 
         void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData) override;
-
-        void SecurityList(Poco::AutoPtr<SecurityListData> securityListData) override;
 
     private:
         TraderApp* app;

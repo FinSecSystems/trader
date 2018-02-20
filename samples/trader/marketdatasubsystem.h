@@ -1,26 +1,22 @@
 #pragma once
 
 #include "tinyfsm.hpp"
+#include "interfacehelper.h"
 
 namespace trader {
 
     class MarketDataSubSystem;
 
-    class MarketDataEventProcessor : public Interface::Connection
+    class MarketDataEventProcessor : public BufferedConnection<Interface::MessageReceivingConnection>
     {
     public:
         MarketDataEventProcessor(MarketDataSubSystem* _sys)
             : marketDataSubSystem(_sys)
-            , messageQueue(10)
+            , BufferedConnection(10)
         {}
 
         void SecurityList(Poco::AutoPtr<SecurityListData> securityListData) override;
 
-        void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData) override;
-
-        void Run();
-
-        BasicFIFOBuffer<Interface::IMessageData*> messageQueue;
         MarketDataSubSystem* marketDataSubSystem;
     };
 

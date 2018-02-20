@@ -480,11 +480,6 @@ namespace trader {
 
                 {
                     ScopedClass<0> scopedClass(header, "IConnection");
-                    header << "virtual void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData) = 0" << cendl;
-                }
-
-                {
-                    ScopedClass<1> scopedConnectionClass(header, "Connection", "IConnection, public Poco::RefCountedObject");
 
                     header << comment("Message Data") << endl;
                     for (UInt32 i = 0; i < messagesNodelist->length(); i++)
@@ -560,13 +555,28 @@ namespace trader {
                         {
                             Element* message = (Element*)messageNode;
                             string name = message->getAttribute("name");
-                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name) << "Data)";
-                            {
-                                ScopedStream<ApiFileOutputStream> funcScope(header);
-                                header << "poco_bugcheck_msg(\"" << name << " not supported.\")" << cendl;
-                            }
+                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name) << "Data) = 0" << cendl;
                         }
                     }
+
+                    header << "virtual void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData) = 0" << cendl;
+                }
+
+                {
+                    ScopedClass<1> scopedConnectionClass(header, "Connection", "IConnection, public Poco::RefCountedObject");
+
+                    header << "virtual void SetReceivingConnection(Poco::AutoPtr<Connection> _connection)";
+                    {
+                        ScopedStream<ApiFileOutputStream> enumScope(header);
+                        header << "receivingConnection = _connection" << cendl;
+                    }
+                    header << endl;
+                    header << "Poco::AutoPtr<Connection> receivingConnection" << cendl;
+
+                }
+
+                {
+                    ScopedClass<1> scopedConnectionClass(header, "MessageReceivingConnection", "Connection");
 
                     header << "void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData)" << endl;
                     {
@@ -593,13 +603,46 @@ namespace trader {
                         }
                     }
 
-                    header << "virtual void SetReceivingConnection(Poco::AutoPtr<Connection> _connection)";
+                    for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                     {
-                        ScopedStream<ApiFileOutputStream> enumScope(header);
-                        header << "receivingConnection = _connection" << cendl;
+                        Node* messageNode = messagesNodelist->item(i);
+                        if (messageNode->nodeType() == Node::ELEMENT_NODE)
+                        {
+                            Element* message = (Element*)messageNode;
+                            string name = message->getAttribute("name");
+                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name) << "Data) override";
+                            {
+                                ScopedStream<ApiFileOutputStream> funcScope(header);
+                                header << "poco_bugcheck_msg(\"" << var_name(name) << " not supported.\")" << cendl;
+                            }
+                        }
                     }
-                    header << endl;
-                    header << "Poco::AutoPtr<Connection> receivingConnection" << cendl;
+
+                }
+
+                {
+                    ScopedClass<1> scopedConnectionClass(header, "CallConnection", "Connection");
+
+                    for (UInt32 i = 0; i < messagesNodelist->length(); i++)
+                    {
+                        Node* messageNode = messagesNodelist->item(i);
+                        if (messageNode->nodeType() == Node::ELEMENT_NODE)
+                        {
+                            Element* message = (Element*)messageNode;
+                            string name = message->getAttribute("name");
+                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name) << "Data) override";
+                            {
+                                ScopedStream<ApiFileOutputStream> funcScope(header);
+                                header << "ProcessMessage(" << var_name(name) << "Data)" << cendl;
+                            }
+                        }
+                    }
+
+                    header << "void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData)" << endl;
+                    {
+                        ScopedStream<ApiFileOutputStream> funcScope(header);
+                        header << "poco_bugcheck_msg(\"ProcessMessage not implemented.\")" << cendl;
+                    }
 
                 }
 

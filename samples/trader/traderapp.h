@@ -10,6 +10,11 @@ namespace trader {
     {
     public:
         Poco::AutoPtr<Interface::Connection> eventProcessor;
+
+        void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData)
+        {
+            eventProcessor->ProcessMessage(_messageData);
+        }
     };
 
 	class TraderApp : public App
