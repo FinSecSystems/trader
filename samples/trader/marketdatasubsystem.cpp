@@ -12,6 +12,7 @@ namespace trader {
         try
         {
             MarketDataStateChart::MarketDataFSMList::start();
+            stateChart.send_event(MarketDataStateChart::Start());
             app->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
         }
         catch (...)
@@ -27,8 +28,32 @@ namespace trader {
 
     void MarketDataSubSystem::run()
     {
-        stateChart.send_event(MarketDataStateChart::Start());
+        eventProcessor.unsafeCast<MarketDataEventProcessor>()->Run();
         app->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
+    }
+
+    void MarketDataEventProcessor::ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData)
+    {
+        _messageData->duplicate();
+        Interface::IMessageData* msgData = _messageData.get();
+        messageQueue.write(&msgData, 1);
+    }
+
+    void MarketDataEventProcessor::Run()
+    {
+        std::size_t queueSize = messageQueue.used();
+        if (queueSize)
+        {
+            Interface::IMessageData** tempQueue = new Interface::IMessageData*[queueSize];
+            std::size_t itemsRead = messageQueue.read(tempQueue, queueSize);
+            for (size_t i = 0; i < itemsRead; ++i)
+            {
+                Interface::IMessageData* messageData = tempQueue[i];
+                Poco::AutoPtr<Interface::IMessageData> messageDataPtr = messageData;
+                Interface::Connection::ProcessMessage(messageDataPtr);
+            }
+            delete[] tempQueue;
+        }
     }
 
     void MarketDataEventProcessor::SecurityList(Poco::AutoPtr<SecurityListData> securityListData)
@@ -56,7 +81,7 @@ namespace trader {
                 securityListRequestData->securityReqID = str.str();
                 connection->SecurityListRequest(securityListRequestData);
             }
-            //transit<ProcessSecurityList>();
+            transit<ProcessSecurityList>();
         };
 
         static std::atomic<std::int32_t> securityListRequestDataIdx;

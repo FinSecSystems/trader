@@ -11,10 +11,16 @@ namespace trader {
     public:
         MarketDataEventProcessor(MarketDataSubSystem* _sys)
             : marketDataSubSystem(_sys)
+            , messageQueue(10)
         {}
 
         void SecurityList(Poco::AutoPtr<SecurityListData> securityListData) override;
 
+        void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData) override;
+
+        void Run();
+
+        BasicFIFOBuffer<Interface::IMessageData*> messageQueue;
         MarketDataSubSystem* marketDataSubSystem;
     };
 
