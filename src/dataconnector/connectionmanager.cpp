@@ -37,15 +37,21 @@ namespace trader {
         {
             return new Interface::CallConnection();
         }
-        connections.push_back(connection);
+        connections.insert({ connectionString, connection });
         return connection;
     }
 
-    void ConnectionData::start()
+    void ConnectionData::DoOperation(DataConnectorOperation _operation)
     {
-        for (auto& connection : connections)
+        switch (_operation)
         {
-            pool.startWithPriority(Thread::PRIO_LOWEST, *(Poco::Runnable*)connection.get() );
+        case DC_START:
+            for (auto& connectionPair : connections)
+            {
+                Poco::AutoPtr<trader::Interface::Connection> connection = connectionPair.second;
+                connection->DoOperation(_operation);
+            }
+            break;
         }
     }
 

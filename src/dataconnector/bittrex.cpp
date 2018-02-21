@@ -273,6 +273,16 @@ namespace trader {
         }
     }
 
+    void BittrexConnection::DoOperation(Poco::Int32 _operation)
+    {
+        switch (_operation)
+        {
+        case DC_START:
+            ConnectionManager::instance.get()->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
+            break;
+        }
+    }
+
     void BittrexConnection::run()
     {
         processingConnection.Run();

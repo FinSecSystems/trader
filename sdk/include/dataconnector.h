@@ -7,3 +7,8 @@
 #else
 #define DATACONNECTOR_DLL
 #endif
+
+enum DataConnectorOperation
+{
+    DC_START = 0
+};

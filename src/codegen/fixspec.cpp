@@ -560,6 +560,8 @@ namespace trader {
                     }
 
                     header << "virtual void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData) = 0" << cendl;
+
+                    header << "virtual void DoOperation(Poco::Int32 operation) = 0" << cendl;
                 }
 
                 {
@@ -618,6 +620,13 @@ namespace trader {
                         }
                     }
 
+                    header << "void DoOperation(Poco::Int32 operation)" << endl;
+                    {
+                        ScopedStream<ApiFileOutputStream> funcScope(header);
+                        header << "(void)operation" << cendl;
+                        header << "poco_bugcheck_msg(\"DoOperation not implemented.\")" << cendl;
+                    }
+
                 }
 
                 {
@@ -642,6 +651,13 @@ namespace trader {
                     {
                         ScopedStream<ApiFileOutputStream> funcScope(header);
                         header << "poco_bugcheck_msg(\"ProcessMessage not implemented.\")" << cendl;
+                    }
+
+                    header << "void DoOperation(Poco::Int32 operation)" << endl;
+                    {
+                        ScopedStream<ApiFileOutputStream> funcScope(header);
+                        header << "(void)operation" << cendl;
+                        header << "poco_bugcheck_msg(\"DoOperation not implemented.\")" << cendl;
                     }
 
                 }

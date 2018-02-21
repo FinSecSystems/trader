@@ -132,6 +132,8 @@ namespace trader {
 
         void run() override;
 
+        void DoOperation(Poco::Int32 operation) override;
+
         BufferedConnection<BittrexProcessingConnection> processingConnection;
     };
 
