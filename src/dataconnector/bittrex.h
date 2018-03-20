@@ -152,18 +152,7 @@ namespace trader {
 
         Poco::AutoPtr<BittrexDatabase::Tables> dataBase;
         
-        struct MarketData
-        {
-            MarketData()
-                : lastCachedId(0)
-            {}
-            Poco::AutoPtr<BittrexDatabase::Trade_History> storage;
-            std::map<Poco::Int32, BittrexApi::History::DataObject::ResultArray> cache;
-            Poco::Int32 lastCachedId;
-        };
-
-        std::unordered_map<std::string, MarketData> marketToTradeHistoryMap;
-        
+       
         static AutoPtr<Interface::Connection> getConnection(const std::string& connectionId);
 
     protected:

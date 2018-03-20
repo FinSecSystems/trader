@@ -68,28 +68,21 @@ namespace trader {
 			AutoPtr<Channel> consoleChannel(new ConsoleChannel());
 #endif
 			AutoPtr<FileChannel> rotatedFileChannel(new FileChannel(logNameStream.str()));
-
 			rotatedFileChannel->setProperty("archive", "timestamp");
 			rotatedFileChannel->setProperty("rotateOnOpen", "true");
-
 #if defined(_DEBUG)
 			//splitterChannel->addChannel(consoleChannel);
 #endif
 			splitterChannel->addChannel(rotatedFileChannel);
-
 			AutoPtr<Formatter> formatter(new PatternFormatter("%Y-%m-%d %H:%M:%S.%c %N[%P]:%s:%q:%t"));
 			AutoPtr<Channel> formattingChannel(new FormattingChannel(formatter, splitterChannel));
-
 			Logger::create("Logs", formattingChannel, Message::PRIO_TRACE);
 
-			//Initialize DB
-			ostringstream dbNameStream;
-			dbNameStream << commandName() << ".db";
-            dB = new Db(new Data::Session("SQLite", dbNameStream.str()));
-
+            // Loader application properties
             loadConfiguration();
             AutoPtr<AbstractConfiguration> proxyProperties(appConfig().createView("proxy"));
 
+            // Grab proxy settings
             HTTPSClientSession::ProxyConfig proxyConfig;
             try {
                 if (proxyProperties->hasProperty("hostname"))
@@ -108,26 +101,34 @@ namespace trader {
                 Logger::get("Logs").information("Bad Application configuration: Missing or invalid %s.properties", commandName().c_str());
                 Logger::get("Logs").information("Application Error: %s", exc.displayText());
             }
-
             HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
 
+            //Make application globally aware
             AppManager::instance.get()->setApp(this);
-            DbManager::instance.get()->setDb(dB);
 
+            //Initialize DB
+            ostringstream dbNameStream;
+            dbNameStream << commandName() << ".db";
+            DbManager::instance.setDb(new Db(new Data::Session("SQLite", dbNameStream.str())));
+
+            //Add Subsystems used by this application
             addSubsystem(new MarketDataSubSystem());
+            
+            //Retrieve required connections from Connection Manager
             connections.push_back(ConnectionManager::instance.get()->getConnection("bittrex"));
-
+            
+            //Setup connection for this applicatino to receive messages
             appConnection = new AppConnection(this);
-
             for (auto& connection : connections)
             {
                 connection->SetReceivingConnection(appConnection);
             }
 
+            //Bootstrap subsystems
             this->initialize(*this);
-
             ConnectionManager::instance.get()->DoOperation(DC_START);
 
+            //Run indefinitely
 			do {
 				Thread::sleep(10000);
 			} while (1); 

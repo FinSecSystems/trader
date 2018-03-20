@@ -2,6 +2,8 @@
 
 #include "tinyfsm.hpp"
 #include "interfacehelper.h"
+#include "genericdatabase.h"
+#include "interface.h"
 
 namespace trader {
 
@@ -80,8 +82,25 @@ namespace trader {
 
         void run() override;
 
+        //typedef std::map<Poco::Int32, Interface::SecListGrpObject::NoRelatedSym> SymMap;
+
+        struct MarketData
+        {
+            MarketData()
+                : lastCachedId(0)
+            {}
+            Poco::AutoPtr<GenericDatabase::Trade_History> storage;
+            //SymMap cache;
+            Poco::Int32 lastCachedId;
+        };
+
         TraderApp* app;
         MarketDataStateChart stateChart;
+
+        typedef std::unordered_map<std::string, MarketData> SymIDMap;
+        SymIDMap marketToTradeHistoryMap;
+
+        bool    useStorage; //Use physical storage
 
         static MarketDataSubSystem* instance;
 	};

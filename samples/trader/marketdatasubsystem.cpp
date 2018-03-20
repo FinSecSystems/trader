@@ -3,12 +3,20 @@
 #include "traderapp.h"
 #include "interface.h"
 #include "marketdatasubsystem.h"
+#include "genericdatabase.h"
+#include "db.h"
 
 namespace trader {
 
     void MarketDataSubSystem::initialize(Application& application)
     {
         app = static_cast<TraderApp*>(&application);
+        AutoPtr<AbstractConfiguration> properties(app->appConfig().createView("MarketDataSubSystem"));
+        if (properties->hasProperty("usestorage"))
+        {
+            useStorage = properties->getBool("usestorage");
+        }
+
         try
         {
             MarketDataStateChart::MarketDataFSMList::start();
@@ -73,11 +81,33 @@ namespace trader {
         void react(OnReceiveSecurityList const & e) override
         {
             Interface::Connection::SecurityListData const& securityListData = *(e.securityList);
+            MarketDataSubSystem* sys = MarketDataSubSystem::instance;
 
             for (auto& syms : securityListData.secListGrp.noRelatedSym)
             {
                 std::cout << syms.instrument.symbol << std::endl;
             }
+            
+            AutoPtr<Db> db = DbManager::instance.getDb();
+            for (auto& syms : securityListData.secListGrp.noRelatedSym)
+            {
+                //Add market if it does not already exist
+                MarketDataSubSystem::SymIDMap::const_iterator marketExists = sys->marketToTradeHistoryMap.find(syms.instrument.symbol);
+                if (marketExists == sys->marketToTradeHistoryMap.end())
+                {
+                    Poco::AutoPtr<GenericDatabase::Trade_History> tradeHistoryTable = new GenericDatabase::Trade_History(db->getDbSession(), syms.instrument.symbol);
+                    MarketDataSubSystem::MarketData marketData;
+                    marketData.storage = tradeHistoryTable;
+                    sys->marketToTradeHistoryMap.insert({ syms.instrument.symbol, marketData });
+                    if (MarketDataSubSystem::instance->useStorage)
+                    {
+                        tradeHistoryTable->init();
+                    }
+                }
+            }
+
+            //TODO: Check if a market has been removed and send an event
+
             transit<Init>();
         };
 
@@ -89,4 +119,3 @@ namespace trader {
 }
 
 FSM_INITIAL_STATE(trader::MarketDataStateChart, trader::Init);
-

@@ -19,7 +19,7 @@ namespace trader {
     Kraken::Kraken()
 		: api(AppManager::instance.get()->getApp(), this)
         , executeTimer(0, 1000)
-        , dataBase(new KrakenDatabase::Tables(DbManager::instance.get()->getDb()->getDbSession()))
+        , dataBase(new KrakenDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
 	{
 	}
 

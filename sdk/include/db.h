@@ -28,7 +28,7 @@ namespace trader {
         Poco::Data::Session* dbSession;
     };
 
-    class DATACONNECTOR_DLL DbManager : public SingletonHolder<DbManager>
+    class DATACONNECTOR_DLL DbManager
     {
     public:
         DbManager()

@@ -18,35 +18,13 @@ namespace trader {
 
     Bittrex::Bittrex()
         : api(AppManager::instance.get()->getApp(), this)
-        , dataBase(new BittrexDatabase::Tables(DbManager::instance.get()->getDb()->getDbSession()))
+        , dataBase(new BittrexDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
     {
     }
     
     void Bittrex::run()
     {
-        static bool useStorage = false;
-        //Get Markets and create tables
-        AutoPtr<Markets> balance = api.GetMarkets();
-        for (auto& market : balance->dataObject.result)
-        {
-            if (market.isActive && market.isSetMarketName())
-            {
-                //Add market if it does not already exist
-                std::unordered_map<std::string, MarketData>::const_iterator marketExists = marketToTradeHistoryMap.find(market.marketName);
-                if (marketExists == marketToTradeHistoryMap.end())
-                {
-                    Poco::AutoPtr<Trade_History> tradeHistoryTable = new Trade_History(dataBase->db, market.marketName);
-                    MarketData marketData;
-                    marketData.storage = tradeHistoryTable;
-                    marketToTradeHistoryMap.insert({ market.marketName, marketData });
-                    if (useStorage)
-                    {
-                        tradeHistoryTable->init();
-                    }
-                }
-            }
-        }
-
+#if 0
         //Populate Trade History
         for (auto& market : marketToTradeHistoryMap)
         {
@@ -186,6 +164,7 @@ namespace trader {
                 }
             }
         }
+#endif
     }
 
     Bittrex::~Bittrex()
