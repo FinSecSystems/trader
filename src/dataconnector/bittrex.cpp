@@ -353,6 +353,70 @@ namespace trader {
         // Poco::AutoPtr<MarketDataRequestRejectData> marketDataRequestRejectData = new MarketDataRequestReject();
         // receivingConnection->MarketDataRequestReject(marketDataRequestRejectData);
 
+#if 0
+        for (auto& sym : marketDataRequestData->instrmtMDReqGrp.noRelatedSym)
+        {
+
+            switch (marketDataRequestData->subscriptionRequestType)
+            {
+            case SubscriptionRequestType_DISABLE_PREVIOUS_SNAPSHOT_PLUS_UPDATE_REQUEST:
+            {
+                
+            }
+            break;
+            }
+
+            //Retrieve Trade History through REST API Call
+            const std::string& marketName = marketDataRequestData->instrmtMDReqGrp.instrument.symbol;
+            Poco::AutoPtr<HistoryParams> historyParams = new HistoryParams();
+            historyParams->dataObject.SetMarket(marketName);
+            AutoPtr<History> history = api.GetMarketHistory(historyParams);
+
+            if (history->dataObject.size())
+            {
+                //Add market if it does not already exist
+                MarketDataSubSystem::SymIDMap::const_iterator marketExists = marketToTradeHistoryMap.find(marketName);
+                if (marketExists == sys->marketToTradeHistoryMap.end())
+                {
+                    MarketDataSubSystem::MarketData marketData;
+                    marketToTradeHistoryMap.insert({ marketName, marketData });
+                }
+
+                //Save to in-memory cache
+                MarketData& marketData = marketToTradeHistoryMap.find(marketName)->second;
+                Int32 previousCacheId =  marketData.lastCachedId
+                Int32& lastCachedId = marketData.lastCachedId;
+                for (History::DataObject::Result::reverse_iterator rit = history->dataObject.result.rbegin(); rit != history->dataObject.result.rend(); ++rit)
+                {
+                    History::DataObject::ResultArray& trade = *rit;
+                    if (trade.id <= lastCachedId)
+                    {
+                        break;
+                    }
+                    marketData.cache.insert({ trade.id, trade });
+                    lastCachedId = trade.id; //Update last cached id
+                }
+
+                switch (marketDataRequestData->subscriptionRequestType)
+                {
+                case SubscriptionRequestType_SNAPSHOT:
+                {
+                    Poco::AutoPtr<MarketDataSnapshotFullRefresh> marketDataSnapshotFullRefreshData = new MarketDataSnapshotFullRefresh();
+                    receivingConnection->MarketDataSnapshotFullRefresh(marketDataSnapshotFullRefreshData);
+                }
+                break;
+                case SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES:
+                {
+                    Poco::AutoPtr<MarketDataIncrementalRefreshData> marketDataIncrementalRefreshData = new MarketDataIncrementalRefreshData();
+                    receivingConnection->MarketDataIncrementalRefresh(marketDataIncrementalRefreshData);
+                    break;
+                }
+                }
+            }
+
+            
+        }
+#endif
         poco_bugcheck_msg("MarketDataRequest not implemented.");
     }
 

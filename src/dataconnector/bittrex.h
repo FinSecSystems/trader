@@ -108,6 +108,23 @@ namespace trader {
         }
 
         Bittrex* exchange;
+
+#if 0
+        struct MarketData
+        {
+            MarketData()
+                : lastCachedId(0)
+            {}
+            typedef std::unordered_map<Poco::Int32, BittrexApi::History::DataObject::ResultArray> cache;
+            Poco::Int32 lastCachedId;
+        };
+
+        TraderApp* app;
+        MarketDataStateChart stateChart;
+
+        typedef std::unordered_map<std::string, MarketData> SymIDMap;
+        SymIDMap marketToTradeHistoryMap;
+#endif
     };
 
     class BittrexConnection : public Interface::CallConnection, public Poco::Runnable
