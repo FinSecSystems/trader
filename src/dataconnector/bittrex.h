@@ -17,6 +17,7 @@
 #include "bittrexdatabase.h"
 #include "interface.h"
 #include "interfacehelper.h"
+#include "app.h"
 
 namespace trader {
 
@@ -109,22 +110,23 @@ namespace trader {
 
         Bittrex* exchange;
 
-#if 0
-        struct MarketData
+        // In-memory cache of marketdata
+        struct BittrexMarketData
         {
-            MarketData()
+            BittrexMarketData()
                 : lastCachedId(0)
             {}
-            typedef std::unordered_map<Poco::Int32, BittrexApi::History::DataObject::ResultArray> cache;
+            typedef std::unordered_map<Poco::Int32, BittrexApi::History::DataObject::ResultArray> MarketDataMap;
+            MarketDataMap marketDataMap;
             Poco::Int32 lastCachedId;
         };
 
-        TraderApp* app;
-        MarketDataStateChart stateChart;
-
-        typedef std::unordered_map<std::string, MarketData> SymIDMap;
+        typedef std::unordered_map<std::string, BittrexMarketData> SymIDMap;
         SymIDMap marketToTradeHistoryMap;
-#endif
+
+        // The id of the last marketData entry that was sent to the requester
+        Poco::Int32 lastCacheRetrievedId;
+
     };
 
     class BittrexConnection : public Interface::CallConnection, public Poco::Runnable

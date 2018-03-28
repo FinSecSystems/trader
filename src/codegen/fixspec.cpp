@@ -427,7 +427,8 @@ namespace trader {
                                             }
                                         }
                                     }
-                                    header << "std::vector<" << groupOrFieldName << "> " << var_name(groupOrFieldName) << cendl;
+                                    header << "typedef std::vector<" << groupOrFieldName << "> " << groupOrFieldName << "Array" << cendl;
+                                    header << groupOrFieldName << "Array " << var_name(groupOrFieldName) << cendl;
                                 }
                                 else if (tagName.compare("field") == 0)
                                 {
