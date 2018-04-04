@@ -108,6 +108,8 @@ namespace trader {
             exchange = _exchange;
         }
 
+        void RunMore();
+
         Bittrex* exchange;
 
         // In-memory cache of marketdata
@@ -124,8 +126,17 @@ namespace trader {
         typedef std::unordered_map<std::string, BittrexMarketData> SymIDMap;
         SymIDMap marketToTradeHistoryMap;
 
-        // The id of the last marketData entry that was sent to the requester
-        Poco::Int32 lastCacheRetrievedId;
+        struct MarketDataRequestRetrievalData
+        {
+            Poco::AutoPtr<MarketDataRequestData> marketRequestData;
+
+            // The id of the last marketData entry that was sent to the requester
+            typedef std::unordered_map<std::string, Poco::Int32> LastCacheIdMap;
+            LastCacheIdMap lastCacheIdMap;
+        };
+
+        typedef std::unordered_map<std::string, MarketDataRequestRetrievalData > MarketDataUpdateMap;
+        MarketDataUpdateMap marketDataUpdateMap;
 
     };
 

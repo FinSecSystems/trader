@@ -264,8 +264,17 @@ namespace trader {
 
     void BittrexConnection::run()
     {
+        processingConnection.RunMore();
         processingConnection.Run();
         ConnectionManager::instance.get()->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
+    }
+
+    void BittrexProcessingConnection::RunMore()
+    {
+        for (auto& marketData : marketDataUpdateMap)
+        {
+            ProcessMessage(marketData.second.marketRequestData);
+        }
     }
 
     void BittrexProcessingConnection::SecurityListRequest(Poco::AutoPtr<SecurityListRequestData> securityListRequestData)
@@ -302,6 +311,15 @@ namespace trader {
         }
 
         receivingConnection->SecurityList(securityListData);
+    }
+
+
+    std::string GetUniqueResponseId()
+    {
+        static  std::atomic<std::int32_t> idx = 0;
+        ostringstream uniqueResponseIdStream;
+        uniqueResponseIdStream << "MD" << ++idx;
+        return uniqueResponseIdStream.str();
     }
 
     void BittrexProcessingConnection::MarketDataRequest(Poco::AutoPtr<MarketDataRequestData> marketDataRequestData)
@@ -353,17 +371,37 @@ namespace trader {
         // Poco::AutoPtr<MarketDataRequestRejectData> marketDataRequestRejectData = new MarketDataRequestReject();
         // receivingConnection->MarketDataRequestReject(marketDataRequestRejectData);
 
+        const Poco::UInt32 UpdateBit = 0x80000000;
+
+        bool updateOnly = ( marketDataRequestData->subscriptionRequestType & UpdateBit ) > 0;
+        Poco::UInt32 subscriptionRequestType = marketDataRequestData->subscriptionRequestType & ~UpdateBit;
+
+        if (subscriptionRequestType == Interface::SubscriptionRequestType_DISABLE_PREVIOUS_SNAPSHOT_PLUS_UPDATE_REQUEST)
+        {
+            poco_assert(updateOnly);
+            MarketDataUpdateMap::iterator itFind = marketDataUpdateMap.find(marketDataRequestData->mDReqID);
+            poco_assert(itFind != marketDataUpdateMap.end());
+            marketDataUpdateMap.erase(itFind);
+
+        }
+
+        Poco::AutoPtr<Interface::IConnection::MarketDataIncrementalRefreshData> marketDataIncrementalRefreshData;
+
+        if (subscriptionRequestType == Interface::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES)
+        {
+            marketDataIncrementalRefreshData = new Interface::IConnection::MarketDataIncrementalRefreshData();
+            marketDataIncrementalRefreshData->mDReqID = GetUniqueResponseId();
+            if (!updateOnly)
+            {
+                marketDataRequestData->subscriptionRequestType = (Interface::SubscriptionRequestType) ( ((Poco::UInt32) marketDataRequestData->subscriptionRequestType) | UpdateBit );
+                MarketDataRequestRetrievalData data;
+                data.marketRequestData = marketDataRequestData;
+                marketDataUpdateMap.insert({ marketDataRequestData->mDReqID, data });
+            }
+        }
+
         for (auto& sym : marketDataRequestData->instrmtMDReqGrp.noRelatedSym)
         {
-
-            switch (marketDataRequestData->subscriptionRequestType)
-            {
-            case Interface::SubscriptionRequestType_DISABLE_PREVIOUS_SNAPSHOT_PLUS_UPDATE_REQUEST:
-            {
-                
-            }
-            break;
-            }
 
             //Retrieve Trade History through REST API Call
             const std::string& marketName = sym.instrument.symbol;
@@ -383,7 +421,7 @@ namespace trader {
 
                 //Save to in-memory cache
                 BittrexMarketData& marketData = marketToTradeHistoryMap.find(marketName)->second;
-                Int32& lastCachedId = marketData.lastCachedId;
+                Int32 lastCachedId = marketData.lastCachedId;
                 for (History::DataObject::Result::reverse_iterator rit = history->dataObject.result.rbegin(); rit != history->dataObject.result.rend(); ++rit)
                 {
                     History::DataObject::ResultArray& trade = *rit;
@@ -392,67 +430,116 @@ namespace trader {
                         break;
                     }
                     marketData.marketDataMap.insert({ trade.id, trade });
-                    lastCachedId = trade.id; //Update last cached id
+                    marketData.lastCachedId = std::max(marketData.lastCachedId, trade.id); //Update last cached id
                 }
 
-                static  std::atomic<std::int32_t> idx = 0;
-
-                ostringstream uniqueResponseIdStream;
-                uniqueResponseIdStream << "MD" << ++idx << endl;
-
-                switch (marketDataRequestData->subscriptionRequestType)
+                if (!updateOnly)
                 {
-                    case Interface::SubscriptionRequestType_SNAPSHOT:
-                    case Interface::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES:
+                    Poco::AutoPtr<Interface::IConnection::MarketDataSnapshotFullRefreshData> marketDataSnapshotFullRefreshData = new Interface::IConnection::MarketDataSnapshotFullRefreshData();
+                    marketDataSnapshotFullRefreshData->instrument.symbol = marketName;
+                    marketDataSnapshotFullRefreshData->mDReqID = GetUniqueResponseId();
+                    marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.reserve(marketData.marketDataMap.size());
+                    BittrexMarketData::MarketDataMap::iterator itMap = marketData.marketDataMap.begin();
+                    Interface::MDFullGrpObject::NoMDEntriesArray::iterator itVec = marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.begin();
+                    for (;itMap != marketData.marketDataMap.end();itMap++,itVec++)
                     {
-                        Poco::AutoPtr<Interface::IConnection::MarketDataSnapshotFullRefreshData> marketDataSnapshotFullRefreshData = new Interface::IConnection::MarketDataSnapshotFullRefreshData();
-                        marketDataSnapshotFullRefreshData->instrument.symbol = marketName;
-                        marketDataSnapshotFullRefreshData->mDReqID = uniqueResponseIdStream.str();
-                        marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.reserve(marketData.marketDataMap.size());
-                        BittrexMarketData::MarketDataMap::iterator itMap = marketData.marketDataMap.begin();
-                        Interface::MDFullGrpObject::NoMDEntriesArray::iterator itVec = marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.begin();
-                        for (;itMap != marketData.marketDataMap.end();itMap++,itVec++)
+                        auto& marketDataItem = itMap->second;
+                        auto& mdEntry = *itVec;
+                        if (marketDataItem.orderType.compare("bid")==0)
                         {
-                            auto& marketDataItem = itMap->second;
-                            auto& mdEntry = *itVec;
-                            if (marketDataItem.orderType.compare("bid")==0)
-                            {
-                                mdEntry.mDEntryType = Interface::MDEntryType_BID;
-                            }
-                            else if (marketDataItem.orderType.compare("offer") == 0)
-                            {
-                                mdEntry.mDEntryType = Interface::MDEntryType_OFFER;
-                            }
-                            else if (marketDataItem.orderType.compare("trade") == 0)
-                            {
-                                mdEntry.mDEntryType = Interface::MDEntryType_TRADE;
-                            }
-                            else
-                            {
-                                poco_bugcheck_msg("Unknown");
-                            }
-
-                            mdEntry.mDEntryPx   = marketDataItem.price;
-                            mdEntry.mDEntrySize = marketDataItem.quantity;
-                            mdEntry.mDEntryTime = (Poco::Int32)marketDataItem.timeStamp.time;
-
-                            if (marketDataItem.filltype.compare("limit") == 0)
-                            {
-                                mdEntry.ordType = Interface::OrdType_LIMIT;
-                            }
+                            mdEntry.mDEntryType = Interface::MDEntryType_BID;
                         }
-                        lastCacheRetrievedId = lastCachedId;
-                        receivingConnection->MarketDataSnapshotFullRefresh(marketDataSnapshotFullRefreshData);
-                        break;
+                        else if (marketDataItem.orderType.compare("offer") == 0)
+                        {
+                            mdEntry.mDEntryType = Interface::MDEntryType_OFFER;
+                        }
+                        else if (marketDataItem.orderType.compare("trade") == 0)
+                        {
+                            mdEntry.mDEntryType = Interface::MDEntryType_TRADE;
+                        }
+                        else
+                        {
+                            poco_bugcheck_msg("Unknown");
+                        }
+
+                        mdEntry.mDEntryPx   = marketDataItem.price;
+                        mdEntry.mDEntrySize = marketDataItem.quantity;
+                        mdEntry.mDEntryTime = (Poco::Int32)marketDataItem.timeStamp.time;
+
+                        if (marketDataItem.filltype.compare("limit") == 0)
+                        {
+                            mdEntry.ordType = Interface::OrdType_LIMIT;
+                        }
                     }
-                    case Interface::SubscriptionRequestType_DISABLE_PREVIOUS_SNAPSHOT_PLUS_UPDATE_REQUEST:
+                    receivingConnection->MarketDataSnapshotFullRefresh(marketDataSnapshotFullRefreshData);
+
+                    if (subscriptionRequestType == Interface::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES)
                     {
-                        break;
+                        MarketDataUpdateMap::iterator itFind = marketDataUpdateMap.find(marketDataRequestData->mDReqID);
+                        MarketDataRequestRetrievalData& retrievalData = itFind->second;
+                        retrievalData.lastCacheIdMap.insert({ marketName, lastCachedId });
                     }
                 }
+                else
+                {
+                    MarketDataUpdateMap::iterator itFind = marketDataUpdateMap.find(marketDataRequestData->mDReqID);
+                    MarketDataRequestRetrievalData& retrievalData = itFind->second;
+                    MarketDataRequestRetrievalData::LastCacheIdMap::iterator itCache = retrievalData.lastCacheIdMap.find(marketName);
+                    Poco::Int32& lastRetrievedId = itCache->second;
+
+                    BittrexMarketData::MarketDataMap::iterator itMap;
+                    if (itCache != retrievalData.lastCacheIdMap.end())
+                    {
+                        itMap = marketData.marketDataMap.find(lastRetrievedId);
+                    }
+
+                    for (;itMap != marketData.marketDataMap.end();itMap++)
+                    {
+                        auto& marketDataItem = itMap->second;
+
+                        marketDataIncrementalRefreshData->mDIncGrp.noMDEntries.emplace_back();
+                        Interface::MDIncGrpObject::NoMDEntries& mdEntry = marketDataIncrementalRefreshData->mDIncGrp.noMDEntries.back();
+
+                        mdEntry.instrument.symbol = marketName;
+                        if (marketDataItem.orderType.compare("bid") == 0)
+                        {
+                            mdEntry.mDEntryType = Interface::MDEntryType_BID;
+                        }
+                        else if (marketDataItem.orderType.compare("offer") == 0)
+                        {
+                            mdEntry.mDEntryType = Interface::MDEntryType_OFFER;
+                        }
+                        else if (marketDataItem.orderType.compare("trade") == 0)
+                        {
+                            mdEntry.mDEntryType = Interface::MDEntryType_TRADE;
+                        }
+                        else
+                        {
+                            poco_bugcheck_msg("Unknown");
+                        }
+
+                        mdEntry.mDEntryPx = marketDataItem.price;
+                        mdEntry.mDEntrySize = marketDataItem.quantity;
+                        mdEntry.mDEntryTime = (Poco::Int32)marketDataItem.timeStamp.time;
+
+                        if (marketDataItem.filltype.compare("limit") == 0)
+                        {
+                            mdEntry.ordType = Interface::OrdType_LIMIT;
+                        }
+                    }
+
+                    lastRetrievedId = marketData.lastCachedId;
+                }
+
             }
 
         }
+
+        if (updateOnly)
+        {
+            receivingConnection->MarketDataIncrementalRefresh(marketDataIncrementalRefreshData);
+        }
+
     }
 
 

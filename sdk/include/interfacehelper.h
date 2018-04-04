@@ -17,7 +17,7 @@ namespace trader {
             messageQueue.write(&msgData, 1);
         }
 
-        void Run()
+        virtual void Run()
         {
             std::size_t queueSize = messageQueue.used();
             if (queueSize)
