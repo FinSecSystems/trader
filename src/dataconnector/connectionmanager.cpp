@@ -37,6 +37,7 @@ namespace trader {
         {
             return new Interface::CallConnection();
         }
+        connection->SetName(connectionString);
         connections.insert({ connectionString, connection });
         return connection;
     }

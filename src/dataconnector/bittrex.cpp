@@ -282,6 +282,7 @@ namespace trader {
         static  std::atomic<std::int32_t> idx = 0;
 
         Poco::AutoPtr<SecurityListData> securityListData = new SecurityListData();
+        securityListData->setSourceConnection(connectionId);
         securityListData->securityListType = Interface::SecurityListType_MARKET;
         securityListData->securityReqID = securityListRequestData->securityReqID;
         securityListData->totNoRelatedSym = 0;
@@ -390,6 +391,7 @@ namespace trader {
         if (subscriptionRequestType == Interface::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES)
         {
             marketDataIncrementalRefreshData = new Interface::IConnection::MarketDataIncrementalRefreshData();
+            marketDataIncrementalRefreshData->setSourceConnection(connectionId);
             marketDataIncrementalRefreshData->mDReqID = GetUniqueResponseId();
             if (!updateOnly)
             {
@@ -436,6 +438,7 @@ namespace trader {
                 if (!updateOnly)
                 {
                     Poco::AutoPtr<Interface::IConnection::MarketDataSnapshotFullRefreshData> marketDataSnapshotFullRefreshData = new Interface::IConnection::MarketDataSnapshotFullRefreshData();
+                    marketDataSnapshotFullRefreshData->setSourceConnection(connectionId);
                     marketDataSnapshotFullRefreshData->instrument.symbol = marketName;
                     marketDataSnapshotFullRefreshData->mDReqID = GetUniqueResponseId();
                     marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.reserve(marketData.marketDataMap.size());

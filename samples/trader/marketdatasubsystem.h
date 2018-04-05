@@ -98,11 +98,16 @@ namespace trader {
         MarketDataStateChart stateChart;
 
         typedef std::unordered_map<std::string, MarketData> SymIDMap;
-        SymIDMap marketToTradeHistoryMap;
+        //SymIDMap marketToTradeHistoryMap;
+
+        typedef std::unordered_map<std::string, SymIDMap> ConnectionMarketMap;
+        ConnectionMarketMap connectionMarketMap;
 
         bool    useStorage; //Use physical storage
 
         static MarketDataSubSystem* instance;
+
+        void getMarkets(std::vector<std::string>& _markets);
 	};
 
 }

@@ -3,6 +3,7 @@
 #include "db.h"
 #include "app.h"
 #include "interface.h"
+#include "tinyfsm.hpp"
 
 namespace trader {
 
@@ -17,7 +18,30 @@ namespace trader {
         }
     };
 
-	class TraderApp : public App
+    class TraderApp;
+
+    class AppStateChart : public tinyfsm::Fsm<AppStateChart>
+    {
+    public:
+        typedef tinyfsm::FsmList<AppStateChart> AppFSMList;
+
+        template<typename E>
+        void send_event(E const & event)
+        {
+            AppFSMList::template dispatch<E>(event);
+        }
+
+        //Events
+        struct OnMarketDataReady : tinyfsm::Event {};
+
+        void react(tinyfsm::Event const&) {};
+        virtual void react(OnMarketDataReady const&) {};
+        virtual void entry(void) {};
+        virtual void exit(void) {};
+
+    };
+
+    class TraderApp : public App
 	{
 	public:
         TraderApp()
@@ -35,6 +59,7 @@ namespace trader {
         ThreadPool pool;
         std::vector<AutoPtr<trader::Interface::Connection>> connections;
         AutoPtr<trader::Interface::Connection> appConnection;
+        AppStateChart stateChart;
 
 	protected:
 		void defineOptions(Poco::Util::OptionSet& options);

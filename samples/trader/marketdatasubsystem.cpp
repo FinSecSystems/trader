@@ -40,6 +40,21 @@ namespace trader {
         app->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
     }
 
+    void MarketDataSubSystem::getMarkets(std::vector<std::string>& _markets)
+    {
+        for (auto& connection : connectionMarketMap)
+        {
+            std::string connectionName = connection.first;
+            for (auto& market : connection.second)
+            {
+                std::ostringstream marketNameStream;
+                marketNameStream << connectionName << ";";
+                marketNameStream << market.first;
+                _markets.push_back(marketNameStream.str());
+            }
+        }
+    }
+
     void MarketDataEventProcessor::SecurityList(Poco::AutoPtr<SecurityListData> securityListData)
     {
         marketDataSubSystem->stateChart.send_event(MarketDataStateChart::OnReceiveSecurityList(securityListData));
@@ -83,6 +98,22 @@ namespace trader {
             Interface::Connection::SecurityListData const& securityListData = *(e.securityList);
             MarketDataSubSystem* sys = MarketDataSubSystem::instance;
 
+            MarketDataSubSystem::ConnectionMarketMap::iterator itConnection = sys->connectionMarketMap.find(securityListData.getSourceConnection());
+            
+            MarketDataSubSystem::SymIDMap *marketToTradeHistoryMapPtr = nullptr;
+            if (itConnection == sys->connectionMarketMap.end())
+            {
+                std::pair<MarketDataSubSystem::ConnectionMarketMap::iterator, bool> ret = sys->connectionMarketMap.insert({ securityListData.getSourceConnection(), MarketDataSubSystem::SymIDMap() });
+                poco_assert(ret.second);
+                marketToTradeHistoryMapPtr = &(ret.first->second);
+                Logger::get("Logs").information("MarketDataSubSystem: Received Security List from %s", securityListData.getSourceConnection());
+            }
+            else
+            {
+                marketToTradeHistoryMapPtr = &(itConnection->second);
+            }
+            MarketDataSubSystem::SymIDMap& marketToTradeHistoryMap = *marketToTradeHistoryMapPtr;
+
             for (auto& syms : securityListData.secListGrp.noRelatedSym)
             {
                 std::cout << syms.instrument.symbol << std::endl;
@@ -92,19 +123,21 @@ namespace trader {
             for (auto& syms : securityListData.secListGrp.noRelatedSym)
             {
                 //Add market if it does not already exist
-                MarketDataSubSystem::SymIDMap::const_iterator marketExists = sys->marketToTradeHistoryMap.find(syms.instrument.symbol);
-                if (marketExists == sys->marketToTradeHistoryMap.end())
+                MarketDataSubSystem::SymIDMap::const_iterator marketExists = marketToTradeHistoryMap.find(syms.instrument.symbol);
+                if (marketExists == marketToTradeHistoryMap.end())
                 {
                     Poco::AutoPtr<GenericDatabase::Trade_History> tradeHistoryTable = new GenericDatabase::Trade_History(db->getDbSession(), syms.instrument.symbol);
                     MarketDataSubSystem::MarketData marketData;
                     marketData.storage = tradeHistoryTable;
-                    sys->marketToTradeHistoryMap.insert({ syms.instrument.symbol, marketData });
+                    marketToTradeHistoryMap.insert({ syms.instrument.symbol, marketData });
                     if (MarketDataSubSystem::instance->useStorage)
                     {
                         tradeHistoryTable->init();
                     }
                 }
             }
+
+            sys->app->stateChart.send_event(AppStateChart::OnMarketDataReady());
 
             //TODO: Check if a market has been removed and send an event
 

@@ -103,6 +103,11 @@ namespace trader {
         // TODO: Documentation
         void TradeCaptureReportRequest(Poco::AutoPtr<TradeCaptureReportRequestData> tradeCaptureReportRequestData) override;
 
+        void SetConnectionId(const std::string& _connectionId)
+        {
+            connectionId = _connectionId;
+        }
+
         void SetExchange(Bittrex* _exchange)
         {
             exchange = _exchange;
@@ -111,6 +116,8 @@ namespace trader {
         void RunMore();
 
         Bittrex* exchange;
+
+        std::string connectionId;
 
         // In-memory cache of marketdata
         struct BittrexMarketData
@@ -143,10 +150,10 @@ namespace trader {
     class BittrexConnection : public Interface::CallConnection, public Poco::Runnable
     {
     public:
-        BittrexConnection(const std::string& connectionid, Bittrex* _exchange)
+        BittrexConnection(const std::string& _connectionid, Bittrex* _exchange)
             : processingConnection(10)
         {
-            (void)connectionid;
+            processingConnection.SetConnectionId(_connectionid);
             processingConnection.SetExchange(_exchange);
         }
 

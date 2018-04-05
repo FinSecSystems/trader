@@ -128,6 +128,8 @@ namespace trader {
             this->initialize(*this);
             ConnectionManager::instance.get()->DoOperation(DC_START);
 
+            AppStateChart::AppFSMList::start();
+
             //Run indefinitely
 			do {
 				Thread::sleep(10000);
@@ -148,7 +150,28 @@ namespace trader {
 		return Util::Application::findFile(path);
 	}
 
+    class WaitForMarketDataReady : public AppStateChart
+    {
+        void entry() override
+        {
+
+        }
+
+        void react(OnMarketDataReady const&) override
+        {
+            MarketDataSubSystem& marketDataSys = AppManager::instance.get()->getApp()->getSubsystem<MarketDataSubSystem>();
+            std::vector<std::string> markets;
+            marketDataSys.getMarkets(markets);
+            for (auto& market : markets)
+            {
+                std::cout << market << std::endl;
+            }
+        }
+
+    };
 }
+
+FSM_INITIAL_STATE(trader::AppStateChart, trader::WaitForMarketDataReady);
 
 POCO_APP_MAIN(trader::TraderApp)
 

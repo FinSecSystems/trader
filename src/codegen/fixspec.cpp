@@ -476,6 +476,20 @@ namespace trader {
                         header << "static std::atomic<MessageId> nextMessageId" << cendl;
                         header << "return ++nextMessageId" << cendl;
                     }
+
+                    header << "void setSourceConnection(const std::string& _sourceConnection)" << endl;
+                    {
+                        ScopedStream<ApiFileOutputStream> funcScope(header);
+                        header << "sourceConnection = _sourceConnection" << cendl;
+                    }
+
+                    header << "const std::string& getSourceConnection() const" << endl;
+                    {
+                        ScopedStream<ApiFileOutputStream> funcScope(header);
+                        header << "return sourceConnection" << cendl;
+                    }
+
+                    header << "std::string sourceConnection" << cendl;
                     header << "MessageId messageId" << cendl;
                 }
 
@@ -574,8 +588,20 @@ namespace trader {
                         header << "receivingConnection = _connection" << cendl;
                     }
                     header << endl;
+                    header << "virtual void SetName(const std::string& _name)";
+                    {
+                        ScopedStream<ApiFileOutputStream> enumScope(header);
+                        header << "name = _name" << cendl;
+                    }
+                    header << endl;
+                    header << "virtual const std::string& GetName() const";
+                    {
+                        ScopedStream<ApiFileOutputStream> enumScope(header);
+                        header << "return name" << cendl;
+                    }
+                    header << endl;
                     header << "Poco::AutoPtr<Connection> receivingConnection" << cendl;
-
+                    header << "std::string name" << cendl;
                 }
 
                 {
