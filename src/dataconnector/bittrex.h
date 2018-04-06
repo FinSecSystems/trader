@@ -44,7 +44,7 @@ namespace trader {
         /// </summary>
         /// <param name="securityListRequestData">Request Data</param>
         /// <param name="securityListRequestData.SecurityReqID">Unique identifier of this request.</param>
-        void SecurityListRequest(Poco::AutoPtr<SecurityListRequestData> securityListRequestData) override;
+        void SecurityListRequest(Poco::AutoPtr<Interface::SecurityListRequestData> securityListRequestData) override;
 
         /// <summary>
         /// [Client-Side] Subscribes the current session to a Market Data - Snapshot/Full Refresh
@@ -69,7 +69,7 @@ namespace trader {
         /// <param name="marketDataRequestData.Symbol">Market data symbol requested.
         ///                                            Valid Values : See Security List for a list of supported symbols.
         /// </param>
-        void MarketDataRequest(Poco::AutoPtr<MarketDataRequestData> marketDataRequestData) override;
+        void MarketDataRequest(Poco::AutoPtr<Interface::MarketDataRequestData> marketDataRequestData) override;
 
         /// <summary>
         /// [Client-Side] Submit a new order to exchange
@@ -95,13 +95,13 @@ namespace trader {
         ///                                                             3 = Immediate Or Cancel (IOC)
         /// </param>
         /// <param name="newOrderSingleData.TransactTime">Time of order creation(expressed in UTC).</param>
-        void NewOrderSingle(Poco::AutoPtr<NewOrderSingleData> newOrderSingleData) override;
+        void NewOrderSingle(Poco::AutoPtr<Interface::NewOrderSingleData> newOrderSingleData) override;
 
         // TODO: Documentation
-        void OrderCancelRequest(Poco::AutoPtr<OrderCancelRequestData> orderCancelRequestData) override;
+        void OrderCancelRequest(Poco::AutoPtr<Interface::OrderCancelRequestData> orderCancelRequestData) override;
 
         // TODO: Documentation
-        void TradeCaptureReportRequest(Poco::AutoPtr<TradeCaptureReportRequestData> tradeCaptureReportRequestData) override;
+        void TradeCaptureReportRequest(Poco::AutoPtr<Interface::TradeCaptureReportRequestData> tradeCaptureReportRequestData) override;
 
         void SetConnectionId(const std::string& _connectionId)
         {
@@ -135,7 +135,7 @@ namespace trader {
 
         struct MarketDataRequestRetrievalData
         {
-            Poco::AutoPtr<MarketDataRequestData> marketRequestData;
+            Poco::AutoPtr<Interface::MarketDataRequestData> marketRequestData;
 
             // The id of the last marketData entry that was sent to the requester
             typedef std::unordered_map<std::string, Poco::Int32> LastCacheIdMap;

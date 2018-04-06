@@ -680,6 +680,7 @@
 		includedirs {
 			".",
 			"sdk/include",
+			"samples/utils",
 			"samples/trader",
 			"deps/poco/Net/include",
 			"deps/poco/Crypto/include",
@@ -698,6 +699,7 @@
 			"*.txt", "*.md",
 			"sdk/include/**.h",
 			"samples/trader/**.h", "samples/trader/**.cpp",
+			"samples/utils/**.h", "samples/utils/**.cpp",
 			"include/**.h",
 			"tmp/%{cfg.platform}/codegen/interface*.h", "tmp/%{cfg.platform}/codegen/interface*.cpp",
 			"tmp/%{cfg.platform}/codegen/generic*.h", "tmp/%{cfg.platform}/codegen/generic*.cpp",

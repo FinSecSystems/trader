@@ -493,75 +493,75 @@ namespace trader {
                     header << "MessageId messageId" << cendl;
                 }
 
+                header << comment("Message Data") << endl;
+                for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                 {
-                    ScopedClass<0> scopedClass(header, "IConnection");
-
-                    header << comment("Message Data") << endl;
-                    for (UInt32 i = 0; i < messagesNodelist->length(); i++)
+                    Node* messageNode = messagesNodelist->item(i);
+                    if (messageNode->nodeType() == Node::ELEMENT_NODE)
                     {
-                        Node* messageNode = messagesNodelist->item(i);
-                        if (messageNode->nodeType() == Node::ELEMENT_NODE)
+                        Element* message = (Element*)messageNode;
+                        string attribName = message->getAttribute("name");
+                        ostringstream className;
+                        className << attribName << "Data";
+                        ScopedStruct<1, ApiFileOutputStream> scopedStruct(header, className.str().c_str(), "IMessageData");
+                        if (className.str().find("Request") != std::string::npos)
                         {
-                            Element* message = (Element*)messageNode;
-                            string attribName = message->getAttribute("name");
-                            ostringstream className;
-                            className << attribName << "Data";
-                            ScopedStruct<1, ApiFileOutputStream> scopedStruct(header, className.str().c_str(), "IMessageData");
-                            if (className.str().find("Request") != std::string::npos)
-                            {
-                                header << className.str().c_str() << "()" << endl;
-                                {
-                                    ScopedStream<ApiFileOutputStream> funcScope(header);
-                                    header << "messageId = getUniqueMessageId()" << cendl;
-                                }
-                            }
-
-                            header << "virtual enum MESSAGES GetType()" << endl;
+                            header << className.str().c_str() << "()" << endl;
                             {
                                 ScopedStream<ApiFileOutputStream> funcScope(header);
-                                header << "return MESSAGES::" << attribName << "_TYPE" << cendl;
+                                header << "messageId = getUniqueMessageId()" << cendl;
                             }
-                            NodeList* messageChildNodeList = messageNode->childNodes();
-                            for (UInt32 j = 0; j < messageChildNodeList->length(); j++)
+                        }
+
+                        header << "virtual enum MESSAGES GetType()" << endl;
+                        {
+                            ScopedStream<ApiFileOutputStream> funcScope(header);
+                            header << "return MESSAGES::" << attribName << "_TYPE" << cendl;
+                        }
+                        NodeList* messageChildNodeList = messageNode->childNodes();
+                        for (UInt32 j = 0; j < messageChildNodeList->length(); j++)
+                        {
+                            Node* messageChildNode = messageChildNodeList->item(j);
+                            if (messageChildNode->nodeType() == Node::ELEMENT_NODE)
                             {
-                                Node* messageChildNode = messageChildNodeList->item(j);
-                                if (messageChildNode->nodeType() == Node::ELEMENT_NODE)
+                                Element* groupOrField = (Element*)messageChildNode;
+                                std::string tagName = groupOrField->tagName();
+                                string attribName2 = groupOrField->getAttribute("name");
+                                if (tagName.compare("group") == 0)
                                 {
-                                    Element* groupOrField = (Element*)messageChildNode;
-                                    std::string tagName = groupOrField->tagName();
-                                    string attribName2 = groupOrField->getAttribute("name");
-                                    if (tagName.compare("group") == 0)
                                     {
+                                        ScopedStruct<0, ApiFileOutputStream> scopedStruct3(header, attribName2.c_str());
+                                        NodeList* fieldNodeList2 = messageChildNode->childNodes();
                                         {
-                                            ScopedStruct<0, ApiFileOutputStream> scopedStruct3(header, attribName2.c_str());
-                                            NodeList* fieldNodeList2 = messageChildNode->childNodes();
+                                            for (UInt32 k = 0; k < fieldNodeList2->length(); k++)
                                             {
-                                                for (UInt32 k = 0; k < fieldNodeList2->length(); k++)
+                                                Node* fieldChildNode = fieldNodeList2->item(k);
+                                                if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
                                                 {
-                                                    Node* fieldChildNode = fieldNodeList2->item(k);
-                                                    if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
-                                                    {
-                                                        Element* field = (Element*)fieldChildNode;
-                                                        string name3 = field->getAttribute("name");
-                                                        header << name3 << " " << var_name(name3) << cendl;
-                                                    }
+                                                    Element* field = (Element*)fieldChildNode;
+                                                    string name3 = field->getAttribute("name");
+                                                    header << name3 << " " << var_name(name3) << cendl;
                                                 }
                                             }
                                         }
-                                        header << "std::vector<" << attribName2 << "> " << var_name(attribName2) << cendl;
                                     }
-                                    else if (tagName.compare("field") == 0)
-                                    {
-                                        header << attribName2 << " " << var_name(attribName2) << cendl;
-                                    }
-                                    else
-                                    {
-                                        header << attribName2 << "Object " << var_name(attribName2) << cendl;
-                                    }
+                                    header << "std::vector<" << attribName2 << "> " << var_name(attribName2) << cendl;
+                                }
+                                else if (tagName.compare("field") == 0)
+                                {
+                                    header << attribName2 << " " << var_name(attribName2) << cendl;
+                                }
+                                else
+                                {
+                                    header << attribName2 << "Object " << var_name(attribName2) << cendl;
                                 }
                             }
                         }
                     }
+                }
+
+                {
+                    ScopedClass<0> scopedClass(header, "IConnection");
 
                     for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                     {

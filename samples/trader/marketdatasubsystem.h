@@ -4,6 +4,7 @@
 #include "interfacehelper.h"
 #include "genericdatabase.h"
 #include "interface.h"
+#include "appsubsystem.h"
 
 namespace trader {
 
@@ -13,14 +14,27 @@ namespace trader {
     {
     public:
         MarketDataEventProcessor(MarketDataSubSystem* _sys)
-            : marketDataSubSystem(_sys)
+            : sys(_sys)
             , BufferedConnection(10)
         {}
 
         void SecurityList(Poco::AutoPtr<SecurityListData> securityListData) override;
+        void MarketDataSnapshotFullRefresh(Poco::AutoPtr<MarketDataSnapshotFullRefreshData> marketDataSnapshotFullRefreshData) override;
+        void MarketDataIncrementalRefresh(Poco::AutoPtr<MarketDataIncrementalRefreshData> marketDataIncrementalRefresh) override;
 
-        MarketDataSubSystem* marketDataSubSystem;
+        MarketDataSubSystem* sys;
     };
+
+#define InterfaceEvent(x) \
+    struct On##x : public MarketDataEvent \
+    { \
+        On##x(MarketDataSubSystem* _sys, Poco::AutoPtr<Interface::##x##Data> param) \
+            : MarketDataEvent(_sys) \
+            , message(param) \
+            {} \
+        Poco::AutoPtr<Interface::##x##Data> message; \
+    }; \
+    virtual void react(On##x const&) {}
 
     class MarketDataStateChart : public tinyfsm::Fsm<MarketDataStateChart>
     {
@@ -35,40 +49,41 @@ namespace trader {
         }
 
         //Events
-        struct PullData : tinyfsm::Event {};
-        struct Start : tinyfsm::Event {};
-        struct OnReceiveSecurityList : tinyfsm::Event
+        struct MarketDataEvent : tinyfsm::Event
         {
-            OnReceiveSecurityList(Poco::AutoPtr<Interface::Connection::SecurityListData> securityListData)
-                : securityList(securityListData)
-            {}
+            MarketDataEvent(MarketDataSubSystem* _sys)
+                : sys(_sys)
+            {
 
-            Poco::AutoPtr<Interface::Connection::SecurityListData> securityList;
+            }
+            MarketDataSubSystem* sys;
         };
+
+        struct Start : public MarketDataEvent
+        {
+            Start(MarketDataSubSystem* _sys)
+             : MarketDataEvent(_sys)
+            {}
+        };
+
+        InterfaceEvent(SecurityList);
+        InterfaceEvent(MarketDataSnapshotFullRefresh);
+        InterfaceEvent(MarketDataIncrementalRefresh);
 
         void react(tinyfsm::Event const&) {};
         virtual void react(Start const&) {}
-        virtual void react(OnReceiveSecurityList const&) {}
         virtual void entry(void) {};
         virtual void exit(void) {};
 
-        MarketDataSubSystem* marketDataSubSystem;
     };
 
-	class MarketDataSubSystem : public TraderSubsystem, public Poco::Runnable
+	class MarketDataSubSystem : public AppSubsystem, public Poco::Runnable
 	{
 	public:
         MarketDataSubSystem() :
             app(nullptr)
 		{
-            poco_assert(MarketDataSubSystem::instance == nullptr);
-            MarketDataSubSystem::instance = this;
             eventProcessor = new MarketDataEventProcessor(this);
-		}
-
-		~MarketDataSubSystem()
-		{
-            MarketDataSubSystem::instance = nullptr;
 		}
 
         const char* name() const override
@@ -103,11 +118,12 @@ namespace trader {
         typedef std::unordered_map<std::string, SymIDMap> ConnectionMarketMap;
         ConnectionMarketMap connectionMarketMap;
 
-        bool    useStorage; //Use physical storage
+        bool useStorage; //Use physical storage
 
-        static MarketDataSubSystem* instance;
+        void retrieveMarkets(std::vector<std::string>& _markets);
 
-        void getMarkets(std::vector<std::string>& _markets);
+        void requestMarketData(const std::string& _for_market);
+
 	};
 
 }

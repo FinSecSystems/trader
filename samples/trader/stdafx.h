@@ -21,6 +21,7 @@
 #include "Poco/Format.h"
 #include "Poco/File.h"
 #include "Poco/FileStream.h"
+#include "Poco/StringTokenizer.h"
 #include "Poco/StreamCopier.h"
 #include "Poco/SHA1Engine.h"
 #include "Poco/SHA2Engine.h"
@@ -67,6 +68,7 @@
 #include <exception>
 
 #include <dataconnector.h>
+#include <interface.h>
 
 using Poco::Util::Application;
 using Poco::Util::Option;
@@ -101,4 +103,7 @@ using namespace Poco;
 using namespace Poco::Data::Keywords;
 using namespace Poco::Net;
 using namespace std::placeholders;
+
+using namespace trader;
+using namespace trader::Interface;
 

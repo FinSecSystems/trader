@@ -4,19 +4,11 @@
 #include "app.h"
 #include "interface.h"
 #include "tinyfsm.hpp"
+#include "connectionhelper.h"
+#include "applicationhelper.h"
+#include "appsubsystem.h"
 
 namespace trader {
-
-    class TraderSubsystem : public Poco::Util::Subsystem
-    {
-    public:
-        Poco::AutoPtr<Interface::Connection> eventProcessor;
-
-        void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData)
-        {
-            eventProcessor->ProcessMessage(_messageData);
-        }
-    };
 
     class TraderApp;
 
@@ -33,39 +25,21 @@ namespace trader {
 
         //Events
         struct OnMarketDataReady : tinyfsm::Event {};
+        struct OnMarketUpdate : tinyfsm::Event {};
 
         void react(tinyfsm::Event const&) {};
         virtual void react(OnMarketDataReady const&) {};
+        virtual void react(OnMarketUpdate const&) {};
         virtual void entry(void) {};
         virtual void exit(void) {};
 
     };
 
-    class TraderApp : public App
+    class TraderApp : public ApplicationHelper, public ConnectionHelper
 	{
 	public:
-        TraderApp()
-		{
-		}
-
-		~TraderApp()
-		{
-		}
-
-		bool findFile(Poco::Path& path) const override;
-
-        Poco::Util::AbstractConfiguration& appConfig();
-
-        ThreadPool pool;
-        std::vector<AutoPtr<trader::Interface::Connection>> connections;
-        AutoPtr<trader::Interface::Connection> appConnection;
         AppStateChart stateChart;
-
 	protected:
-		void defineOptions(Poco::Util::OptionSet& options);
-		void handleHelp(const std::string& name, const std::string& value);
-		void displayHelp();
 		int main(const std::vector<std::string>& args) override;
-
 	};
 }

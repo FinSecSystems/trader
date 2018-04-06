@@ -277,11 +277,11 @@ namespace trader {
         }
     }
 
-    void BittrexProcessingConnection::SecurityListRequest(Poco::AutoPtr<SecurityListRequestData> securityListRequestData)
+    void BittrexProcessingConnection::SecurityListRequest(Poco::AutoPtr<Interface::SecurityListRequestData> securityListRequestData)
     {
         static  std::atomic<std::int32_t> idx = 0;
 
-        Poco::AutoPtr<SecurityListData> securityListData = new SecurityListData();
+        Poco::AutoPtr<Interface::SecurityListData> securityListData = new Interface::SecurityListData();
         securityListData->setSourceConnection(connectionId);
         securityListData->securityListType = Interface::SecurityListType_MARKET;
         securityListData->securityReqID = securityListRequestData->securityReqID;
@@ -323,7 +323,7 @@ namespace trader {
         return uniqueResponseIdStream.str();
     }
 
-    void BittrexProcessingConnection::MarketDataRequest(Poco::AutoPtr<MarketDataRequestData> marketDataRequestData)
+    void BittrexProcessingConnection::MarketDataRequest(Poco::AutoPtr<Interface::MarketDataRequestData> marketDataRequestData)
     {
         // [Server-Side]
         // Returns either MarketDataSnapshotFullRefreshData, MarketDataIncrementalRefresh or MarketDataRequestReject
@@ -386,14 +386,17 @@ namespace trader {
 
         }
 
-        Poco::AutoPtr<Interface::IConnection::MarketDataIncrementalRefreshData> marketDataIncrementalRefreshData;
+        Poco::AutoPtr<Interface::MarketDataIncrementalRefreshData> marketDataIncrementalRefreshData;
 
         if (subscriptionRequestType == Interface::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES)
         {
-            marketDataIncrementalRefreshData = new Interface::IConnection::MarketDataIncrementalRefreshData();
-            marketDataIncrementalRefreshData->setSourceConnection(connectionId);
-            marketDataIncrementalRefreshData->mDReqID = GetUniqueResponseId();
-            if (!updateOnly)
+            if (updateOnly)
+            {
+                marketDataIncrementalRefreshData = new Interface::MarketDataIncrementalRefreshData();
+                marketDataIncrementalRefreshData->setSourceConnection(connectionId);
+                marketDataIncrementalRefreshData->mDReqID = GetUniqueResponseId();
+            }
+            else
             {
                 marketDataRequestData->subscriptionRequestType = (Interface::SubscriptionRequestType) ( ((Poco::UInt32) marketDataRequestData->subscriptionRequestType) | UpdateBit );
                 MarketDataRequestRetrievalData data;
@@ -437,42 +440,37 @@ namespace trader {
 
                 if (!updateOnly)
                 {
-                    Poco::AutoPtr<Interface::IConnection::MarketDataSnapshotFullRefreshData> marketDataSnapshotFullRefreshData = new Interface::IConnection::MarketDataSnapshotFullRefreshData();
+                    Poco::AutoPtr<Interface::MarketDataSnapshotFullRefreshData> marketDataSnapshotFullRefreshData = new Interface::MarketDataSnapshotFullRefreshData();
                     marketDataSnapshotFullRefreshData->setSourceConnection(connectionId);
                     marketDataSnapshotFullRefreshData->instrument.symbol = marketName;
                     marketDataSnapshotFullRefreshData->mDReqID = GetUniqueResponseId();
                     marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.reserve(marketData.marketDataMap.size());
-                    BittrexMarketData::MarketDataMap::iterator itMap = marketData.marketDataMap.begin();
-                    Interface::MDFullGrpObject::NoMDEntriesArray::iterator itVec = marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.begin();
-                    for (;itMap != marketData.marketDataMap.end();itMap++,itVec++)
+                   
+                    for (auto itMap = marketData.marketDataMap.begin();itMap != marketData.marketDataMap.end();itMap++)
                     {
                         auto& marketDataItem = itMap->second;
-                        auto& mdEntry = *itVec;
-                        if (marketDataItem.orderType.compare("bid")==0)
+                        marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.emplace_back();
+                        Interface::MDFullGrpObject::NoMDEntries& mdEntry = marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.back();
+                        if (marketDataItem.orderType.compare("BUY")==0)
                         {
                             mdEntry.mDEntryType = Interface::MDEntryType_BID;
                         }
-                        else if (marketDataItem.orderType.compare("offer") == 0)
+                        else if (marketDataItem.orderType.compare("SELL") == 0)
                         {
                             mdEntry.mDEntryType = Interface::MDEntryType_OFFER;
                         }
-                        else if (marketDataItem.orderType.compare("trade") == 0)
-                        {
-                            mdEntry.mDEntryType = Interface::MDEntryType_TRADE;
-                        }
                         else
                         {
-                            poco_bugcheck_msg("Unknown");
+                            Logger::get("Logs").error("Bittrex Error: Unknown order type %s", marketDataItem.orderType);
+                            marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.pop_back();
+                            continue;
                         }
 
                         mdEntry.mDEntryPx   = marketDataItem.price;
                         mdEntry.mDEntrySize = marketDataItem.quantity;
                         mdEntry.mDEntryTime = (Poco::Int32)marketDataItem.timeStamp.time;
 
-                        if (marketDataItem.filltype.compare("limit") == 0)
-                        {
-                            mdEntry.ordType = Interface::OrdType_LIMIT;
-                        }
+                        mdEntry.ordType = Interface::OrdType_LIMIT;
                     }
                     receivingConnection->MarketDataSnapshotFullRefresh(marketDataSnapshotFullRefreshData);
 
@@ -504,31 +502,26 @@ namespace trader {
                         Interface::MDIncGrpObject::NoMDEntries& mdEntry = marketDataIncrementalRefreshData->mDIncGrp.noMDEntries.back();
 
                         mdEntry.instrument.symbol = marketName;
-                        if (marketDataItem.orderType.compare("bid") == 0)
+                        if (marketDataItem.orderType.compare("BUY") == 0)
                         {
                             mdEntry.mDEntryType = Interface::MDEntryType_BID;
                         }
-                        else if (marketDataItem.orderType.compare("offer") == 0)
+                        else if (marketDataItem.orderType.compare("SELL") == 0)
                         {
                             mdEntry.mDEntryType = Interface::MDEntryType_OFFER;
                         }
-                        else if (marketDataItem.orderType.compare("trade") == 0)
-                        {
-                            mdEntry.mDEntryType = Interface::MDEntryType_TRADE;
-                        }
                         else
                         {
-                            poco_bugcheck_msg("Unknown");
+                            Logger::get("Logs").error("Bittrex Error: Unknown order type %s", marketDataItem.orderType);
+                            marketDataIncrementalRefreshData->mDIncGrp.noMDEntries.pop_back();
+                            continue;
                         }
 
                         mdEntry.mDEntryPx = marketDataItem.price;
                         mdEntry.mDEntrySize = marketDataItem.quantity;
                         mdEntry.mDEntryTime = (Poco::Int32)marketDataItem.timeStamp.time;
 
-                        if (marketDataItem.filltype.compare("limit") == 0)
-                        {
-                            mdEntry.ordType = Interface::OrdType_LIMIT;
-                        }
+                        mdEntry.ordType = Interface::OrdType_LIMIT;
                     }
 
                     lastRetrievedId = marketData.lastCachedId;
@@ -546,7 +539,7 @@ namespace trader {
     }
 
 
-    void BittrexProcessingConnection::NewOrderSingle(Poco::AutoPtr<NewOrderSingleData> newOrderSingleData)
+    void BittrexProcessingConnection::NewOrderSingle(Poco::AutoPtr<Interface::NewOrderSingleData> newOrderSingleData)
     {
         // [Server-Side]
         // Returns  TradeCaptureReport and/or ExecutionReport
@@ -560,7 +553,7 @@ namespace trader {
         poco_bugcheck_msg("NewOrderSingle not implemented.");
     }
 
-    void BittrexProcessingConnection::OrderCancelRequest(Poco::AutoPtr<OrderCancelRequestData> orderCancelRequestData)
+    void BittrexProcessingConnection::OrderCancelRequest(Poco::AutoPtr<Interface::OrderCancelRequestData> orderCancelRequestData)
     {
         // [Server-Side]
         // Returns ExecutionReport or OrderCancelReject
@@ -575,7 +568,7 @@ namespace trader {
         poco_bugcheck_msg("OrderCancelRequest not implemented.");
     }
 
-    void BittrexProcessingConnection::TradeCaptureReportRequest(Poco::AutoPtr<TradeCaptureReportRequestData> tradeCaptureReportRequestData)
+    void BittrexProcessingConnection::TradeCaptureReportRequest(Poco::AutoPtr<Interface::TradeCaptureReportRequestData> tradeCaptureReportRequestData)
     {
         // [Server-Side]
         // Returns TradeCaptureReport

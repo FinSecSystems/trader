@@ -54,3 +54,9 @@ deps/*.make
 *.properties
 /*.tss
 /lib
+/OnDemandConnRouteHelper.pdb/E1DCCA38E307E1BB54B6694B066E18991/*.error
+/cryptnet.pdb/ED49C36A305C47E3CF805C139B59CB7A1/*.error
+/mskeyprotect.pdb/EC69116F018D1D0D9A316F8DFDA7CC511/*.error
+/ncryptsslp.pdb/61FBBDC42A2B3572F22A2D4222EA10601/*.error
+/schannel.pdb/E9470EC044AE8BE890E31480CC9DA5311/*.error
+/webio.pdb/58F88BE253550B89CD878FECE4A1D6771/*.error

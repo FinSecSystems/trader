@@ -1,18 +1,14 @@
 #include "stdafx.h"
-#include "db.h"
 #include "app.h"
 #include "connectionmanager.h"
-#include "traderapp.h"
 #include "interface.h"
 #include "appconnection.h"
-#include "Poco/FIFOEvent.h"
-#include "Poco/KeyValueArgs.h"
-#include "Poco/Delegate.h"
+#include "appsubsystem.h"
 
 namespace trader {
 
 
-    AppConnection::AppConnection(TraderApp* _app)
+    AppConnection::AppConnection(ApplicationHelper* _app)
         : app(_app)
     {}
 
@@ -28,7 +24,7 @@ namespace trader {
         {
             if (!skip--)
             {
-                subSystem.unsafeCast<TraderSubsystem>()->ProcessMessage(_messageData);
+                subSystem.unsafeCast<AppSubsystem>()->ProcessMessage(_messageData);
             }
         }
     }

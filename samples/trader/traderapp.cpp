@@ -9,49 +9,6 @@
 
 namespace trader {
 
-    void TraderApp::defineOptions(OptionSet& options)
-    {
-        Application::defineOptions(options);
-
-        options.addOption(
-            Option("help", "h", "Display help information on command line arguments.")
-            .required(false)
-            .repeatable(false)
-            .callback(OptionCallback<TraderApp>(this, &TraderApp::handleHelp)));
-
-    }
-
-    void TraderApp::handleHelp(const string& name, const string& value)
-    {
-		(void)name;
-		(void)value;
-        displayHelp();
-        stopOptionsProcessing();
-    }
-
-     void TraderApp::displayHelp()
-    {
-        HelpFormatter helpFormatter(options());
-        helpFormatter.setCommand(commandName());
-        helpFormatter.setUsage("OPTIONS");
-        helpFormatter.setHeader("A simple command line client for posting status updates.");
-        helpFormatter.format(cout);
-    }
-
-     Poco::Util::AbstractConfiguration& TraderApp::appConfig()
-     {
-         try
-         {
-             return Util::Application::instance().config();
-         }
-         catch (NullPointerException&)
-         {
-             throw IllegalStateException(
-                 "An application configuration is required to initialize the application"
-             );
-         }
-     }
-
     int TraderApp::main(const std::vector<std::string>& args)
     {
 		(void)args;
@@ -60,73 +17,22 @@ namespace trader {
 #endif
         try
         {
-			//Initialize logs
-			AutoPtr<SplitterChannel> splitterChannel(new SplitterChannel());
-			ostringstream logNameStream;
-			logNameStream << commandName() << ".log.txt";
-#if defined(_DEBUG)
-			AutoPtr<Channel> consoleChannel(new ConsoleChannel());
-#endif
-			AutoPtr<FileChannel> rotatedFileChannel(new FileChannel(logNameStream.str()));
-			rotatedFileChannel->setProperty("archive", "timestamp");
-			rotatedFileChannel->setProperty("rotateOnOpen", "true");
-#if defined(_DEBUG)
-			//splitterChannel->addChannel(consoleChannel);
-#endif
-			splitterChannel->addChannel(rotatedFileChannel);
-			AutoPtr<Formatter> formatter(new PatternFormatter("%Y-%m-%d %H:%M:%S.%c %N[%P]:%s:%q:%t"));
-			AutoPtr<Channel> formattingChannel(new FormattingChannel(formatter, splitterChannel));
-			Logger::create("Logs", formattingChannel, Message::PRIO_TRACE);
-
-            // Loader application properties
-            loadConfiguration();
-            AutoPtr<AbstractConfiguration> proxyProperties(appConfig().createView("proxy"));
-
-            // Grab proxy settings
-            HTTPSClientSession::ProxyConfig proxyConfig;
-            try {
-                if (proxyProperties->hasProperty("hostname"))
-                    proxyConfig.host = proxyProperties->getString("hostname");
-                if (proxyProperties->hasProperty("port"))
-                    proxyConfig.port = (UInt16)proxyProperties->getUInt("port");
-                if (proxyProperties->hasProperty("username"))
-                    proxyConfig.username = proxyProperties->getString("username");
-                if (proxyProperties->hasProperty("password"))
-                    proxyConfig.password = proxyProperties->getString("password");
-                if (proxyProperties->hasProperty("nonproxyhosts"))
-                    proxyConfig.nonProxyHosts = proxyProperties->getString("nonproxyhosts");
-            }
-            catch (Exception& exc)
-            {
-                Logger::get("Logs").information("Bad Application configuration: Missing or invalid %s.properties", commandName().c_str());
-                Logger::get("Logs").information("Application Error: %s", exc.displayText());
-            }
-            HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
-
-            //Make application globally aware
-            AppManager::instance.get()->setApp(this);
-
-            //Initialize DB
-            ostringstream dbNameStream;
-            dbNameStream << commandName() << ".db";
-            DbManager::instance.setDb(new Db(new Data::Session("SQLite", dbNameStream.str())));
+            //Setup logs, proxy settings, db
+            setup();
 
             //Add Subsystems used by this application
             addSubsystem(new MarketDataSubSystem());
             
             //Retrieve required connections from Connection Manager
-            connections.push_back(ConnectionManager::instance.get()->getConnection("bittrex"));
-            
-            //Setup connection for this applicatino to receive messages
-            appConnection = new AppConnection(this);
-            for (auto& connection : connections)
-            {
-                connection->SetReceivingConnection(appConnection);
-            }
+            std::vector<std::string> connectionStrings;
+            connectionStrings.push_back("bittrex");
+            setupConnections(connectionStrings);
 
             //Bootstrap subsystems
-            this->initialize(*this);
-            ConnectionManager::instance.get()->DoOperation(DC_START);
+            start();
+
+            //Start Connections
+            startConnections();
 
             AppStateChart::AppFSMList::start();
 
@@ -145,30 +51,41 @@ namespace trader {
         return Application::EXIT_OK;
     }
 
-	bool TraderApp::findFile(Path& path) const
-	{
-		return Util::Application::findFile(path);
-	}
+    class GetMarketData;
 
     class WaitForMarketDataReady : public AppStateChart
     {
-        void entry() override
-        {
-
-        }
 
         void react(OnMarketDataReady const&) override
         {
             MarketDataSubSystem& marketDataSys = AppManager::instance.get()->getApp()->getSubsystem<MarketDataSubSystem>();
             std::vector<std::string> markets;
-            marketDataSys.getMarkets(markets);
+            marketDataSys.retrieveMarkets(markets);
             for (auto& market : markets)
             {
                 std::cout << market << std::endl;
             }
+
+            transit<GetMarketData>();
         }
 
     };
+
+    class GetMarketData : public AppStateChart
+    {
+        void entry() override
+        {
+            MarketDataSubSystem& marketDataSys = AppManager::instance.get()->getApp()->getSubsystem<MarketDataSubSystem>();
+            marketDataSys.requestMarketData("bittrex;USDT-BTC");
+        }
+
+        void react(OnMarketUpdate const&) override
+        {
+
+        }
+
+    };
+
 }
 
 FSM_INITIAL_STATE(trader::AppStateChart, trader::WaitForMarketDataReady);

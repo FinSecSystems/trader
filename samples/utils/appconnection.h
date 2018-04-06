@@ -1,18 +1,21 @@
 #pragma once
 
+#include "applicationhelper.h"
+#include "interface.h"
+
 namespace trader {
 
 	class AppConnection : public Interface::CallConnection
 	{
 	public:
 
-        AppConnection(TraderApp* _app);
+        AppConnection(ApplicationHelper* _app);
 
         ~AppConnection();
 
         void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData) override;
 
     private:
-        TraderApp* app;
+        ApplicationHelper* app;
 	};
 }

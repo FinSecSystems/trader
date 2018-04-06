@@ -122,7 +122,7 @@
                 "format": "double",
                 "type": "number"
               },
-              "Filltype": {
+              "FillType": {
                 "type": "string"
               },
               "OrderType": {
