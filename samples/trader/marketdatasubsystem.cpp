@@ -191,9 +191,13 @@ namespace trader
 
     class ListenState : public MarketDataStateChart
     {
-        void react(OnMarketDataSnapshotFullRefresh const &e) override {}
+        void react(OnMarketDataSnapshotFullRefresh const &e) override {
 
-        void react(OnMarketDataIncrementalRefresh const &e) override {}
+        }
+
+        void react(OnMarketDataIncrementalRefresh const &e) override {
+
+        }
     };
 
     atomic< int32_t > Init::securityListRequestDataIdx;

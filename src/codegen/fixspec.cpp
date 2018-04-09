@@ -10,22 +10,25 @@ namespace trader
 {
     FixSpec FixSpec::instance;
 
-    const char *FixSpec::getCppType(const string &dbType)
+    const char *FixSpec::getCppType(const string &dbName, const string &dbType)
     {
         if (dbType.compare("STRING") == 0 || dbType.compare("CHAR") == 0 || dbType.compare("CURRENCY") == 0 ||
             dbType.compare("EXCHANGE") == 0 || dbType.compare("MULTIPLECHARVALUE") == 0 ||
             dbType.compare("MULTIPLESTRINGVALUE") == 0 || dbType.compare("COUNTRY") == 0 ||
             dbType.compare("DATA") == 0 || dbType.compare("XMLDATA") == 0)
         {
+            typenameToTypeMap.insert({ dbName, InterfaceType_STRING });
             return "std::string";
         }
         else if (dbType.compare("PRICE") == 0 || dbType.compare("QTY") == 0 || dbType.compare("AMT") == 0 ||
                  dbType.compare("PRICEOFFSET") == 0)
         {
+            typenameToTypeMap.insert({ dbName, InterfaceType_DOUBLE });
             return "double";
         }
         else if (dbType.compare("FLOAT") == 0 || dbType.compare("PERCENTAGE") == 0)
         {
+            typenameToTypeMap.insert({ dbName, InterfaceType_FLOAT });
             return "float";
         }
         else if (dbType.compare("SEQNUM") == 0 || dbType.compare("INT") == 0 || dbType.compare("UTCTIMESTAMP") == 0 ||
@@ -35,13 +38,44 @@ namespace trader
                  dbType.compare("TZTIMEONLY") == 0 || dbType.compare("TZTIMESTAMP") == 0 ||
                  dbType.compare("LANGUAGE") == 0)
         {
+            typenameToTypeMap.insert({ dbName, InterfaceType_INTEGER });
             return "Poco::Int32";
         }
         else if (dbType.compare("BOOLEAN") == 0)
         {
+            typenameToTypeMap.insert({ dbName, InterfaceType_BOOL });
             return "bool";
         }
         return dbType.c_str();
+    }
+
+    string FixSpec::getDefaultType(const string &dbName, InterfaceType interfaceType)
+    {
+        string retStr;
+        switch (interfaceType)
+        {
+            case InterfaceType_STRING:
+                retStr = "\"Unset\"";
+                break;
+            case InterfaceType_DOUBLE:
+                retStr = "std::numeric_limits<double>::max()";
+                break;
+            case InterfaceType_FLOAT:
+                retStr ="std::numeric_limits<float>::max()";
+                break;
+            case InterfaceType_INTEGER:
+                retStr = "std::numeric_limits<unsigned int>::max()";
+                break;
+            case InterfaceType_BOOL:
+                retStr = "false";
+                break;
+            case InterfaceType_ENUM:
+                ostringstream str;
+                str << dbName << "_" << "UNSET";
+                retStr = str.str();
+                break;
+        }
+        return retStr;
     }
 
     // Class to represent a graph
@@ -186,7 +220,8 @@ namespace trader
                         string name = fieldNode->getAttribute("name");
                         if (fieldNode->hasChildNodes())
                         {
-                            header << "enum " << name << " ";
+                            typenameToTypeMap.insert({ name, InterfaceType_ENUM });
+                            header << "enum " << name << " : unsigned int ";
                             {
                                 ScopedStream< ApiFileOutputStream > enumScope(header);
                                 NodeList *enumNodeList = fieldNode->childNodes();
@@ -200,14 +235,15 @@ namespace trader
                                         header << name << "_" << description << "," << endl;
                                     }
                                 }
-                                header << "NUM_" << name << endl;
+                                header << "NUM_" << name << "," << endl;
+                                header << name << "_UNSET = 0xFFFFFFFF" << endl;
                             }
                             header << cendl;
                         }
                         else
                         {
                             string type = fieldNode->getAttribute("type");
-                            string cppType = getCppType(type);
+                            string cppType = getCppType(name, type);
                             header << "typedef " << cppType << " " << name << cendl;
                         }
                         header << endl;
@@ -350,13 +386,40 @@ namespace trader
                         structName << name << "Object";
                         ScopedStruct< 0, ApiFileOutputStream > scopedStruct(header, structName.str().c_str());
                         NodeList *componentChildNodeList = componentNode->childNodes();
+
+                        header << structName.str().c_str() << "()" << endl;
+                        bool first = true;
                         for (UInt32 j = 0; j < componentChildNodeList->length(); j++)
                         {
                             Node *componentChildNode = componentChildNodeList->item(j);
                             if (componentChildNode->nodeType() == Node::ELEMENT_NODE)
                             {
                                 Element *groupOrField = (Element *)componentChildNode;
-                                std::string tagName = groupOrField->tagName();
+                                string groupOrFieldName = groupOrField->getAttribute("name");
+                                string tagName = groupOrField->tagName();
+                                if (tagName.compare("field") == 0)
+                                {
+                                    auto it = typenameToTypeMap.find(groupOrFieldName);
+                                    if (it != typenameToTypeMap.end())
+                                    {
+                                        string sym = (first ? ":" : ",");
+                                        header << sym << var_name(groupOrFieldName) << "(" << getDefaultType(groupOrFieldName, it->second) << ")" << endl;
+                                        first = false;
+                                    }
+                                }
+                            }
+                        }
+                        {
+                            ScopedStream< ApiFileOutputStream > constructScope(header);
+                        }
+
+                        for (UInt32 j = 0; j < componentChildNodeList->length(); j++)
+                        {
+                            Node *componentChildNode = componentChildNodeList->item(j);
+                            if (componentChildNode->nodeType() == Node::ELEMENT_NODE)
+                            {
+                                Element *groupOrField = (Element *)componentChildNode;
+                                string tagName = groupOrField->tagName();
                                 string groupOrFieldName = groupOrField->getAttribute("name");
                                 if (tagName.compare("group") == 0)
                                 {
@@ -365,6 +428,34 @@ namespace trader
                                             header, groupOrFieldName.c_str());
                                         NodeList *componentChildNodeList2 = componentChildNode->childNodes();
                                         {
+
+                                            header << groupOrFieldName.c_str() << "()" << endl;
+                                            bool first2 = true;
+                                            for (UInt32 k = 0; k < componentChildNodeList2->length(); k++)
+                                            {
+                                                Node *fieldChildNode = componentChildNodeList2->item(k);
+                                                if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
+                                                {
+                                                    Element *field = (Element *)fieldChildNode;
+                                                    string fieldName = field->getAttribute("name");
+                                                    string fieldTagName = field->tagName();
+                                                    if (fieldTagName.compare("field") == 0)
+                                                    {
+                                                        auto it = typenameToTypeMap.find(fieldName);
+                                                        if (it != typenameToTypeMap.end())
+                                                        {
+                                                            std::string sym = (first2 ? ":" : ",");
+                                                            header << sym << var_name(fieldName) << "(" << getDefaultType(fieldName,it->second) << ")" << endl;
+                                                            first2 = false;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            {
+                                                ScopedStream< ApiFileOutputStream > constructScope(header);
+                                            }
+
+
                                             for (UInt32 k = 0; k < componentChildNodeList2->length(); k++)
                                             {
                                                 Node *fieldChildNode = componentChildNodeList2->item(k);
