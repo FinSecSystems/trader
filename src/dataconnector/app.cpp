@@ -1,8 +1,8 @@
 #include <stdafx.h>
 #include "app.h"
 
-namespace trader {
+namespace trader
+{
 
     AppManager AppManager::instance;
-
 }

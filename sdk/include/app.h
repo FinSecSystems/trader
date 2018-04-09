@@ -1,34 +1,28 @@
 #pragma once
 
-namespace trader {
+namespace trader
+{
 
     class DATACONNECTOR_DLL App : public Poco::Util::Application
     {
-    public:
-        virtual bool findFile(Poco::Path& path) const = 0;
+      public:
+        virtual bool findFile(Poco::Path &path) const = 0;
     };
 
-    class DATACONNECTOR_DLL AppManager : public SingletonHolder<AppManager>
+    class DATACONNECTOR_DLL AppManager : public SingletonHolder< AppManager >
     {
-    public:
-        AppManager()
-        {}
+      public:
+        AppManager() {}
 
-        ~AppManager()
-        {}
+        ~AppManager() {}
 
-        void setApp(Poco::AutoPtr<App> _app)
-        {
-            application = _app;
-        }
+        void setApp(Poco::AutoPtr< App > _app) { application = _app; }
 
-        Poco::AutoPtr<App> getApp()
-        {
-            return application;
-        }
+        Poco::AutoPtr< App > getApp() { return application; }
 
         static AppManager instance;
-    private:
-        Poco::AutoPtr<App> application;
+
+      private:
+        Poco::AutoPtr< App > application;
     };
-}
+} // namespace trader

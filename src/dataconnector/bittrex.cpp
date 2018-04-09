@@ -1,17 +1,18 @@
 #include "stdafx.h"
 #include "bittrex.h"
+#include "app.h"
 #include "bittrexapi.h"
+#include "connectionmanager.h"
 #include "helper.h"
 #include "shautils.h"
-#include "app.h"
-#include "connectionmanager.h"
 
-namespace trader {
+namespace trader
+{
 
     using namespace BittrexApi;
     using namespace BittrexDatabase;
 
-    AutoPtr<Interface::Connection> Bittrex::getConnection(const std::string& connectionId)
+    AutoPtr< Interface::Connection > Bittrex::getConnection(const std::string &connectionId)
     {
         return new BittrexConnection(connectionId, new Bittrex());
     }
@@ -21,7 +22,7 @@ namespace trader {
         , dataBase(new BittrexDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
     {
     }
-    
+
     void Bittrex::run()
     {
 #if 0
@@ -167,65 +168,63 @@ namespace trader {
 #endif
     }
 
-    Bittrex::~Bittrex()
+    Bittrex::~Bittrex() {}
+
+    string getHMAC2(string keyParam, string message)
     {
+        char key[10000];
+        char data[10000];
+        strcpy(key, keyParam.c_str());
+        strncpy(data, message.c_str(), sizeof(data));
+
+        unsigned char *digest;
+        digest = HMAC(EVP_sha512(), key, (int)strlen(key), (unsigned char *)data, (int)strlen(data), NULL, NULL);
+        char mdString[SHA512_DIGEST_LENGTH * 2 + 1];
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
+            sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+        mdString[SHA512_DIGEST_LENGTH * 2] = '\0';
+
+        string output = mdString;
+        return output;
     }
 
-	string getHMAC2(string keyParam, string message)
-	{
-		char key[10000];
-		char data[10000];
-		strcpy(key, keyParam.c_str());
-		strncpy(data, message.c_str(), sizeof(data));
-
-		unsigned char* digest;
-		digest = HMAC(EVP_sha512(), key, (int)strlen(key), (unsigned char*)data, (int)strlen(data), NULL, NULL);
-		char mdString[SHA512_DIGEST_LENGTH*2+1];
-		for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
-			sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
-		mdString[SHA512_DIGEST_LENGTH * 2] = '\0';
-
-		string output = mdString;
-		return output;
-	}
-
-    Dynamic::Var Bittrex::invoke(const string& httpMethod, URI& uri)
+    Dynamic::Var Bittrex::invoke(const string &httpMethod, URI &uri)
     {
         (void)httpMethod;
 
-		time_t currentTimeStamp = std::time(nullptr);
+        time_t currentTimeStamp = std::time(nullptr);
 
-		bool privateApi = (uri.getHost().find("public") == std::string::npos);
+        bool privateApi = (uri.getHost().find("public") == std::string::npos);
 
-		// Sign request
-		if (privateApi)
-		{
-			//Add api key
-			uri.addQueryParameter(string("apikey"), api.config.dataObject.api_key);
+        // Sign request
+        if (privateApi)
+        {
+            // Add api key
+            uri.addQueryParameter(string("apikey"), api.config.dataObject.api_key);
 
-			//Add nonce
-			ostringstream nonceStream;
-			nonceStream << currentTimeStamp;
-			uri.addQueryParameter(string("nonce"), nonceStream.str());
-		}
+            // Add nonce
+            ostringstream nonceStream;
+            nonceStream << currentTimeStamp;
+            uri.addQueryParameter(string("nonce"), nonceStream.str());
+        }
 
         // Create the request URI.
         HTTPSClientSession session(uri.getHost(), uri.getPort());
         HTTPRequest req(HTTPRequest::HTTP_GET, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
 
-		if (privateApi)
-		{
-			req.set("apisign", getHMAC2(api.config.dataObject.api_secret, uri.toString()));
-		}
+        if (privateApi)
+        {
+            req.set("apisign", getHMAC2(api.config.dataObject.api_secret, uri.toString()));
+        }
 
-		//Submit
-		session.sendRequest(req);
+        // Submit
+        session.sendRequest(req);
 
         Logger::get("Logs").information("Send Request: %s", uri.toString());
 
         // Receive the response.
         HTTPResponse res;
-        istream& rs = session.receiveResponse(res);
+        istream &rs = session.receiveResponse(res);
 
         // Parse the JSON
         JSON::Parser parser;
@@ -238,7 +237,7 @@ namespace trader {
         // Otherwise throw an exception.
         if (res.getStatus() == HTTPResponse::HTTP_OK)
         {
-            Poco::AutoPtr<ResultIntrospector> msg = new ResultIntrospector();
+            Poco::AutoPtr< ResultIntrospector > msg = new ResultIntrospector();
             msg->read(result);
             if (!msg->dataObject.success)
             {
@@ -256,9 +255,9 @@ namespace trader {
     {
         switch (_operation)
         {
-        case DC_START:
-            ConnectionManager::instance.get()->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
-            break;
+            case DC_START:
+                ConnectionManager::instance.get()->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
+                break;
         }
     }
 
@@ -271,17 +270,18 @@ namespace trader {
 
     void BittrexProcessingConnection::RunMore()
     {
-        for (auto& marketData : marketDataUpdateMap)
+        for (auto &marketData : marketDataUpdateMap)
         {
             ProcessMessage(marketData.second.marketRequestData);
         }
     }
 
-    void BittrexProcessingConnection::SecurityListRequest(Poco::AutoPtr<Interface::SecurityListRequestData> securityListRequestData)
+    void BittrexProcessingConnection::SecurityListRequest(
+        Poco::AutoPtr< Interface::SecurityListRequestData > securityListRequestData)
     {
-        static  std::atomic<std::int32_t> idx = 0;
+        static std::atomic< std::int32_t > idx = 0;
 
-        Poco::AutoPtr<Interface::SecurityListData> securityListData = new Interface::SecurityListData();
+        Poco::AutoPtr< Interface::SecurityListData > securityListData = new Interface::SecurityListData();
         securityListData->setSourceConnection(connectionId);
         securityListData->securityListType = Interface::SecurityListType_MARKET;
         securityListData->securityReqID = securityListRequestData->securityReqID;
@@ -292,15 +292,15 @@ namespace trader {
         str << "SL" << ++idx << endl;
         securityListData->securityResponseID = str.str();
 
-        //Get Markets and create tables
-        Poco::AutoPtr<BittrexApi::Markets> markets = exchange->api.GetMarkets();
+        // Get Markets and create tables
+        Poco::AutoPtr< BittrexApi::Markets > markets = exchange->api.GetMarkets();
 
-        for (auto& market : markets->dataObject.result)
+        for (auto &market : markets->dataObject.result)
         {
             if (market.isActive && market.isSetMarketName())
             {
                 securityListData->secListGrp.noRelatedSym.emplace_back();
-                Interface::SecListGrpObject::NoRelatedSym& newMarket = securityListData->secListGrp.noRelatedSym.back();
+                Interface::SecListGrpObject::NoRelatedSym &newMarket = securityListData->secListGrp.noRelatedSym.back();
                 newMarket.instrument.symbol = market.marketName;
                 securityListData->totNoRelatedSym++;
             }
@@ -314,16 +314,16 @@ namespace trader {
         receivingConnection->SecurityList(securityListData);
     }
 
-
     std::string GetUniqueResponseId()
     {
-        static  std::atomic<std::int32_t> idx = 0;
+        static std::atomic< std::int32_t > idx = 0;
         ostringstream uniqueResponseIdStream;
         uniqueResponseIdStream << "MD" << ++idx;
         return uniqueResponseIdStream.str();
     }
 
-    void BittrexProcessingConnection::MarketDataRequest(Poco::AutoPtr<Interface::MarketDataRequestData> marketDataRequestData)
+    void BittrexProcessingConnection::MarketDataRequest(
+        Poco::AutoPtr< Interface::MarketDataRequestData > marketDataRequestData)
     {
         // [Server-Side]
         // Returns either MarketDataSnapshotFullRefreshData, MarketDataIncrementalRefresh or MarketDataRequestReject
@@ -339,7 +339,8 @@ namespace trader {
         //              - MDEntryPx	- Price of market data entry.
         //              - MDEntrySize - Quantity of market data entry.
         // Example:
-        // Poco::AutoPtr<MarketDataSnapshotFullRefresh> marketDataSnapshotFullRefreshData = new MarketDataSnapshotFullRefresh();
+        // Poco::AutoPtr<MarketDataSnapshotFullRefresh> marketDataSnapshotFullRefreshData = new
+        // MarketDataSnapshotFullRefresh();
         // receivingConnection->MarketDataSnapshotFullRefresh(marketDataSnapshotFullRefreshData);
 
         // MarketDataIncrementalRefresh
@@ -357,7 +358,8 @@ namespace trader {
         //             - MDEntryPx	- Price of market data entry.
         //             - MDEntrySize - Quantity of market data entry.
         // Example:
-        // Poco::AutoPtr<MarketDataIncrementalRefreshData> marketDataIncrementalRefreshData = new MarketDataIncrementalRefreshData();
+        // Poco::AutoPtr<MarketDataIncrementalRefreshData> marketDataIncrementalRefreshData = new
+        // MarketDataIncrementalRefreshData();
         // receivingConnection->MarketDataIncrementalRefresh(marketDataIncrementalRefreshData);
 
         // MarketDataRequestReject
@@ -374,7 +376,7 @@ namespace trader {
 
         const Poco::UInt32 UpdateBit = 0x80000000;
 
-        bool updateOnly = ( marketDataRequestData->subscriptionRequestType & UpdateBit ) > 0;
+        bool updateOnly = (marketDataRequestData->subscriptionRequestType & UpdateBit) > 0;
         Poco::UInt32 subscriptionRequestType = marketDataRequestData->subscriptionRequestType & ~UpdateBit;
 
         if (subscriptionRequestType == Interface::SubscriptionRequestType_DISABLE_PREVIOUS_SNAPSHOT_PLUS_UPDATE_REQUEST)
@@ -383,10 +385,9 @@ namespace trader {
             MarketDataUpdateMap::iterator itFind = marketDataUpdateMap.find(marketDataRequestData->mDReqID);
             poco_assert(itFind != marketDataUpdateMap.end());
             marketDataUpdateMap.erase(itFind);
-
         }
 
-        Poco::AutoPtr<Interface::MarketDataIncrementalRefreshData> marketDataIncrementalRefreshData;
+        Poco::AutoPtr< Interface::MarketDataIncrementalRefreshData > marketDataIncrementalRefreshData;
 
         if (subscriptionRequestType == Interface::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES)
         {
@@ -398,60 +399,65 @@ namespace trader {
             }
             else
             {
-                marketDataRequestData->subscriptionRequestType = (Interface::SubscriptionRequestType) ( ((Poco::UInt32) marketDataRequestData->subscriptionRequestType) | UpdateBit );
+                marketDataRequestData->subscriptionRequestType = (Interface::SubscriptionRequestType)(
+                    ((Poco::UInt32)marketDataRequestData->subscriptionRequestType) | UpdateBit);
                 MarketDataRequestRetrievalData data;
                 data.marketRequestData = marketDataRequestData;
-                marketDataUpdateMap.insert({ marketDataRequestData->mDReqID, data });
+                marketDataUpdateMap.insert({marketDataRequestData->mDReqID, data});
             }
         }
 
-        for (auto& sym : marketDataRequestData->instrmtMDReqGrp.noRelatedSym)
+        for (auto &sym : marketDataRequestData->instrmtMDReqGrp.noRelatedSym)
         {
 
-            //Retrieve Trade History through REST API Call
-            const std::string& marketName = sym.instrument.symbol;
-            Poco::AutoPtr<HistoryParams> historyParams = new HistoryParams();
+            // Retrieve Trade History through REST API Call
+            const std::string &marketName = sym.instrument.symbol;
+            Poco::AutoPtr< HistoryParams > historyParams = new HistoryParams();
             historyParams->dataObject.SetMarket(marketName);
-            AutoPtr<History> history = exchange->api.GetMarketHistory(historyParams);
+            AutoPtr< History > history = exchange->api.GetMarketHistory(historyParams);
 
             if (history->dataObject.result.size())
             {
-                //Add market if it does not already exist
+                // Add market if it does not already exist
                 SymIDMap::const_iterator marketExists = marketToTradeHistoryMap.find(marketName);
                 if (marketExists == marketToTradeHistoryMap.end())
                 {
                     BittrexMarketData marketData;
-                    marketToTradeHistoryMap.insert({ marketName, marketData });
+                    marketToTradeHistoryMap.insert({marketName, marketData});
                 }
 
-                //Save to in-memory cache
-                BittrexMarketData& marketData = marketToTradeHistoryMap.find(marketName)->second;
+                // Save to in-memory cache
+                BittrexMarketData &marketData = marketToTradeHistoryMap.find(marketName)->second;
                 Int32 lastCachedId = marketData.lastCachedId;
-                for (History::DataObject::Result::reverse_iterator rit = history->dataObject.result.rbegin(); rit != history->dataObject.result.rend(); ++rit)
+                for (History::DataObject::Result::reverse_iterator rit = history->dataObject.result.rbegin();
+                     rit != history->dataObject.result.rend(); ++rit)
                 {
-                    History::DataObject::ResultArray& trade = *rit;
+                    History::DataObject::ResultArray &trade = *rit;
                     if (trade.id <= lastCachedId)
                     {
                         break;
                     }
-                    marketData.marketDataMap.insert({ trade.id, trade });
-                    marketData.lastCachedId = std::max(marketData.lastCachedId, trade.id); //Update last cached id
+                    marketData.marketDataMap.insert({trade.id, trade});
+                    marketData.lastCachedId = std::max(marketData.lastCachedId, trade.id); // Update last cached id
                 }
 
                 if (!updateOnly)
                 {
-                    Poco::AutoPtr<Interface::MarketDataSnapshotFullRefreshData> marketDataSnapshotFullRefreshData = new Interface::MarketDataSnapshotFullRefreshData();
+                    Poco::AutoPtr< Interface::MarketDataSnapshotFullRefreshData > marketDataSnapshotFullRefreshData =
+                        new Interface::MarketDataSnapshotFullRefreshData();
                     marketDataSnapshotFullRefreshData->setSourceConnection(connectionId);
                     marketDataSnapshotFullRefreshData->instrument.symbol = marketName;
                     marketDataSnapshotFullRefreshData->mDReqID = GetUniqueResponseId();
                     marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.reserve(marketData.marketDataMap.size());
-                   
-                    for (auto itMap = marketData.marketDataMap.begin();itMap != marketData.marketDataMap.end();itMap++)
+
+                    for (auto itMap = marketData.marketDataMap.begin(); itMap != marketData.marketDataMap.end();
+                         itMap++)
                     {
-                        auto& marketDataItem = itMap->second;
+                        auto &marketDataItem = itMap->second;
                         marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.emplace_back();
-                        Interface::MDFullGrpObject::NoMDEntries& mdEntry = marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.back();
-                        if (marketDataItem.orderType.compare("BUY")==0)
+                        Interface::MDFullGrpObject::NoMDEntries &mdEntry =
+                            marketDataSnapshotFullRefreshData->mDFullGrp.noMDEntries.back();
+                        if (marketDataItem.orderType.compare("BUY") == 0)
                         {
                             mdEntry.mDEntryType = Interface::MDEntryType_BID;
                         }
@@ -466,7 +472,7 @@ namespace trader {
                             continue;
                         }
 
-                        mdEntry.mDEntryPx   = marketDataItem.price;
+                        mdEntry.mDEntryPx = marketDataItem.price;
                         mdEntry.mDEntrySize = marketDataItem.quantity;
                         mdEntry.mDEntryTime = (Poco::Int32)marketDataItem.timeStamp.time;
 
@@ -477,16 +483,17 @@ namespace trader {
                     if (subscriptionRequestType == Interface::SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES)
                     {
                         MarketDataUpdateMap::iterator itFind = marketDataUpdateMap.find(marketDataRequestData->mDReqID);
-                        MarketDataRequestRetrievalData& retrievalData = itFind->second;
-                        retrievalData.lastCacheIdMap.insert({ marketName, lastCachedId });
+                        MarketDataRequestRetrievalData &retrievalData = itFind->second;
+                        retrievalData.lastCacheIdMap.insert({marketName, lastCachedId});
                     }
                 }
                 else
                 {
                     MarketDataUpdateMap::iterator itFind = marketDataUpdateMap.find(marketDataRequestData->mDReqID);
-                    MarketDataRequestRetrievalData& retrievalData = itFind->second;
-                    MarketDataRequestRetrievalData::LastCacheIdMap::iterator itCache = retrievalData.lastCacheIdMap.find(marketName);
-                    Poco::Int32& lastRetrievedId = itCache->second;
+                    MarketDataRequestRetrievalData &retrievalData = itFind->second;
+                    MarketDataRequestRetrievalData::LastCacheIdMap::iterator itCache =
+                        retrievalData.lastCacheIdMap.find(marketName);
+                    Poco::Int32 &lastRetrievedId = itCache->second;
 
                     BittrexMarketData::MarketDataMap::iterator itMap;
                     if (itCache != retrievalData.lastCacheIdMap.end())
@@ -494,12 +501,13 @@ namespace trader {
                         itMap = marketData.marketDataMap.find(lastRetrievedId);
                     }
 
-                    for (;itMap != marketData.marketDataMap.end();itMap++)
+                    for (; itMap != marketData.marketDataMap.end(); itMap++)
                     {
-                        auto& marketDataItem = itMap->second;
+                        auto &marketDataItem = itMap->second;
 
                         marketDataIncrementalRefreshData->mDIncGrp.noMDEntries.emplace_back();
-                        Interface::MDIncGrpObject::NoMDEntries& mdEntry = marketDataIncrementalRefreshData->mDIncGrp.noMDEntries.back();
+                        Interface::MDIncGrpObject::NoMDEntries &mdEntry =
+                            marketDataIncrementalRefreshData->mDIncGrp.noMDEntries.back();
 
                         mdEntry.instrument.symbol = marketName;
                         if (marketDataItem.orderType.compare("BUY") == 0)
@@ -526,20 +534,16 @@ namespace trader {
 
                     lastRetrievedId = marketData.lastCachedId;
                 }
-
             }
-
         }
 
         if (updateOnly)
         {
             receivingConnection->MarketDataIncrementalRefresh(marketDataIncrementalRefreshData);
         }
-
     }
 
-
-    void BittrexProcessingConnection::NewOrderSingle(Poco::AutoPtr<Interface::NewOrderSingleData> newOrderSingleData)
+    void BittrexProcessingConnection::NewOrderSingle(Poco::AutoPtr< Interface::NewOrderSingleData > newOrderSingleData)
     {
         // [Server-Side]
         // Returns  TradeCaptureReport and/or ExecutionReport
@@ -553,7 +557,8 @@ namespace trader {
         poco_bugcheck_msg("NewOrderSingle not implemented.");
     }
 
-    void BittrexProcessingConnection::OrderCancelRequest(Poco::AutoPtr<Interface::OrderCancelRequestData> orderCancelRequestData)
+    void BittrexProcessingConnection::OrderCancelRequest(
+        Poco::AutoPtr< Interface::OrderCancelRequestData > orderCancelRequestData)
     {
         // [Server-Side]
         // Returns ExecutionReport or OrderCancelReject
@@ -568,7 +573,8 @@ namespace trader {
         poco_bugcheck_msg("OrderCancelRequest not implemented.");
     }
 
-    void BittrexProcessingConnection::TradeCaptureReportRequest(Poco::AutoPtr<Interface::TradeCaptureReportRequestData> tradeCaptureReportRequestData)
+    void BittrexProcessingConnection::TradeCaptureReportRequest(
+        Poco::AutoPtr< Interface::TradeCaptureReportRequestData > tradeCaptureReportRequestData)
     {
         // [Server-Side]
         // Returns TradeCaptureReport
@@ -581,4 +587,4 @@ namespace trader {
         poco_bugcheck_msg("TradeCaptureReportRequest not implemented.");
     }
 
-}
+} // namespace trader

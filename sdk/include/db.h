@@ -1,11 +1,12 @@
 #pragma once
 
-namespace trader {
+namespace trader
+{
 
     class DATACONNECTOR_DLL Db : public Poco::RefCountedObject
     {
-    public:
-        Db(Poco::Data::Session* _dbSession)
+      public:
+        Db(Poco::Data::Session *_dbSession)
             : dbSession(_dbSession)
         {
         }
@@ -19,38 +20,27 @@ namespace trader {
             }
         }
 
-        Poco::Data::Session* getDbSession()
-        {
-            return dbSession;
-        }
+        Poco::Data::Session *getDbSession() { return dbSession; }
 
-    protected:
-        Poco::Data::Session* dbSession;
+      protected:
+        Poco::Data::Session *dbSession;
     };
 
     class DATACONNECTOR_DLL DbManager
     {
-    public:
-        DbManager()
-        {}
+      public:
+        DbManager() {}
 
-        ~DbManager()
-        {}
+        ~DbManager() {}
 
-        void setDb(Poco::AutoPtr<Db> _db)
-        {
-            database = _db;
-        }
+        void setDb(Poco::AutoPtr< Db > _db) { database = _db; }
 
-        Poco::AutoPtr<Db> getDb()
-        {
-            return database;
-        }
+        Poco::AutoPtr< Db > getDb() { return database; }
 
         static DbManager instance;
 
-    private:
-        Poco::AutoPtr<Db> database;
+      private:
+        Poco::AutoPtr< Db > database;
     };
 
-}
+} // namespace trader

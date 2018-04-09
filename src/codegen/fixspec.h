@@ -1,19 +1,7 @@
-#include "stdafx.h"
-#include "Poco/Util/Application.h"
-#include "Poco/Util/Option.h"
-#include "Poco/Util/OptionSet.h"
-#include "Poco/Util/HelpFormatter.h"
-#include "Poco/File.h"
-#include "Poco/FileStream.h"
-#include "Poco/StreamCopier.h"
-#include "Poco/DirectoryIterator.h"
-#include "Poco/JSON/Parser.h"
-#include "Poco/JSON/ParseHandler.h"
-#include "Poco/JSON/JSONException.h"
-#include "Poco/StringTokenizer.h"
+#pragma once
+
 #include "endpoint.h"
 #include "fileoutputstream.h"
-#pragma once
 
 
 namespace trader {

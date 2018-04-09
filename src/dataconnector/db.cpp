@@ -1,9 +1,8 @@
-#pragma once
 #include "stdafx.h"
 #include "db.h"
 
-namespace trader {
+namespace trader
+{
 
     DbManager DbManager::instance;
-
 }

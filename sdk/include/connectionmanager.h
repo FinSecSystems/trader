@@ -2,21 +2,22 @@
 #include "interface.h"
 #include <map>
 
-namespace trader {
+namespace trader
+{
 
     class DATACONNECTOR_DLL ConnectionData
     {
-    public:
+      public:
         ThreadPool pool;
-        std::map<std::string, Poco::AutoPtr<Interface::Connection>> connections;
-        Poco::AutoPtr<Interface::Connection> getConnection(const std::string& connectionString);
+        std::map< std::string, Poco::AutoPtr< Interface::Connection > > connections;
+        Poco::AutoPtr< Interface::Connection > getConnection(const std::string &connectionString);
         void DoOperation(DataConnectorOperation _operation);
     };
 
-    class DATACONNECTOR_DLL ConnectionManager : public SingletonHolder<ConnectionData>
+    class DATACONNECTOR_DLL ConnectionManager : public SingletonHolder< ConnectionData >
     {
-    public:
+      public:
         static ConnectionManager instance;
     };
 
-};
+}; // namespace trader

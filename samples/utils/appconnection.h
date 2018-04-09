@@ -3,19 +3,19 @@
 #include "applicationhelper.h"
 #include "interface.h"
 
-namespace trader {
+namespace trader
+{
 
-	class AppConnection : public Interface::CallConnection
-	{
-	public:
-
-        AppConnection(ApplicationHelper* _app);
+    class AppConnection : public Interface::CallConnection
+    {
+      public:
+        AppConnection(ApplicationHelper *_app);
 
         ~AppConnection();
 
-        void ProcessMessage(Poco::AutoPtr<Interface::IMessageData> _messageData) override;
+        void ProcessMessage(Poco::AutoPtr< Interface::IMessageData > _messageData) override;
 
-    private:
-        ApplicationHelper* app;
-	};
-}
+      private:
+        ApplicationHelper *app;
+    };
+} // namespace trader

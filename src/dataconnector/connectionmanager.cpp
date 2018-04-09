@@ -1,18 +1,19 @@
 #include "stdafx.h"
 #include "connectionmanager.h"
 #include "bittrex.h"
-#include "fyb.h"
-#include "kraken.h"
 #include "cryptowatch.h"
 #include "exchangeratelab.h"
+#include "fyb.h"
+#include "kraken.h"
 
-namespace trader {
+namespace trader
+{
 
     ConnectionManager ConnectionManager::instance;
 
-    AutoPtr<Interface::Connection> ConnectionData::getConnection(const std::string& connectionString)
+    AutoPtr< Interface::Connection > ConnectionData::getConnection(const std::string &connectionString)
     {
-        AutoPtr<Interface::Connection> connection = nullptr;
+        AutoPtr< Interface::Connection > connection = nullptr;
         if (connectionString.find("bittrex") != std::string::npos)
         {
             connection = Bittrex::getConnection(connectionString);
@@ -38,7 +39,7 @@ namespace trader {
             return new Interface::CallConnection();
         }
         connection->SetName(connectionString);
-        connections.insert({ connectionString, connection });
+        connections.insert({connectionString, connection});
         return connection;
     }
 
@@ -46,14 +47,14 @@ namespace trader {
     {
         switch (_operation)
         {
-        case DC_START:
-            for (auto& connectionPair : connections)
-            {
-                Poco::AutoPtr<trader::Interface::Connection> connection = connectionPair.second;
-                connection->DoOperation(_operation);
-            }
-            break;
+            case DC_START:
+                for (auto &connectionPair : connections)
+                {
+                    Poco::AutoPtr< trader::Interface::Connection > connection = connectionPair.second;
+                    connection->DoOperation(_operation);
+                }
+                break;
         }
     }
 
-}
+} // namespace trader
