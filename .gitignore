@@ -60,3 +60,4 @@ deps/*.make
 /ncryptsslp.pdb/61FBBDC42A2B3572F22A2D4222EA10601/*.error
 /schannel.pdb/E9470EC044AE8BE890E31480CC9DA5311/*.error
 /webio.pdb/58F88BE253550B89CD878FECE4A1D6771/*.error
+packages/
