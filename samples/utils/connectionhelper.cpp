@@ -2,18 +2,17 @@
 
 #include "app.h"
 #include "appconnection.h"
-#include "traderapp.h"
 #include "connectionmanager.h"
 #include "db.h"
 #include "interface.h"
-#include "marketdatasubsystem.h"
+#include "connectionhelper.h"
 
 namespace trader
 {
 
     void ConnectionHelper::setupConnections(std::vector< std::string > _connections)
     {
-        appConnection = new AppConnection((TraderApp *)this);
+        appConnection = new AppConnection((ApplicationHelper *)this);
         for (auto &connectionString : _connections)
         {
             auto it = connections.insert(

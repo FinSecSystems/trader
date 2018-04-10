@@ -6,6 +6,9 @@
     },
     "api_secret": {
       "type": "string"
+    },
+    "requests_per_minute": {
+      "type": "number"
     }
   }
 }

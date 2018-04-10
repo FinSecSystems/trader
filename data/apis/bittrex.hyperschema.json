@@ -43,6 +43,12 @@
               },
               "Created": {
                 "type": "string"
+              },
+              "LogoUrl": {
+                "type": "string"
+              },
+              "Notice": {
+                "type": "string"
               }
             }
           }

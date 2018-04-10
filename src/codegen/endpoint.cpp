@@ -51,6 +51,10 @@ namespace trader
                 {
                     cpp << "return retVal" << cendl;
                 }
+                else
+                {
+
+                }
             }
             cpp << "catch (Poco::Exception& exc) ";
             {
@@ -63,6 +67,7 @@ namespace trader
         {
             cpp << "Poco::Logger::get(\"Logs\").information(\"Response Parsing Error: %s\", exc.displayText())"
                 << cendl;
+            cpp << "throw" << cendl;
         }
     }
 
@@ -104,10 +109,11 @@ namespace trader
                 ScopedStream< ApiFileOutputStream > catchStream(cpp);
                 cpp << "Poco::Logger::get(\"Logs\").information(\"Response Receiving Error: %s\", exc.displayText())"
                     << cendl;
+                cpp << "throw" << cendl;
             }
-            cpp << "Poco::AutoPtr<" << responseSchemaNames[0] << "> retVal = new " << responseSchemaNames[0] << "()"
-                << cendl;
-            cpp << "return retVal" << cendl;
+            //cpp << "Poco::AutoPtr<" << responseSchemaNames[0] << "> retVal = new " << responseSchemaNames[0] << "()"
+            //    << cendl;
+            //cpp << "return retVal" << cendl;
         }
         cpp << endl;
     }

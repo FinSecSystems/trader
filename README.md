@@ -36,6 +36,10 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 - Right-click trader project and Set as StartUp Project
 - Press F5 to run/debug in Visual Studio
 
+## Optional
+- Install [Clang Format](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat) Visual Studio Extension to format code
+- Install [Google Test Adapter](https://marketplace.visualstudio.com/items?itemName=ChristianSoltenborn.GoogleTestAdapter) to run tests in Visual Studio 
+
 ### Linux/WSL
 
 #### Setup Instructions

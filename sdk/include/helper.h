@@ -48,6 +48,7 @@ namespace trader
 #else
             struct tm tm;
             memset(&tm, 0, sizeof(struct tm));
+            //TODO: Fix hardcoded pattern
             strptime(str.c_str(), "%Y-%m-%d %H:%M:%S", &tm);
             time = mktime(&tm);
 #endif

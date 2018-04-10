@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "connectionmanager.h"
-#include "bittrex.h"
+#include "bittrexconnection.h"
 #include "cryptowatch.h"
 #include "exchangeratelab.h"
 #include "fyb.h"
@@ -16,7 +16,7 @@ namespace trader
         AutoPtr< Interface::Connection > connection = nullptr;
         if (connectionString.find("bittrex") != std::string::npos)
         {
-            connection = Bittrex::getConnection(connectionString);
+            connection = BittrexConnection::getConnection(connectionString);
         }
         else if (connectionString.find("cryptowatch") != std::string::npos)
         {

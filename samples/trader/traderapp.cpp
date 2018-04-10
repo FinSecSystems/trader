@@ -165,14 +165,3 @@ POCO_APP_MAIN(trader::TraderApp)
 // orderBookParams->dataObject.pair = "XZECZUSD";
 // AutoPtr<KrakenApi::RecentSpread> orderBook = kraken.api.GetRecentSpread(orderBookParams);
 
-// Bittrex bittrex(this);
-// while (1)
-//{
-//    bittrex.run();
-//    break;
-//}
-// AutoPtr<BittrexApi::Markets> markets = bittrex.api.GetMarkets();
-
-// AutoPtr<BittrexApi::BalanceParams> balanceParam = new BittrexApi::BalanceParams();
-// balanceParam->dataObject.SetCurrency("BTC");
-// AutoPtr<BittrexApi::Balance> balance = bittrex.api.GetBalance(balanceParam);

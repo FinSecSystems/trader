@@ -1,11 +1,7 @@
-#include "app.h"
-#include "appconnection.h"
-#include "connectionmanager.h"
-#include "db.h"
-#include "interface.h"
-#include "marketdatasubsystem.h"
 #include "stdafx.h"
-#include "traderapp.h"
+#include "app.h"
+#include "db.h"
+#include "applicationhelper.h"
 
 namespace trader
 {

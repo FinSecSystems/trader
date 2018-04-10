@@ -357,15 +357,15 @@ namespace trader
                         else
                         {
                             CODEGEN_DEBUG(stream << comment("Case Var 2"));
-                            stream << expansionStream.var_name_str() << "." << var_name(keyName) << " = "
-                                   << temp_name(idx) << ".convert<" << getJsonLibType(type, obj) << ">()" << cendl;
+                            stream << expansionStream.var_name_str() << ".Set" << type_name(keyName) << "("
+                                   << temp_name(idx) << ".convert<" << getJsonLibType(type, obj) << ">())" << cendl;
                         }
                     }
                     else
                     {
                         CODEGEN_DEBUG(stream << comment("Case Var 3"));
-                        stream << expansionStream.prefix_str() << "." << var_name(keyName) << " = " << temp_name(idx)
-                               << ".convert<" << getJsonLibType(type, obj) << ">()" << cendl;
+                        stream << expansionStream.prefix_str() << ".Set" << type_name(keyName) << "(" << temp_name(idx)
+                               << ".convert<" << getJsonLibType(type, obj) << ">())" << cendl;
                     }
                 }
                 expansionstringstream newExpansionStream(expansionStream);
@@ -416,6 +416,10 @@ namespace trader
                 stream << ", ";
             }
             stream << var_name(keyName) << "(" << getCppDefaultVal(type, obj) << ")" << endl;
+            if (type.compare("bool") == 0)
+            {
+                stream << ", " << var_name(keyName) << "Set(" << getCppDefaultVal(type, obj) << ")" << endl;
+            }
         }
     }
 
@@ -556,6 +560,10 @@ namespace trader
                         else
                         {
                             stream << var_name(keyName) << " = val" << cendl;
+                            if (type.compare("bool") == 0)
+                            {
+                                stream << var_name(keyName) << "Set = true" << cendl;
+                            }
                         }
                     }
                     stream << endl;
@@ -564,12 +572,37 @@ namespace trader
                         stream << "bool isSet" << type_name(keyName) << "() ";
                         {
                             ScopedStream< ApiFileOutputStream > isSetScope(stream);
-                            stream << "return (" << var_name(keyName) << " != " << getCppDefaultVal(type, obj) << ")"
-                                   << cendl;
+                            if (type.compare("bool") == 0)
+                            {
+                                stream << "return (" << var_name(keyName) << "Set != " << getCppDefaultVal(type, obj)
+                                       << ")" << cendl;
+                            }
+                            else
+                            {
+                                stream << "return (" << var_name(keyName) << " != " << getCppDefaultVal(type, obj)
+                                       << ")" << cendl;
+                            }
                         }
                         stream << endl;
                     }
+                    else
+                    {
+                        Poco::Dynamic::Var patternVar = obj->get("pattern");
+                        stream << "void Set" << type_name(keyName) << "(const std::string& val)" << endl;
+                        {
+                            string pattern = patternVar.convert< string >();
+                            trader::replace(pattern, "\\", "\\\\");
+                            ScopedStream< ApiFileOutputStream > scopedStream(stream);
+                            stream << "FormattedTime fmt(\"" << pattern << "\")" << cendl;
+                            stream << "fmt = val" << cendl;
+                            stream << var_name(keyName) << " = fmt" << cendl;
+                        }
+                    }
                     stream << getCppType(type, obj) << tabs(1) << var_name(keyName) << cendl;
+                    if (type.compare("bool") == 0)
+                    {
+                        stream << getCppType(type, obj) << tabs(1) << var_name(keyName) << "Set" << cendl;
+                    }
                 }
                 stream << endl;
             }
