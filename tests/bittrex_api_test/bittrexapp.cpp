@@ -15,23 +15,25 @@ namespace trader
     {
     protected:
         virtual void SetUp() {
-            gen = new std::mt19937(rd());
+			gen = new std::mt19937(rd());
+			bittrex = new Bittrex();
         }
 
-        virtual void TearDown() {
-            delete gen;
-        }
+		virtual void TearDown() {
+			delete bittrex;
+			delete gen;
+		}
 
-        Bittrex bittrex;
-        std::vector<string> marketNames;
-        std::random_device rd;  //Will be used to obtain a seed for the random number engine
-        std::mt19937* gen; //Standard mersenne_twister_engine seeded with rd()
+		Bittrex* bittrex;
+		std::vector<string> marketNames;
+		std::random_device rd;  //Will be used to obtain a seed for the random number engine
+		std::mt19937* gen; //Standard mersenne_twister_engine seeded with rd()
     };
 
     TEST_F(BittrexTests, GetMarkets)
     {
         AutoPtr< BittrexApi::Markets > markets;
-        ASSERT_NO_THROW(markets = bittrex.api.GetMarkets());
+        ASSERT_NO_THROW(markets = bittrex->api.GetMarkets());
         for (auto item : markets->dataObject.result)
         {
             EXPECT_TRUE(item.isSetBaseCurrency());
@@ -42,7 +44,6 @@ namespace trader
             EXPECT_TRUE(item.isSetMarketCurrencyLong());
             EXPECT_TRUE(item.isSetMarketName());
             EXPECT_TRUE(item.isSetMinTradeSize());
-            marketNames.push_back(item.marketName);
         }
     }
     
@@ -51,7 +52,7 @@ namespace trader
         AutoPtr< BittrexApi::BalanceParams > balanceParam = new BittrexApi::BalanceParams();
         balanceParam->dataObject.SetCurrency("BTC");
         AutoPtr< BittrexApi::Balance > balance;
-        ASSERT_NO_THROW(balance = bittrex.api.GetBalance(balanceParam));
+        ASSERT_NO_THROW(balance = bittrex->api.GetBalance(balanceParam));
         for (auto item : balance->dataObject.result)
         {
             EXPECT_TRUE(item.isSetAvailable());
@@ -66,11 +67,18 @@ namespace trader
 
     TEST_F(BittrexTests, GetMarketHistory)
     {
+		AutoPtr< BittrexApi::Markets > markets;
+		ASSERT_NO_THROW(markets = bittrex->api.GetMarkets());
+		for (auto item : markets->dataObject.result)
+		{
+			marketNames.push_back(item.marketName);
+		}
+
         AutoPtr< BittrexApi::HistoryParams > historyParam = new BittrexApi::HistoryParams();
         std::uniform_int_distribution<> dis(0, (int) marketNames.size()-1);
         historyParam->dataObject.SetMarket(marketNames[dis(*gen)]);
         AutoPtr< BittrexApi::History > history;
-        ASSERT_NO_THROW(history = bittrex.api.GetMarketHistory(historyParam));
+        ASSERT_NO_THROW(history = bittrex->api.GetMarketHistory(historyParam));
         for (auto item : history->dataObject.result)
         {
             EXPECT_TRUE(item.isSetFillType());
@@ -101,21 +109,36 @@ namespace trader
             cerr << exc.displayText() << std::endl;
             Logger::get("Logs").information("Application Error: %s", exc.displayText());
             poco_debugger();
-            return Application::EXIT_SOFTWARE;
-        }
+       }
+		return Application::EXIT_SOFTWARE;
+	}
 
-        int argc = (int) args.size();
-        char** argv = new char*[args.size()];
-        for (UInt32 count = 0; count < args.size(); count++)
-        {
-            argv[count] = (char*) args[count].c_str();
-        }
-
-        ::testing::InitGoogleTest(&argc, argv);
-        delete[] argv;
-        return RUN_ALL_TESTS();
-    }
+	void setup(Poco::AutoPtr<trader::ApplicationHelper> pApp)
+	{
+		pApp->setup();
+		pApp->start();
+	}
 
 } // namespace trader
 
-POCO_APP_MAIN(trader::BittrexApp)
+#if defined(_WIN32) && defined(POCO_WIN32_UTF8) && !defined(POCO_NO_WSTRING)
+int wmain(int argc, wchar_t **argv)
+{
+	::testing::InitGoogleTest(&argc, argv);
+	Poco::AutoPtr<trader::ApplicationHelper> pApp = new trader::BittrexApp;
+	pApp->init(argc, argv);
+	trader::setup(pApp);
+
+	int res = RUN_ALL_TESTS();
+	trader::AppManager::instance.get()->setApp(nullptr);
+	return res;
+}
+#else
+int main(int argc, char **argv)
+{
+	::testing::InitGoogleTest(&argc, argv);
+	savedArgc = argc;
+	savedArgv = argv;
+	return RUN_ALL_TESTS();
+}
+#endif

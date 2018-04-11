@@ -101,6 +101,12 @@ namespace trader
         DbManager::instance.setDb(new Db(new Data::Session("SQLite", dbNameStream.str())));
     }
 
+	void ApplicationHelper::destroy()
+	{
+		Logger::destroy("Logs");
+		DbManager::instance.setDb(nullptr);
+	}
+
     void ApplicationHelper::start() { this->initialize(*this); }
 
     bool ApplicationHelper::findFile(Path &path) const { return Util::Application::findFile(path); }

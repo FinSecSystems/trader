@@ -181,6 +181,7 @@
 
 	group "Tests"
 		project "bittrex_api_test"
+		project "sample_app_test"
 	
 	group ""
 
@@ -892,6 +893,161 @@
 			"src/dataconnector/db*",
 			"src/dataconnector/app*",
 			"tests/bittrex_api_test/**.h", "tests/bittrex_api_test/**.cpp",
+			"samples/utils/applicationhelper*",
+			"include/**.h",
+			"tmp/%{cfg.platform}/codegen/interface*.h", "tmp/%{cfg.platform}/codegen/interface*.cpp",
+			"tmp/%{cfg.platform}/codegen/generic*.h", "tmp/%{cfg.platform}/codegen/generic*.cpp",
+			"tmp/%{cfg.platform}/codegen/bittrex*.h", "tmp/%{cfg.platform}/codegen/bittrex*.cpp",
+			"bin/**.json", "bin/**.properties"
+		}
+
+		filter "files:deps/**.*"
+			flags { "ExcludeFromBuild" }
+
+		excludes {
+		}
+
+		filter { "platforms:Linux64*", "system:linux" }
+			includedirs {
+				"deps/poco/NetSSL_OpenSSL/include",
+			}
+			files {
+				"deps/poco/openssl/include/**.h", "deps/poco/openssl/src/**.cpp",
+				"deps/poco/NetSSL_OpenSSL/include/**.h", "deps/poco/NetSSL_OpenSSL/src/**.cpp"
+			}
+
+		filter { "system:windows", "platforms:Win64" }
+			includedirs {
+				"deps/poco/NetSSL_Win/include",
+				"deps/intel_se_api/ittnotify/include",
+				}
+			links {
+				"deps/intel_se_api/bin/ittnotify64.lib",
+				"Iphlpapi.lib",
+				"ws2_32.lib",
+				"crypt32.lib"
+			}
+			files {
+				"deps/intel_se_api/ittnotify/include/*.h",
+				"deps/intel_se_api/ittnotify/include/*.hpp",
+				"deps/intel_se_api/ittnotify/include/*.cpp",
+			}
+
+		filter { "platforms:Win64", "system:windows", "configurations:debug-static" }
+			links { 
+				"deps/poco/lib64/PocoFoundationmtd.lib",
+				"deps/poco/lib64/PocoNetmtd.lib",
+				"deps/poco/lib64/PocoNetSSLWinmtd.lib",
+				"deps/poco/lib64/PocoUtilmtd.lib",
+				"deps/poco/lib64/PocoCryptomtd.lib",
+				"deps/poco/lib64/ssleay64MTd.lib",
+				"deps/poco/lib64/libeay64MTd.lib",
+				"deps/poco/lib64/PocoJSONmtd.lib",
+				"deps/poco/lib64/PocoDatamtd.lib",
+				"deps/poco/lib64/PocoDataSQLitemtd.lib",
+				"deps/poco/lib64/PocoXMLmtd.lib",
+				"packages/gtest-vc140-static-64.1.1.0/lib/native/libs/x64/static/Debug/gtest.lib"
+			}
+
+		filter { "platforms:Win64", "system:windows", "configurations:release-static" }
+			links { 
+				"deps/poco/lib64/PocoFoundationmt.lib",
+				"deps/poco/lib64/PocoNetmt.lib",
+				"deps/poco/lib64/PocoNetSSLWinmt.lib",
+				"deps/poco/lib64/PocoUtilmt.lib",
+				"deps/poco/lib64/PocoCryptomt.lib",
+				"deps/poco/lib64/ssleay64MT.lib",
+				"deps/poco/lib64/libeay64MT.lib",
+				"deps/poco/lib64/PocoJSONmt.lib",
+				"deps/poco/lib64/PocoDatamt.lib",
+				"deps/poco/lib64/PocoDataSQLitemt.lib",
+				"deps/poco/lib64/PocoXMLmt.lib",
+				"packages/gtest-vc140-static-64.1.1.0/lib/native/libs/x64/static/Release/gtest.lib"
+			}
+
+		filter { "platforms:Linux64*", "system:linux" }
+			links { 
+				"pthread",
+				"ssl",
+				"crypto"
+			}
+
+		filter { "platforms:Linux64*", "system:linux", "configurations:debug*" }
+			links { 
+				"deps/poco/lib/Linux/x86_64/PocoFoundationd",
+				"deps/poco/lib/Linux/x86_64/PocoUtild",
+				"deps/poco/lib/Linux/x86_64/PocoJSONd",
+				"deps/poco/lib/Linux/x86_64/PocoXMLd",
+				"deps/poco/lib/Linux/x86_64/PocoNetd",
+				"deps/poco/lib/Linux/x86_64/PocoDatad",
+				"deps/poco/lib/Linux/x86_64/PocoDataSQLited",
+				"deps/poco/lib/Linux/x86_64/PocoNetSSLd",
+				"deps/poco/lib/Linux/x86_64/PocoCryptod"
+			}
+
+		filter { "platforms:Linux64*", "system:linux", "configurations:release*" }
+			links { 
+				"deps/poco/lib/Linux/x86_64/PocoFoundation",
+				"deps/poco/lib/Linux/x86_64/PocoUtil",
+				"deps/poco/lib/Linux/x86_64/PocoJSON",
+				"deps/poco/lib/Linux/x86_64/PocoXML",
+				"deps/poco/lib/Linux/x86_64/PocoNet",
+				"deps/poco/lib/Linux/x86_64/PocoData",
+				"deps/poco/lib/Linux/x86_64/PocoDataSQLite",
+				"deps/poco/lib/Linux/x86_64/PocoNetSSL",
+				"deps/poco/lib/Linux/x86_64/PocoCrypto"
+				}
+
+		filter { "system:windows" }
+			debugenvs {
+				"PATH=$(SolutionDir)deps\\poco\\bin64"
+			}
+
+	project "sample_app_test"
+		configmap {
+			["debug-static"] = "debug-static",
+			["debug-shared"] = "debug-static",
+			["release-static"] = "release-static",
+			["release-shared"] = "release-static",
+		}
+		targetname	"sample_app_test"
+		language	"C++"
+		kind		"ConsoleApp"
+		targetdir	"bin/%{cfg.platform}/%{cfg.buildcfg}"
+		debugdir	"bin/%{cfg.platform}/%{cfg.buildcfg}"
+		dependson {
+			"apis",
+			"configs",
+			"databases",
+			"interface"
+		}
+		includedirs {
+			".",
+			"src",
+			"sdk/include",
+			"samples/utils",
+			"src/dataconnector",
+			"tests/sample_app_test",
+			"deps/poco/Net/include",
+			"deps/poco/Crypto/include",
+			"deps/poco/Foundation/include",
+			"deps/poco/Util/include",
+			"deps/poco/openssl/include",
+			"deps/poco/JSON/include",
+			"deps/poco/Data/include",
+			"deps/poco/Data/SQLite/include",
+			"tmp/%{cfg.platform}/codegen",
+			"deps/tinyfsm/include",
+			"packages/gtest-vc140-static-64.1.1.0/lib/native/include"
+		}
+		pchheader	"stdafx.h"
+		pchsource	"tests/sample_app_test/stdafx.cpp"
+		files {
+			"sdk/include/**.h",
+			"src/dataconnector/api*",
+			"src/dataconnector/db*",
+			"src/dataconnector/app*",
+			"tests/sample_app_test/**.h", "tests/sample_app_test/**.cpp",
 			"samples/utils/applicationhelper*",
 			"include/**.h",
 			"tmp/%{cfg.platform}/codegen/interface*.h", "tmp/%{cfg.platform}/codegen/interface*.cpp",
