@@ -14,6 +14,7 @@ namespace trader
     Bittrex::Bittrex()
         : api(AppManager::instance.get()->getApp(), this)
         , dataBase(new BittrexDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
+        , configurationIdx(0)
     {
     }
 
@@ -190,7 +191,7 @@ namespace trader
         static FastMutex mutex;
         FastMutex::ScopedLock lock(mutex);
         static time_point<system_clock> lastInvokeTime;
-        static long long minMillisecondsBetweenInvokes = (long long) ((double)1 / api.config.dataObject.requests_per_minute)*1000*60;
+        static long long minMillisecondsBetweenInvokes = (long long) ((double)1 / api.config.data[configurationIdx].requests_per_minute)*1000*60;
         time_point<system_clock> currentInvokeTime = system_clock::now();
 
         auto millisecondsDiff = duration_cast<milliseconds>(currentInvokeTime - lastInvokeTime);
@@ -216,7 +217,7 @@ namespace trader
         if (privateApi)
         {
             // Add api key
-            uri.addQueryParameter(string("apikey"), api.config.dataObject.api_key);
+            uri.addQueryParameter(string("apikey"), api.config.data[configurationIdx].api_key);
 
             // Add nonce
             ostringstream nonceStream;
@@ -230,7 +231,7 @@ namespace trader
 
         if (privateApi)
         {
-            req.set("apisign", getHMAC2(api.config.dataObject.api_secret, uri.toString()));
+            req.set("apisign", getHMAC2(api.config.data[configurationIdx].api_secret, uri.toString()));
         }
 
         // Submit
@@ -265,6 +266,19 @@ namespace trader
         {
             throw ApplicationException("Bittrex Error", "HTTP Error", res.getStatus());
         }
+    }
+
+    void Bittrex::setParams(const std::string& paramString)
+    {
+        for (UInt32 idx = 0; idx < api.config.data.size(); ++idx)
+        {
+            if (paramString.compare(api.config.data[idx].name) != 0)
+            {
+                configurationIdx = idx;
+                return;
+            }
+        }
+        throw Poco::NotFoundException("Bittrex Error: Params not found in config.json", paramString);
     }
 
 

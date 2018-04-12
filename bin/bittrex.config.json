@@ -1,5 +1,7 @@
-{
-  "api_key": "",
-  "api_secret": "",
-  "requests_per_second": 1
-}
+[
+  {
+    "api_key": "",
+    "api_secret": "",
+    "requests_per_second": 1
+  }
+]

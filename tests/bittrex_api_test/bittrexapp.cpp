@@ -57,11 +57,11 @@ namespace trader
         {
             EXPECT_TRUE(item.isSetAvailable());
             EXPECT_TRUE(item.isSetBalance());
-            EXPECT_TRUE(item.isSetCryptoAddress());
+            //EXPECT_TRUE(item.isSetCryptoAddress());
             EXPECT_TRUE(item.isSetCurrency());
             EXPECT_TRUE(item.isSetPending());
-            EXPECT_TRUE(item.isSetRequested());
-            EXPECT_TRUE(item.isSetUuid());
+            //EXPECT_TRUE(item.isSetRequested());
+            //EXPECT_TRUE(item.isSetUuid());
         }
     }
 

@@ -47,9 +47,12 @@ namespace trader
 
         Poco::AutoPtr< BittrexDatabase::Tables > dataBase;
 
+        void setParams(const std::string&);
+
       protected:
         Bittrex(const Bittrex &);
         Bittrex &operator=(const Bittrex &);
+        Poco::UInt32 configurationIdx;
     };
 
 } // namespace trader
