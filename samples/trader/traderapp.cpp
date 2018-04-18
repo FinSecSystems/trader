@@ -22,20 +22,22 @@ namespace trader
             // Setup logs, proxy settings, db
             setup();
 
-            // Add Subsystems used by this application
+            // Add subsystems used by this application
             addSubsystem(new MarketDataSubSystem());
 
-            // Retrieve required connections from Connection Manager
-            std::vector< std::string > connectionStrings;
-            connectionStrings.push_back("bittrex");
-            setupConnections(connectionStrings);
+            //Create a new receiving connection
+            setupAppConnection(this);
 
-            // Bootstrap subsystems
+            //Load connection information from .properties file
+            loadConnections();
+
+            // Bootstrap user subsystems
             start();
 
             // Start Connections
             startConnections();
 
+            //Start statechart
             AppStateChart::AppFSMList::start();
 
             // Run indefinitely
@@ -80,7 +82,7 @@ namespace trader
         {
             MarketDataSubSystem &marketDataSys =
                 AppManager::instance.get()->getApp()->getSubsystem< MarketDataSubSystem >();
-            marketDataSys.requestMarketData("bittrex;USDT-BTC");
+            marketDataSys.requestMarketData("bittrex;config1_readonly:USDT-BTC");
         }
 
         void react(OnMarketUpdate const &) override {}

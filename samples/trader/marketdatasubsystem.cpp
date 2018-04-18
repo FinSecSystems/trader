@@ -58,8 +58,11 @@ namespace trader
     {
         static atomic< int32_t > marketDataRequestDataIdx;
         StringTokenizer marketTokenString(_for_market,
-                                          ";,:", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
-        poco_assert(marketTokenString.count() == 2);
+                                          ":", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
+        if (marketTokenString.count() != 2)
+        {
+            throw InvalidArgumentException("MarketDataSubSystem: Invalid Market Data Request");
+        }
 
         string &connectionName = marketTokenString[0];
         string &securityName = marketTokenString[1];
