@@ -750,6 +750,22 @@
 				"deps/intel_se_api/ittnotify/include/*.cpp",
 			}
 
+		filter "action:vs2015"
+			includedirs { 
+				"packages/finsec.poco-basic-windows-v140.1.8.0/lib/native/include"
+			}
+			libdirs { 
+				"packages/finsec.poco-basic-windows-v140.1.8.0/lib/native/lib64"
+			}
+
+		filter "action:vs2017"
+			includedirs { 
+				"packages/finsec.poco-basic-windows-v141.1.8.0/lib/native/include"
+			}
+			libdirs { 
+				"packages/finsec.poco-basic-windows-v141.1.8.0/lib/native/lib64"
+			}
+
 		filter { "platforms:Win64", "system:windows", "configurations:debug-static" }
 			links { 
 				"deps/poco/lib64/PocoFoundationmtd.lib",
