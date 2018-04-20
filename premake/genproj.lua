@@ -1,4 +1,5 @@
 project "genproj"
+	location "%{wks.location}/tmp/projects"
 	targetname  "genproj"
     kind "Makefile"
 	files
@@ -6,7 +7,8 @@ project "genproj"
         "%{wks.location}/*.lua",
 		"%{wks.location}/*.md",
 		"%{wks.location}/*.txt",
-		"%{wks.location}/premake/**"
+		"%{wks.location}/premake/**",
+		"%{wks.location}/*.config"
 	}
 
 	filter { "system:linux" }

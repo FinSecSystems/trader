@@ -1,4 +1,5 @@
 project "apis"
+	location "%{wks.location}/tmp/projects"
 	targetname "fybapi.h"
 	dependson { 
 		"codegen"

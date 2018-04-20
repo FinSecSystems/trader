@@ -1,4 +1,5 @@
 project "connection_interface_test"
+	location "%{wks.location}/tmp/projects"
 	targetname	"connection_interface_test"
 	language	"C++"
 	kind		"ConsoleApp"

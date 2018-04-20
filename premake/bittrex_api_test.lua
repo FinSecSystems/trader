@@ -1,4 +1,5 @@
 project "bittrex_api_test"
+	location "%{wks.location}/tmp/projects"
 	configmap {
 		["debug-static"] = "debug-static",
 		["debug-shared"] = "debug-static",

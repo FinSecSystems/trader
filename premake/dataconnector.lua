@@ -1,4 +1,5 @@
 project "dataconnector"
+	location "%{wks.location}/tmp/projects"
 	targetname	"dataconnector"
 	language	"C++"
 	targetdir	"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"

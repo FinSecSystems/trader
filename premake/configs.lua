@@ -1,4 +1,5 @@
 project "configs"
+	location "%{wks.location}/tmp/projects"
 	targetname "fybconfig.h"
 	dependson { 
 		"codegen"

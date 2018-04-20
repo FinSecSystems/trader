@@ -1,4 +1,5 @@
 project "trader"
+	location	"%{wks.location}/tmp/projects"
 	targetname	"trader"
 	language	"C++"
 	kind		"ConsoleApp"

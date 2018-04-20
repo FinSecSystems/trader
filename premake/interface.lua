@@ -1,4 +1,5 @@
 project "interface"
+	location	"%{wks.location}/tmp/projects"
 	dependson { 
 		"codegen"
 	}
