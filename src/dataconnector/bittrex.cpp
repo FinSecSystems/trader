@@ -272,7 +272,7 @@ namespace trader
     {
         for (UInt32 idx = 0; idx < api.config.data.size(); ++idx)
         {
-            if (paramString.compare(api.config.data[idx].name) != 0)
+            if (paramString.compare(api.config.data[idx].name) == 0)
             {
                 configurationIdx = idx;
                 return;

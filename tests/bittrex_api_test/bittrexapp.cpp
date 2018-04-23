@@ -17,6 +17,7 @@ namespace trader
         virtual void SetUp() {
 			gen = new std::mt19937(rd());
 			bittrex = new Bittrex();
+            bittrex->setParams("config1_readonly");
         }
 
 		virtual void TearDown() {
@@ -38,8 +39,8 @@ namespace trader
         {
             EXPECT_TRUE(item.isSetBaseCurrency());
             EXPECT_TRUE(item.isSetBaseCurrencyLong());
-            EXPECT_TRUE(item.isSetCreated());
             EXPECT_TRUE(item.isSetIsActive());
+            EXPECT_GT(item.created.time, 0);
             EXPECT_TRUE(item.isSetMarketCurrency());
             EXPECT_TRUE(item.isSetMarketCurrencyLong());
             EXPECT_TRUE(item.isSetMarketName());
@@ -87,6 +88,51 @@ namespace trader
             EXPECT_TRUE(item.isSetPrice());
             EXPECT_TRUE(item.isSetQuantity());
             EXPECT_TRUE(item.isSetTotal());
+        }
+    }
+
+    TEST_F(BittrexTests, GetOrderBook)
+    {
+        AutoPtr< BittrexApi::Markets > markets;
+        ASSERT_NO_THROW(markets = bittrex->api.GetMarkets());
+        for (auto item : markets->dataObject.result)
+        {
+            marketNames.push_back(item.marketName);
+        }
+
+        AutoPtr< BittrexApi::OrderBookParams > orderBookParam = new BittrexApi::OrderBookParams();
+        std::uniform_int_distribution<> dis(0, (int)marketNames.size() - 1);
+        orderBookParam->dataObject.SetMarket(marketNames[dis(*gen)]);
+        orderBookParam->dataObject.SetType("buy");
+        AutoPtr< BittrexApi::OrderBook > orderBookBuy;
+        ASSERT_NO_THROW(orderBookBuy = bittrex->api.GetOrderBook(orderBookParam));
+        for (auto item : orderBookBuy->dataObject.result)
+        {
+            EXPECT_TRUE(item.isSetQuantity());
+            EXPECT_TRUE(item.isSetRate());
+        }
+
+        orderBookParam->dataObject.SetType("sell");
+        AutoPtr< BittrexApi::OrderBook > orderBookSell;
+        ASSERT_NO_THROW(orderBookSell = bittrex->api.GetOrderBook(orderBookParam));
+        for (auto item : orderBookSell->dataObject.result)
+        {
+            EXPECT_TRUE(item.isSetQuantity());
+            EXPECT_TRUE(item.isSetRate());
+        }
+
+        orderBookParam->dataObject.SetType("both");
+        AutoPtr< BittrexApi::OrderBookBoth > orderBookBoth;
+        ASSERT_NO_THROW(orderBookBoth = bittrex->api.GetBothOrderBooks(orderBookParam));
+        for (auto item : orderBookBoth->dataObject.resultObject.sell)
+        {
+            EXPECT_TRUE(item.isSetQuantity());
+            EXPECT_TRUE(item.isSetRate());
+        }
+        for (auto item : orderBookBoth->dataObject.resultObject.buy)
+        {
+            EXPECT_TRUE(item.isSetQuantity());
+            EXPECT_TRUE(item.isSetRate());
         }
     }
 

@@ -1,5 +1,5 @@
-pocoPathVS2015	= "packages/finsec.poco-basic-windows-v140.1.8.0.1/"
-pocoPathVS2017	= "packages/finsec.poco-basic-windows-v141.1.8.0/"
+pocoPathVS2015	= "packages/finsec.poco-windows-v140.1.8.0.1/"
+pocoPathVS2017	= "packages/finsec.poco-windows-v141.1.8.0/"
 gtestPath		= "packages/gtest-vc140-static-64.1.1.0/"
 	
 workspace "trader"
