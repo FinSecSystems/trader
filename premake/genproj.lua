@@ -32,6 +32,7 @@ project "genproj"
 			"packages.config"			
 		}
 		buildcommands {
+			"{COPY} %{wks.location}/packages.config %{wks.location}/tmp/projects/packages.config",
 			"$(SolutionDir)build\\genproj.cmd"
 		}
 		rebuildcommands {
