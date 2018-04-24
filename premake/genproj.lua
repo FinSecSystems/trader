@@ -27,12 +27,28 @@ project "genproj"
 			"{RMDIR} %{wks.location}*.make"
 		}
 
-	filter { "system:windows" }
+	filter { "action:vs2015", "system:windows" }
 		files {
-			"packages.config"			
+			"%{pocoPathVS2015}lib/native/include/**.h"
 		}
 		buildcommands {
-			"{COPY} %{wks.location}/packages.config %{wks.location}/tmp/projects/packages.config",
+			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{pocoPackageVS2015} -OutputDirectory %{wks.location}\\packages"
+		}
+
+	filter { "action:vs2017", "system:windows" }
+		files {
+			"%{pocoPathVS2017}lib/native/include/**.h"
+		}
+		buildcommands {
+			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{pocoPackageVS2017} -OutputDirectory %{wks.location}\\packages"
+		}
+
+	filter { "system:windows" }
+		files {
+			"%{gtestPath}lib/native/include/**.h"			
+		}
+		buildcommands {
+			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{gTestPackage} -OutputDirectory %{wks.location}\\packages",
 			"$(SolutionDir)build\\genproj.cmd"
 		}
 		rebuildcommands {
@@ -43,19 +59,4 @@ project "genproj"
 		cleancommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*",
-		}
-
-	filter { "platforms:Win64", "system:windows" }
-		files {
-			"%{gtestPath}lib/native/include/**.h"
-		}
-
-	filter { "platforms:Win64", "action:vs2015", "system:windows" }
-		files {
-			"%{pocoPathVS2015}lib/native/include/**.h"
-		}
-
-	filter { "platforms:Win64", "action:vs2017", "system:windows" }
-		files {
-			"%{pocoPathVS2017}lib/native/include/**.h"
 		}

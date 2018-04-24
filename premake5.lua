@@ -1,6 +1,12 @@
-pocoPathVS2015	= "packages/finsec.poco-windows-v140.1.8.0.1/"
-pocoPathVS2017	= "packages/finsec.poco-windows-v141.1.8.0.1/"
-gtestPath		= "packages/gtest-vc140-static-64.1.1.0/"
+pocoPackageVS2015 = "finsec.poco-windows-v140"
+pocoPackageVS2017 = "finsec.poco-windows-v141"
+pocoPackageVersion = "1.8.0.1"
+gTestPackage = "gtest-vc140-static-64"
+gTestPackageVersion = "1.1.0"
+
+pocoPathVS2015	= "packages/%{pocoPackageVS2015}.%{pocoPackageVersion}/"
+pocoPathVS2017	= "packages/%{pocoPackageVS2017}.%{pocoPackageVersion}/"
+gtestPath		= "packages/%{gTestPackage}.%{gTestPackageVersion}/"
 	
 workspace "trader"
 	editorintegration "On"
