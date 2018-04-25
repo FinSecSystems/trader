@@ -1,5 +1,6 @@
 $scriptpath = $MyInvocation.MyCommand.Path
 $dir = Split-Path $scriptpath
+Push-Location $dir
 [Environment]::CurrentDirectory = $dir
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
