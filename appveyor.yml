@@ -11,7 +11,7 @@ configuration:
 
 install:
   - cmd: git submodule update --init --recursive
-  - cmd: powershell -ExecutionPolicy Bypass -File .\deploy_tools.ps1
+  - cmd: powershell -ExecutionPolicy Bypass -File .\build\deploy_tools.ps1
   - cmd: build\genproj.cmd
 
 build:
@@ -19,4 +19,4 @@ build:
 
 cache:
   - packages -> premake5.lua
-  - tools -> build\deploy_tools.cmd
+  - tools -> build\deploy_tools.ps1
