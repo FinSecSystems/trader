@@ -78,7 +78,20 @@ workspace "trader"
 		warnings "Extra"
 		disablewarnings { "4251" }
 		includedirs {
-			"%{gtestPath}lib/native/include"
+			"%{gtestPath}lib/native/include",
+			"%{intelSEAPIPath}/include"
+		}
+		libdirs {
+			"%{intelSEAPIPath}lib"
+		}
+		debugenvs {
+			"PATH=$(SolutionDir)%{intelSEAPIPath:gsub('/', '\\')}bin"
+		}
+		prebuildcommands {
+			"PATH=$(SolutionDir)%{intelSEAPIPath:gsub('/', '\\')}bin"
+		}
+		rebuildcommands {
+			"PATH=$(SolutionDir)%{intelSEAPIPath:gsub('/', '\\')}bin"
 		}
 
 	filter { "platforms:Win64", "system:windows", "configurations:*static" }
@@ -90,20 +103,18 @@ workspace "trader"
 		toolset "v140"
 		libdirs {
 			"%{pocoPathVS2015}lib/native/lib64",
-			"%{intelSEAPIPath}lib"
 		}	
 		debugenvs {
-			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;$(SolutionDir)%{intelSEAPIPath:gsub('/', '\\')}bin"
+			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;%PATH%"
 		}
 		includedirs {
-			"%{pocoPathVS2015}lib/native/include",
-			"%{intelSEAPIPath}/include",
+			"%{pocoPathVS2015}lib/native/include"
 		}
 		prebuildcommands {
-			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64"
+			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;%PATH%"
 		}
 		rebuildcommands {
-			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64"
+			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;%PATH%"
 		}
 
 	filter { "platforms:Win64", "action:vs2017", "system:windows" }
@@ -112,16 +123,16 @@ workspace "trader"
 			"%{pocoPathVS2017}lib/native/lib64"
 		}
 		debugenvs {
-			"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64"
+			"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64;%PATH%"
 		}
 		includedirs {
 			"%{pocoPathVS2017}lib/native/include",
 		}
 		prebuildcommands {
-			"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64"
+			"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64;%PATH%"
 		}
 		rebuildcommands {
-			"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64"
+			"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64;%PATH%"
 		}
 
 	filter { "platforms:Win64", "system:windows", "configurations:debug*" }
@@ -205,7 +216,8 @@ workspace "trader"
 		defines     { 
             "_CRT_SECURE_NO_DEPRECATE",
             "_CRT_SECURE_NO_WARNINGS",
-            "_CRT_NONSTDC_NO_WARNINGS"
+            "_CRT_NONSTDC_NO_WARNINGS",
+			"_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING"
             }
 
 	filter { "system:windows", "configurations:release*" }
