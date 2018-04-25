@@ -12,9 +12,13 @@ configuration:
   - release-static
 
 install:
-  - cmd: git submodule update deps\poco
-  - cmd: build\deploy_poco.cmd
+  - cmd: git submodule update --init --recursive
+  - cmd: build\deploy_tools.cmd
   - cmd: build\genproj.cmd
 
 build:
   project: trader.sln
+
+cache:
+  - packages -> premake5.lua
+  - tools -> build\deploy_tools.cmd

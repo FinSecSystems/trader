@@ -8,7 +8,8 @@ project "genproj"
 		"%{wks.location}/*.md",
 		"%{wks.location}/*.txt",
 		"%{wks.location}/premake/**",
-		"%{wks.location}/*.config"
+		"%{wks.location}/*.config",
+		"%{wks.location}/*.yml"
 	}
 
 	filter { "system:linux" }
