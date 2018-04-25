@@ -1,6 +1,8 @@
 project "genproj"
+	toolset "v140"
 	location "%{wks.location}/tmp/projects"
-	targetname  "genproj"
+	targetdir "%{wks.location}"
+	targetname  "%{wks.name}.sln"
     kind "Makefile"
 	files
 	{
