@@ -11,7 +11,7 @@ configuration:
 
 install:
   - cmd: git submodule update --init --recursive
-  - cmd: powershell -ExecutionPolicy Bypass -File .\deploy_tools.ps1
+  - cmd: .\build\deploy_tools.ps1
   - cmd: build\genproj.cmd
 
 build:
