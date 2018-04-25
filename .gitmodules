@@ -1,6 +1,3 @@
-[submodule "deps/intel_se_api"]
-	path = deps/intel_se_api
-	url = http://github.com/FinSecSystems/IntelSEAPI.git
 [submodule "deps/quickfix"]
 	path = deps/quickfix
 	url = https://github.com/FinSecSystems/quickfix.git
