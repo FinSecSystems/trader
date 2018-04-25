@@ -1,4 +1,5 @@
 # trader
+[![Build status](https://ci.appveyor.com/api/projects/status/kks53akyvugs7j1w?svg=true)](https://ci.appveyor.com/project/Administrator73626/trader-private)
 
 This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.
 
