@@ -7,6 +7,7 @@ gTestPackageVersion = "1.1.0"
 pocoPathVS2015	= "packages/%{pocoPackageVS2015}.%{pocoPackageVersion}/"
 pocoPathVS2017	= "packages/%{pocoPackageVS2017}.%{pocoPackageVersion}/"
 gtestPath		= "packages/%{gTestPackage}.%{gTestPackageVersion}/"
+intelSEAPIPath  = "packages/IntelSEAPI-Windows/"
 	
 workspace "trader"
 	editorintegration "On"
@@ -88,13 +89,15 @@ workspace "trader"
 	filter { "platforms:Win64", "action:vs2015", "system:windows" }
 		toolset "v140"
 		libdirs {
-			"%{pocoPathVS2015}lib/native/lib64"
+			"%{pocoPathVS2015}lib/native/lib64",
+			"%{intelSEAPIPath}lib"
 		}	
 		debugenvs {
-			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64"
+			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;$(SolutionDir)%{intelSEAPIPath:gsub('/', '\\')}bin"
 		}
 		includedirs {
 			"%{pocoPathVS2015}lib/native/include",
+			"%{intelSEAPIPath}/include",
 		}
 		prebuildcommands {
 			"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64"

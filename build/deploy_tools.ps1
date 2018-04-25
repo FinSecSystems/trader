@@ -5,17 +5,29 @@ Push-Location $dir
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-#vswhere
-$repo = "Microsoft/vswhere"
-$exename = "vswhere.exe"
-$destinationdir = "..\tools\bin\vswhere"
-
 Write-Host "Setup directories"
 New-Item "..\tmp" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\tools" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\tools\bin" -itemtype directory -ErrorAction SilentlyContinue
 
+#intelseapi
+Write-Host "Installing IntelSEAPI"
+$repo = "intel/IntelSEAPI"
+$exename = "IntelSEAPI-Windows.exe"
+$destinationdir = "..\tmp"
+$releases = "https://api.github.com/repos/$repo/releases"
+$url = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets[2].browser_download_url
+$download = "https://github.com/$repo/releases/download/$tag/$exename"
+Write-Host $download
+Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 
+Invoke-WebRequest $url -Out $destinationdir\$exename
+& "$destinationdir\$exename" /S  /D=$dir\..\packages\IntelSEAPI-Windows
+
+#vswhere
 Write-Host "Installing VSWhere"
+$repo = "Microsoft/vswhere"
+$exename = "vswhere.exe"
+$destinationdir = "..\tools\bin\vswhere"
 $releases = "https://api.github.com/repos/$repo/releases"
 $url = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets[0].browser_download_url
 $download = "https://github.com/$repo/releases/download/$tag/$exename"
@@ -31,12 +43,11 @@ Invoke-WebRequest -Uri "https://dist.nuget.org/win-x86-commandline/latest/nuget.
 Write-Host "Nuget Deployed"
 
 #Premake
+Write-Host "Installing Premake"
 $repo = "premake/premake-core"
 $file = "premake.zip"
 $exename = "premake5.exe"
 $destinationdir = "..\tools\bin\premake"
-
-Write-Host "Installing Premake"
 $releases = "https://api.github.com/repos/$repo/releases"
 $tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name.Substring(1)
 $name = $file.Split(".")[0]

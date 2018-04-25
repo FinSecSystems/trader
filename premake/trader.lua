@@ -57,19 +57,15 @@ project "trader"
 		}
 
 	filter { "system:windows", "platforms:Win64" }
-		includedirs {
-			"%{wks.location}/deps/intel_se_api/ittnotify/include",
-			}
 		links {
-			"%{wks.location}/deps/intel_se_api/bin/ittnotify64.lib",
+			"ittnotify64.lib",
 			"Iphlpapi.lib",
 			"ws2_32.lib",
 			"crypt32.lib"
 		}
 		files {
-			"%{wks.location}/deps/intel_se_api/ittnotify/include/*.h",
-			"%{wks.location}/deps/intel_se_api/ittnotify/include/*.hpp",
-			"%{wks.location}/deps/intel_se_api/ittnotify/include/*.cpp",
+			"%{wks.location}/%{intelSEAPIPath}/include/*.h",
+			"%{wks.location}/%{intelSEAPIPath}/include/*.hpp",
 		}
 
 	filter { "platforms:Win64", "system:windows", "configurations:debug-static" }
