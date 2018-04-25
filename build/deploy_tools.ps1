@@ -5,6 +5,11 @@ $repo = "Microsoft/vswhere"
 $exename = "vswhere.exe"
 $destinationdir = "..\tools\bin\vswhere"
 
+Write-Host "Setup directories"
+New-Item "..\tmp" -itemtype directory -ErrorAction SilentlyContinue
+New-Item "..\tools" -itemtype directory -ErrorAction SilentlyContinue
+New-Item "..\tools\bin" -itemtype directory -ErrorAction SilentlyContinue
+
 Write-Host "Installing VSWhere"
 $releases = "https://api.github.com/repos/$repo/releases"
 $url = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets[0].browser_download_url
@@ -34,7 +39,7 @@ $zip = "$name-$tag-windows.zip"
 $dir = "$name-$tag"
 $zipfile = "..\tmp\$name-$tag-windows.zip"
 $download = "https://github.com/$repo/releases/download/v$tag/$zip"
-New-Item $destinationdir -itemtype directory -ErrorAction SilentlyContinue 
+New-Item $destinationdir -itemtype directory -ErrorAction SilentlyContinue
 Write-Host $download
 Invoke-WebRequest $download -Out $zipfile
 Expand-Archive $zipfile -Force -DestinationPath "..\tmp"
