@@ -12,8 +12,8 @@ configuration:
 install:
   - cmd: git submodule update --init --recursive
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\deploy_tools.ps1
-  - cmd: msbuild tmp\projects\genproj.vcxproj /t:Build /p:Configuration="debug-static Win64" /p:PlatformToolset=v140 /p:SolutionDir=..\..\
   - cmd: build\genproj.cmd
+  - cmd: msbuild tmp\projects\genproj.vcxproj /t:Build /p:Configuration="debug-static Win64" /p:PlatformToolset=v140 /p:SolutionDir=..\..\
 
 build:
   project: trader.sln
