@@ -58,20 +58,12 @@ project "connection_interface_test"
 		}
 
 	filter { "system:windows", "platforms:Win64" }
-		includedirs {
-			"%{wks.location}/deps/intel_se_api/ittnotify/include"
-			}
 		links {
-			"%{wks.location}/deps/intel_se_api/bin/ittnotify64.lib",
+			"ittnotify64.lib",
 			"Iphlpapi.lib",
 			"ws2_32.lib",
 			"crypt32.lib",
 			"gtest.lib"
-		}
-		files {
-			"%{wks.location}/deps/intel_se_api/ittnotify/include/*.h",
-			"%{wks.location}/deps/intel_se_api/ittnotify/include/*.hpp",
-			"%{wks.location}/deps/intel_se_api/ittnotify/include/*.cpp"
 		}
 
 	filter { "platforms:Win64", "system:windows", "configurations:debug-static" }
