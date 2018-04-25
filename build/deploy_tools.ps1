@@ -1,3 +1,7 @@
+$scriptpath = $MyInvocation.MyCommand.Path
+$dir = Split-Path $scriptpath
+[Environment]::CurrentDirectory = $dir
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 #vswhere
@@ -47,3 +51,5 @@ Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue
 Move-Item ..\tmp\$exename -Destination $destinationdir\$exename -Force
 Remove-Item $zipfile -Force
 
+Pop-Location
+[Environment]::CurrentDirectory = $PWD

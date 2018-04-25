@@ -9,7 +9,9 @@ project "genproj"
 		"%{wks.location}/*.txt",
 		"%{wks.location}/premake/**",
 		"%{wks.location}/*.config",
-		"%{wks.location}/*.yml"
+		"%{wks.location}/*.yml",
+		"%{wks.location}/build/**.cmd",
+		"%{wks.location}/build/**.ps1"
 	}
 
 	filter { "system:linux" }
