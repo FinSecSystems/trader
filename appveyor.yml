@@ -4,9 +4,9 @@ os:
 environment:
   matrix:
   - TOOLSET: vs2017
-	VS_PLATFORM_TOOLSET: v141
+    VS_PLATFORM_TOOLSET: v141
   - TOOLSET: vs2015
-	VS_PLATFORM_TOOLSET: v140
+    VS_PLATFORM_TOOLSET: v140
 
 configuration:
   - debug-static
