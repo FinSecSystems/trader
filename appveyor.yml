@@ -27,7 +27,12 @@ cache:
   - tools -> build\deploy_tools.ps1
 
 after_build:
-  7z a trader_tests_{{configuration}}_%APPVEYOR_BUILD_NUMBER%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\debug-static\*test.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
+  7z a trader_tests_{{configuration}}_%APPVEYOR_BUILD_NUMBER%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\{{configuration}}\*test.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
+
+artifacts:
+  # pushing a single file
+  - path: trader_tests_{{configuration}}_%APPVEYOR_BUILD_NUMBER%.zip
+  - path: bin
 
 deploy:
     # Deploy to GitHub Releases
@@ -37,4 +42,6 @@ deploy:
     prerelease: true
     on:
       branch: master                # release from master branch only
+	auth_token:
+	  secure: cVIYLIIEjkS7RLb2rseOsIWW9ru4KNdKjA0bWfE6gVVsutQXo6uyodpau6al+YS+
 #      appveyor_repo_tag: true       # deploy on tag push only
