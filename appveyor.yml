@@ -1,3 +1,5 @@
+version: 0.0.{build}
+
 os:
   - Visual Studio 2017
 
@@ -16,11 +18,15 @@ install:
   - cmd: git submodule update --init --recursive
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\deploy_tools.ps1
   - cmd: build\genproj.cmd
-  - cmd: msbuild tmp\projects\genproj.vcxproj /t:Build /p:Configuration="debug-static Win64" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:SolutionDir=..\..\ -p:Platform=x64
+#  - cmd: msbuild tmp\projects\genproj.vcxproj /t:Build /p:Configuration="debug-static Win64" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:SolutionDir=..\..\ -p:Platform=x64
 
 before_build:
   - cmd: msbuild generators.sln /t:Build /p:Configuration="debug" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
+    on:
+      configuration: debug-static
   - cmd: msbuild generators.sln /t:Build /p:Configuration="release" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
+    on:
+      configuration: release-static
 
 build:
   project: trader.sln
@@ -33,7 +39,7 @@ after_build:
   7z a trader_tests_%configuration%_%APPVEYOR_BUILD_VERSION %.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*test.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
 
 artifacts:
-  - path: trader_tests_%configuration%_%APPVEYOR_BUILD_VERSION %.zip
+  - path: trader_tests_%configuration%_%APPVEYOR_BUILD_VERSION%.zip
 
   - path: bin
     type: zip
