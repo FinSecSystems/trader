@@ -63,5 +63,13 @@ Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue
 Move-Item ..\tmp\$exename -Destination $destinationdir\$exename -Force
 Remove-Item $zipfile -Force
 
+#Poco
+& "..\tools\bin\nuget\nuget.exe" install finsec.poco-windows-v140 -OutputDirectory ..\packages
+& "..\tools\bin\nuget\nuget.exe" install finsec.poco-windows-v141 -OutputDirectory ..\packages
+
+#gTest
+& "..\tools\bin\nuget\nuget.exe" install gtest-vc140-static-64 -OutputDirectory ..\packages
+
 Pop-Location
 [Environment]::CurrentDirectory = $PWD
+

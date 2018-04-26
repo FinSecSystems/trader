@@ -8,14 +8,12 @@ pocoPathVS2015	= "packages/%{pocoPackageVS2015}.%{pocoPackageVersion}/"
 pocoPathVS2017	= "packages/%{pocoPackageVS2017}.%{pocoPackageVersion}/"
 gtestPath		= "packages/%{gTestPackage}.%{gTestPackageVersion}/"
 intelSEAPIPath  = "packages/IntelSEAPI-Windows/"
-	
+
+-------------------------------------------------------------------------------
+
+-- Repo wide settings
 editorintegration "On"
-configurations {
-		"debug-static",
-		"debug-shared",
-		"release-static",
-		"release-shared"
-	}
+
 platforms {
 		"Win64",
 		"Win64-Clang",
@@ -23,18 +21,16 @@ platforms {
 		"Linux64-gcc",
 		"Linux64-Clang"
 	}
+
 objdir "tmp"
 
+--- Clean Unnecessary platforms
 filter { "system:linux" }
 	removeplatforms {                
 		"Win64",
 		"Win64-Clang",
 		"Win64-MSClang"
 		}
-	buildoptions    {
-		"-std=c++11",
-		"-shared-libgcc"
-	}
 
 filter { "system:windows" }
 	removeplatforms {                
@@ -42,16 +38,59 @@ filter { "system:windows" }
 		"Linux64-gcc"
 		}
 
-filter { "platforms:Linux64*", "system:linux" }
+--- Debug Only
+filter "configurations:debug*"
+	defines     "_DEBUG"
+	symbols 	"On"
+
+--- Release Only
+filter "configurations:release*"
+	defines     "NDEBUG"
+	optimize    "Full"
+
+--- Static Libs Only
+filter { "configurations:*static" }
+	defines "USE_SHARED_LIBS"
+
+--- Dynamic Libs Only
+filter { "configurations:*shared" }
+	defines "USE_DYNAMIC_LIBS"
+
+-------------------------------------------------------------------------------
+
+-- Linux Only
+filter { "system:linux", "platforms:Linux64*"  }
 	buildoptions {
 		"-frtti",
 		"-fexceptions",
-		"-g"
+		"-g",
+		"-std=c++11",
+		"-shared-libgcc",
+		"-Wno-unknown-pragmas"
 	}
 	linkoptions {
 		"-g"
 	}
+	includedirs {
+		"deps/poco/Foundation/include",
+		"deps/poco/Util/include",
+		"deps/poco/JSON/include",
+		"deps/poco/XML/include",
+		"deps/poco/Net/include",
+		"deps/poco/Crypto/include",
+		"deps/poco/Foundation/include",
+		"deps/poco/Util/include",
+		"deps/poco/openssl/include",
+		"deps/poco/JSON/include",
+		"deps/poco/Data/include",
+		"deps/poco/Data/SQLite/include",
+		"deps/poco/NetSSL_OpenSSL/include"
+	}
+	libdirs {
+		"deps/poco/lib/Linux/x86_64"
+	}
 
+--- Linux, GCC Only
 filter { "platforms:Linux64-gcc", "system:linux" }
 	toolset "gcc"
 	buildoptions {
@@ -62,10 +101,20 @@ filter { "platforms:Linux64-gcc", "system:linux" }
 		"-Wl,--no-as-needed"
 	}
 
-filter { "platforms:Linux64-clang", "system:linux" }
+--- Linux, Clang Only
+filter { "system:linux", "platforms:Linux64-clang" }
 	toolset "clang"
 
-filter { "platforms:Win64", "system:windows" }
+--- Linux, Clang, Debug Only
+filter { "system:linux", "platforms:Linux64-clang", "configurations:debug*" }
+	buildoptions {
+		"-Wall"
+	}
+
+-------------------------------------------------------------------------------
+
+--- Windows Only
+filter { "system:windows", "platforms:Win64" }
 	system "Windows"
 	architecture "x64"
 	flags { 
@@ -93,12 +142,47 @@ filter { "platforms:Win64", "system:windows" }
 		"PATH=$(SolutionDir)%{intelSEAPIPath:gsub('/', '\\')}bin"
 	}
 
-filter { "platforms:Win64", "system:windows", "configurations:*static" }
+--- Windows, Debug Only
+filter { "system:windows", "platforms:Win64", "configurations:debug*" }
+	libdirs { 
+		"%{gtestPath}lib/native/libs/x64/static/Debug/"
+	}
+-- 	links { 
+-- 		"MSVCRTD.LIB"
+-- 	}
+-- 	linkoptions {
+-- 		"/NODEFAULTLIB:msvcrt"
+-- 	}
+
+--- Windows, Release Only
+filter { "system:windows", "platforms:Win64", "configurations:release*" }
+	libdirs { 
+		"%{gtestPath}lib/native/libs/x64/static/Release/"
+	}
+	flags       {
+        "NoBufferSecurityCheck",
+        "NoRuntimeChecks",
+        "NoIncrementalLink",
+        "LinkTimeOptimization"
+    }
+
+--- Windows, Static Libs Only
+filter {  "system:windows", "platforms:Win64", "configurations:*static" }
 	flags { 
 		"StaticRuntime"
-		}
+    }
 
-filter { "platforms:Win64", "action:vs2015", "system:windows" }
+--- Visual Studio Only
+filter "action:vs*"
+	defines     { 
+        "_CRT_SECURE_NO_DEPRECATE",
+        "_CRT_SECURE_NO_WARNINGS",
+        "_CRT_NONSTDC_NO_WARNINGS",
+		"_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING"
+        }
+
+--- Visual Studio 2015 Only
+filter { "system:windows", "platforms:Win64", "action:vs2015" }
 	toolset "v140"
 	libdirs {
 		"%{pocoPathVS2015}lib/native/lib64",
@@ -116,7 +200,8 @@ filter { "platforms:Win64", "action:vs2015", "system:windows" }
 		"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;%PATH%"
 	}
 
-filter { "platforms:Win64", "action:vs2017", "system:windows" }
+--- Visual Studio 2017 Only
+filter { "system:windows", "platforms:Win64", "action:vs2017" }
 	toolset "v141"
 	libdirs {
 		"%{pocoPathVS2017}lib/native/lib64"
@@ -134,42 +219,14 @@ filter { "platforms:Win64", "action:vs2017", "system:windows" }
 		"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64;%PATH%"
 	}
 
-filter { "platforms:Win64", "system:windows", "configurations:debug*" }
-	libdirs { 
-		"%{gtestPath}lib/native/libs/x64/static/Debug/"
-	}
-
-filter { "platforms:Win64", "system:windows", "configurations:release*" }
-	libdirs { 
-		"%{gtestPath}lib/native/libs/x64/static/Release/"
-	}
-
-filter { "system:linux" }
-	includedirs {
-		"deps/poco/Foundation/include",
-		"deps/poco/Util/include",
-		"deps/poco/JSON/include",
-		"deps/poco/XML/include",
-		"deps/poco/Net/include",
-		"deps/poco/Crypto/include",
-		"deps/poco/Foundation/include",
-		"deps/poco/Util/include",
-		"deps/poco/openssl/include",
-		"deps/poco/JSON/include",
-		"deps/poco/Data/include",
-		"deps/poco/Data/SQLite/include",
-		"deps/poco/NetSSL_OpenSSL/include"
-	}
-	libdirs {
-		"deps/poco/lib/Linux/x86_64"
-	}
-
-filter { "platforms:Win64-Clang", "system:windows" }
+--- Windows Clang Only
+filter { "system:windows", "platforms:Win64-Clang"  }
 	system "Windows"
 	architecture "x64"
 	toolset "msc-llvm-vs2014"
 
-filter { "platforms:Win64-MSClang", "system:windows" }
+--- Windows Microsoft Clang Only
+filter { "system:windows", "platforms:Win64-MSClang" }
 	system "Windows"
 	architecture "x64"
 	toolset "v140_clang_c2"
@@ -178,58 +235,16 @@ filter { "platforms:Win64-MSClang", "system:windows" }
 		"-fms-compatibility"
 	}
 
-filter "configurations:debug*"
-	defines     "_DEBUG"
-	symbols 	"On"
-
-filter "configurations:release*"
-	defines     "NDEBUG"
-	optimize    "Full"
-
--- filter { "configurations:debug", "platforms:Win64" }
--- 	links { 
--- 		"MSVCRTD.LIB"
--- 	}
--- 	linkoptions {
--- 		"/NODEFAULTLIB:msvcrt"
--- 	}
-
-filter { "configurations:debug*", "platforms:Linux64-clang" }
-	buildoptions {
-		"-Wall"
-	}
-
-filter { "configurations:debug*", "platforms:Win64-MSClang" }
+--- Windows Microsoft Clang Debug Only
+filter { "system:windows", "platforms:Win64-MSClang", "configurations:debug*", }
 	buildoptions {
 		"-g2",
 		"-Wall"
-	}				
-
-filter { "configurations:release*", "platforms:Win64" }
-	flags       {
-        "NoBufferSecurityCheck",
-        "NoRuntimeChecks"
-        }
-
-filter "action:vs*"
-	defines     { 
-        "_CRT_SECURE_NO_DEPRECATE",
-        "_CRT_SECURE_NO_WARNINGS",
-        "_CRT_NONSTDC_NO_WARNINGS",
-		"_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING"
-        }
-
-filter { "system:windows", "configurations:release*" }
-	flags       {
-        "NoIncrementalLink",
-        "LinkTimeOptimization"
-    }
-
-filter { "platforms:Linux64*", "system:linux" }
-	buildoptions {
-		"-Wno-unknown-pragmas",
 	}
+	
+-------------------------------------------------------------------------------			
 
+--- File custom builds
 filter "files:premake5.lua"
     -- A message to display while this build step is running (optional)
     buildmessage 'Generating Projects'
@@ -242,54 +257,65 @@ filter "files:premake5.lua"
     -- One or more outputs resulting from the build (required)
     buildoutputs { '$(SolutionDir)trader.sln' }
 
-filter { "configurations:*static" }
-	defines "USE_SHARED_LIBS"
+-------------------------------------------------------------------------------
 
-filter { "configurations:*shared" }
-	defines "USE_DYNAMIC_LIBS"
-
+--- Workspaces
 workspace "generators"
+	configurations {
+			"debug",
+			"release",
+		}
 
-group "Tools"
-	project "codegen"
-	project "genproj"
-	project "genproj2"
+	group "Tools"
+		project "codegen"
+		project "gencode"
 
-group "Generators"
-	project "apis"
-	project "configs"
-	project "databases"
-	project "interface"
+	group "Generators"
+		project "apis"
+		project "configs"
+		project "databases"
+		project "interface"
 
-group ""
+	group ""
 
-include "premake/genproj.lua"	
-include "premake/codegen.lua"
-include "premake/interface.lua"
-include "premake/apis.lua"
-include "premake/databases.lua"
-include "premake/configs.lua"
-include "premake/genproj2.lua"	
+	include "premake/codegen.lua"
+	include "premake/interface.lua"
+	include "premake/apis.lua"
+	include "premake/databases.lua"
+	include "premake/configs.lua"
+	include "premake/gencode.lua"	
+
+-------------------------------------------------------------------------------
 
 workspace "trader"
+	configurations {
+			"debug-static",
+			"debug-shared",
+			"release-static",
+			"release-shared"
+		}
 
-group "Modules"
-	project "dataconnector"
+	group "Tools"
+		project "genproj"
 
-group "Samples"
-	project "trader"
+	group "Modules"
+		project "dataconnector"
 
-group "Apps"
+	group "Samples"
+		project "trader"
 
-group "Tests"
-	project "bittrex_api_test"
-	project "sample_app_test"
-	project "connection_interface_test"
+	group "Apps"
+
+	group "Tests"
+		project "bittrex_api_test"
+		project "sample_app_test"
+		project "connection_interface_test"
 	
-group ""
+	group ""
 
-include "premake/dataconnector.lua"
-include "premake/trader.lua"
-include "premake/bittrex_api_test.lua"
-include "premake/sample_app_test.lua"
-include "premake/connection_interface_test.lua"
+	include "premake/genproj"
+	include "premake/dataconnector.lua"
+	include "premake/trader.lua"
+	include "premake/bittrex_api_test.lua"
+	include "premake/sample_app_test.lua"
+	include "premake/connection_interface_test.lua"

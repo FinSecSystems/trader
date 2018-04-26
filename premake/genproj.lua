@@ -1,9 +1,9 @@
 project "genproj"
 	toolset "v140"
+    kind "Makefile"
 	location "%{wks.location}/tmp/projects"
 	targetdir "%{wks.location}"
 	targetname  "%{wks.name}.sln"
-    kind "Makefile"
 	files
 	{
         "%{wks.location}/*.lua",
@@ -36,16 +36,10 @@ project "genproj"
 		files {
 			"%{pocoPathVS2015}lib/native/include/**.h"
 		}
-		buildcommands {
-			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{pocoPackageVS2015} -OutputDirectory %{wks.location}\\packages"
-		}
 
 	filter { "action:vs2017", "system:windows" }
 		files {
 			"%{pocoPathVS2017}lib/native/include/**.h"
-		}
-		buildcommands {
-			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{pocoPackageVS2017} -OutputDirectory %{wks.location}\\packages"
 		}
 
 	filter { "system:windows" }
@@ -53,7 +47,6 @@ project "genproj"
 			"%{gtestPath}lib/native/include/**.h"			
 		}
 		buildcommands {
-			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{gTestPackage} -OutputDirectory %{wks.location}\\packages",
 			"$(SolutionDir)build\\genproj.cmd"
 		}
 		rebuildcommands {

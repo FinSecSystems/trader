@@ -1,4 +1,4 @@
-project "genproj2"
+project "gencode"
 	toolset "v140"
 	location "%{wks.location}/tmp/projects"
 	targetdir "%{wks.location}"
@@ -42,16 +42,10 @@ project "genproj2"
 		files {
 			"%{pocoPathVS2015}lib/native/include/**.h"
 		}
-		buildcommands {
-			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{pocoPackageVS2015} -OutputDirectory %{wks.location}\\packages"
-		}
 
 	filter { "action:vs2017", "system:windows" }
 		files {
 			"%{pocoPathVS2017}lib/native/include/**.h"
-		}
-		buildcommands {
-			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{pocoPackageVS2017} -OutputDirectory %{wks.location}\\packages"
 		}
 
 	filter { "system:windows" }
@@ -59,7 +53,6 @@ project "genproj2"
 			"%{gtestPath}lib/native/include/**.h"			
 		}
 		buildcommands {
-			"%{wks.location}tools\\bin\\nuget\\nuget.exe install %{gTestPackage} -OutputDirectory %{wks.location}\\packages",
 			"$(SolutionDir)build\\genproj.cmd"
 		}
 		rebuildcommands {

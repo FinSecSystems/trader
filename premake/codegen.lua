@@ -5,12 +5,6 @@ project "codegen"
 	kind        "ConsoleApp"
 	targetdir   "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 	debugdir    "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
-	configmap {
-		["debug-static"] = "debug",
-		["debug-shared"] = "debug",
-		["release-static"] = "release",
-		["release-shared"] = "release",
-	}
 	includedirs {
 		"%{wks.location}/src/codegen"
 	}
@@ -22,7 +16,6 @@ project "codegen"
 		"/n:trader",
 		"/t:xmlspec"
     }
-
 	files
 	{
 		"%{wks.location}/src/codegen/**.h",
@@ -41,10 +34,6 @@ project "codegen"
 
     filter "files:deps/**.*"
         flags { "ExcludeFromBuild" }
-
-	excludes
-	{
-	}
 
 	filter { "platforms:Linux64*", "system:linux", "configurations:debug"  }
 		links { 
