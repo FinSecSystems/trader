@@ -4,6 +4,9 @@ os:
 environment:
   matrix:
   - TOOLSET: vs2017
+	VS_PLATFORM_TOOLSET: v141
+  - TOOLSET: vs2015
+	VS_PLATFORM_TOOLSET: v140
 
 configuration:
   - debug-static
@@ -13,11 +16,11 @@ install:
   - cmd: git submodule update --init --recursive
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\deploy_tools.ps1
   - cmd: build\genproj.cmd
-  - cmd: msbuild tmp\projects\genproj.vcxproj /t:Build /p:Configuration="debug-static Win64" /p:PlatformToolset=v141 /p:SolutionDir=..\..\ -p:Platform=x64
+  - cmd: msbuild tmp\projects\genproj.vcxproj /t:Build /p:Configuration="debug-static Win64" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:SolutionDir=..\..\ -p:Platform=x64
 
 before_build:
-  - cmd: msbuild generators.sln /t:Build /p:Configuration="debug" /p:PlatformToolset=v141 /p:Platform=Win64
-  - cmd: msbuild generators.sln /t:Build /p:Configuration="release" /p:PlatformToolset=v141 /p:Platform=Win64
+  - cmd: msbuild generators.sln /t:Build /p:Configuration="debug" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
+  - cmd: msbuild generators.sln /t:Build /p:Configuration="release" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
 
 build:
   project: trader.sln
@@ -30,9 +33,10 @@ after_build:
   7z a trader_tests_{{configuration}}_%APPVEYOR_BUILD_NUMBER%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\{{configuration}}\*test.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
 
 artifacts:
-  # pushing a single file
   - path: trader_tests_{{configuration}}_%APPVEYOR_BUILD_NUMBER%.zip
+
   - path: bin
+    type: zip
 
 deploy:
     # Deploy to GitHub Releases
@@ -42,6 +46,6 @@ deploy:
     prerelease: true
     on:
       branch: master                # release from master branch only
-	auth_token:
-	  secure: cVIYLIIEjkS7RLb2rseOsIWW9ru4KNdKjA0bWfE6gVVsutQXo6uyodpau6al+YS+
+    auth_token:
+      secure: cVIYLIIEjkS7RLb2rseOsIWW9ru4KNdKjA0bWfE6gVVsutQXo6uyodpau6al+YS+
 #      appveyor_repo_tag: true       # deploy on tag push only
