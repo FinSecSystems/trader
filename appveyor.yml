@@ -25,3 +25,27 @@ build:
 cache:
   - packages -> premake5.lua
   - tools -> build\deploy_tools.ps1
+
+after_build:
+  7z a trader_tests_{{configuration}}_%APPVEYOR_BUILD_NUMBER%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\debug-static\*test.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
+
+notifications:
+  # Email
+  - provider: Email
+    to:
+      - viknash@finsec.systems
+      - adrian@finsec.systems
+	  - fang@finsec.systems
+    subject: 'Build {{status}}'                  # optional
+    message: "{{message}}, {{commitId}}, ..."    # optional
+    on_build_status_changed: true
+
+deploy:
+    # Deploy to GitHub Releases
+  - provider: GitHub
+    artifact: /.*\.zip/           # upload all zip packages to release assets
+    draft: true
+    prerelease: true
+    on:
+      branch: master                # release from master branch only
+#      appveyor_repo_tag: true       # deploy on tag push only
