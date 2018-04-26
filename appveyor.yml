@@ -30,10 +30,10 @@ cache:
   - tools -> build\deploy_tools.ps1
 
 after_build:
-  7z a trader_tests_{{configuration}}_%APPVEYOR_BUILD_NUMBER%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\{{configuration}}\*test.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
+  7z a trader_tests_%configuration%_%APPVEYOR_BUILD_VERSION %.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*test.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
 
 artifacts:
-  - path: trader_tests_{{configuration}}_%APPVEYOR_BUILD_NUMBER%.zip
+  - path: trader_tests_%configuration%_%APPVEYOR_BUILD_VERSION %.zip
 
   - path: bin
     type: zip
