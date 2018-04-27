@@ -5,12 +5,6 @@ project "trader"
 	kind		"ConsoleApp"
 	targetdir	"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 	debugdir	"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
-	dependson {
-		"apis",
-		"configs",
-		"databases",
-		"interface"
-	}
 	links {
 		"dataconnector"
 	}
@@ -41,9 +35,6 @@ project "trader"
 
 	filter "files:%{wks.location}/deps/**.*"
 		flags { "ExcludeFromBuild" }
-
-	excludes {
-	}
 
 	filter { "configurations:*shared" }
 		defines "IMPORT_DATACONNECTOR"

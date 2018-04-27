@@ -5,11 +5,8 @@ project "connection_interface_test"
 	kind		"ConsoleApp"
 	targetdir	"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 	debugdir	"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
-	dependson {
-		"apis",
-		"configs",
-		"databases",
-		"interface"
+	links {
+		"dataconnector"
 	}
 	includedirs {
 		"%{wks.location}",
@@ -25,29 +22,19 @@ project "connection_interface_test"
 	pchsource	"%{wks.location}/tests/connection_interface_test/stdafx.cpp"
 	files {
 		"%{wks.location}/sdk/include/**.h",
-		"%{wks.location}/src/dataconnector/*",
 		"%{wks.location}/tests/connection_interface_test/**.h",
 		"%{wks.location}/tests/connection_interface_test/**.cpp",
 		"%{wks.location}/samples/utils/*",
 		"%{wks.location}/include/**.h",
-		"%{wks.location}/tmp/%{cfg.platform}/codegen/interface*.h",
-		"%{wks.location}/tmp/%{cfg.platform}/codegen/interface*.cpp",
-		"%{wks.location}/tmp/%{cfg.platform}/codegen/generic*.h",
-		"%{wks.location}/tmp/%{cfg.platform}/codegen/generic*.cpp",
-		"%{wks.location}/tmp/%{cfg.platform}/codegen/bittrex*.h",
-		"%{wks.location}/tmp/%{cfg.platform}/codegen/bittrex*.cpp",
 		"%{wks.location}/bin/**.json",
 		"%{wks.location}/bin/**.properties"
-	}
-	links {
-		"dataconnector"
 	}
 
 	filter "files:%{wks.location}/deps/**.*"
 		flags { "ExcludeFromBuild" }
 
-	excludes {
-	}
+	filter { "configurations:*shared" }
+		defines "IMPORT_DATACONNECTOR"
 
 	filter { "platforms:Linux64*", "system:linux" }
 		files {
@@ -77,7 +64,6 @@ project "connection_interface_test"
 			"libeay64MTd.lib",
 			"PocoJSONmtd.lib",
 			"PocoDatamtd.lib",
-			"PocoDataSQLitemtd.lib",
 			"PocoXMLmtd.lib"
 		}
 
@@ -94,6 +80,36 @@ project "connection_interface_test"
 			"PocoDatamt.lib",
 			"PocoDataSQLitemt.lib",
 			"PocoXMLmt.lib"
+		}
+
+	filter { "platforms:Win64", "system:windows", "configurations:debug-shared" }
+		links { 
+			"PocoFoundationd.lib",
+			"PocoNetd.lib",
+			"PocoNetSSLWind.lib",
+			"PocoUtild.lib",
+			"PocoCryptod.lib",
+			"ssleay64MTd.lib",
+			"libeay64MTd.lib",
+			"PocoJSONd.lib",
+			"PocoDatad.lib",
+			"PocoDataSQLited.lib",
+			"PocoXMLd.lib"
+		}
+
+	filter { "platforms:Win64", "system:windows", "configurations:release-shared" }
+		links { 
+			"PocoFoundation.lib",
+			"PocoNet.lib",
+			"PocoNetSSLWin.lib",
+			"PocoUtil.lib",
+			"PocoCrypto.lib",
+			"ssleay64MT.lib",
+			"libeay64MT.lib",
+			"PocoJSON.lib",
+			"PocoData.lib",
+			"PocoDataSQLite.lib",
+			"PocoXML.lib"
 		}
 
 	filter { "platforms:Linux64*", "system:linux" }
@@ -127,7 +143,4 @@ project "connection_interface_test"
 			"PocoDataSQLite",
 			"PocoNetSSL",
 			"PocoCrypto"
-			}
-
-	filter { "configurations:*shared" }
-		defines "IMPORT_DATACONNECTOR"
+		}

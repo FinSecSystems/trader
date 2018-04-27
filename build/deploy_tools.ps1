@@ -69,6 +69,7 @@ Remove-Item $zipfile -Force
 
 #gTest
 & "..\tools\bin\nuget\nuget.exe" install gtest-vc140-static-64 -OutputDirectory ..\packages
+& "..\tools\bin\nuget\nuget.exe" install Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn -OutputDirectory ..\packages
 
 Pop-Location
 [Environment]::CurrentDirectory = $PWD

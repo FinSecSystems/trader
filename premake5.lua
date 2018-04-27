@@ -3,10 +3,13 @@ pocoPackageVS2017 = "finsec.poco-windows-v141"
 pocoPackageVersion = "1.8.0.1"
 gTestPackage = "gtest-vc140-static-64"
 gTestPackageVersion = "1.1.0"
+gTestPackageDynamic = "Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn"
+gTestPackageVersionDynamic = "1.8.0"
 
 pocoPathVS2015	= "packages/%{pocoPackageVS2015}.%{pocoPackageVersion}/"
 pocoPathVS2017	= "packages/%{pocoPackageVS2017}.%{pocoPackageVersion}/"
 gtestPath		= "packages/%{gTestPackage}.%{gTestPackageVersion}/"
+gtestPathDynamic = "packages/%{gTestPackageDynamic}.%{gTestPackageVersionDynamic}/"
 intelSEAPIPath  = "packages/IntelSEAPI-Windows/"
 
 -------------------------------------------------------------------------------
@@ -118,7 +121,8 @@ filter { "system:windows", "platforms:Win64" }
 	system "Windows"
 	architecture "x64"
 	flags { 
-		"MultiProcessorCompile"
+		"MultiProcessorCompile",
+		"Maps"
 		}
 	buildoptions {
 		-- "/GR-"  //Keep rtti enabled because Poco uses dynamic cast
@@ -144,9 +148,6 @@ filter { "system:windows", "platforms:Win64" }
 
 --- Windows, Debug Only
 filter { "system:windows", "platforms:Win64", "configurations:debug*" }
-	libdirs { 
-		"%{gtestPath}lib/native/libs/x64/static/Debug/"
-	}
 -- 	links { 
 -- 		"MSVCRTD.LIB"
 -- 	}
@@ -156,9 +157,6 @@ filter { "system:windows", "platforms:Win64", "configurations:debug*" }
 
 --- Windows, Release Only
 filter { "system:windows", "platforms:Win64", "configurations:release*" }
-	libdirs { 
-		"%{gtestPath}lib/native/libs/x64/static/Release/"
-	}
 	flags       {
         "NoBufferSecurityCheck",
         "NoRuntimeChecks",
@@ -171,6 +169,30 @@ filter {  "system:windows", "platforms:Win64", "configurations:*static" }
 	flags { 
 		"StaticRuntime"
     }
+
+--- Windows, Debug, Static Lib Only
+filter { "system:windows", "platforms:Win64", "configurations:debug-static" }
+	libdirs { 
+		"%{gtestPath}lib/native/libs/x64/static/Debug/"
+	}
+
+--- Windows, Debug, Release Lib Only
+filter { "system:windows", "platforms:Win64", "configurations:release-static" }
+	libdirs { 
+		"%{gtestPath}lib/native/libs/x64/static/Debug/"
+	}
+
+--- Windows, Debug, Dynamic Lib Only
+filter { "system:windows", "platforms:Win64", "configurations:debug-shared" }
+	libdirs { 
+		"%{gtestPathDynamic}lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Debug/"
+	}
+
+--- Windows, Release, Dynamic Lib Only
+filter { "system:windows", "platforms:Win64", "configurations:release-shared" }
+	libdirs { 
+		"%{gtestPathDynamic}lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/"
+	}
 
 --- Visual Studio Only
 filter "action:vs*"
@@ -187,17 +209,8 @@ filter { "system:windows", "platforms:Win64", "action:vs2015" }
 	libdirs {
 		"%{pocoPathVS2015}lib/native/lib64",
 	}	
-	debugenvs {
-		"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;%PATH%"
-	}
 	includedirs {
 		"%{pocoPathVS2015}lib/native/include"
-	}
-	prebuildcommands {
-		"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;%PATH%"
-	}
-	rebuildcommands {
-		"PATH=$(SolutionDir)%{pocoPathVS2015:gsub('/', '\\')}build\\native\\x64;%PATH%"
 	}
 
 --- Visual Studio 2017 Only
@@ -206,17 +219,8 @@ filter { "system:windows", "platforms:Win64", "action:vs2017" }
 	libdirs {
 		"%{pocoPathVS2017}lib/native/lib64"
 	}
-	debugenvs {
-		"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64;%PATH%"
-	}
 	includedirs {
 		"%{pocoPathVS2017}lib/native/include",
-	}
-	prebuildcommands {
-		"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64;%PATH%"
-	}
-	rebuildcommands {
-		"PATH=$(SolutionDir)%{pocoPathVS2017:gsub('/', '\\')}build\\native\\x64;%PATH%"
 	}
 
 --- Windows Clang Only
