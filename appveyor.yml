@@ -71,7 +71,7 @@ test_script:
   - cmd: bin\Win64\%configuration%\connection_interface_test.exe --gtest_output=xml:connection_interface_test.xml
   - cmd: bin\Win64\%configuration%\sample_app_test.exe --gtest_output=xml:sample_app_test.xml
 
-on_finish:
+after_test:
   - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\bittrex_api_test.xml))
   - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\connection_interface_test.xml))
   - ps: (new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\sample_app_test.xml))
