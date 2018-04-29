@@ -38,7 +38,7 @@
 *.vcxproj*
 *.sln
 ./*.db
-/bin
+/bin/Win64
 *.log
 /*.make
 * - Copy.*
@@ -53,3 +53,4 @@ deps/*.make
 /lib
 /*.pdb/*
 packages/
+tools/bin/appveyor-tools/

@@ -35,6 +35,10 @@ namespace trader
 
         AutoPtr< trader::Interface::Connection > connection = ConnectionManager::instance.get()->getConnection("bittrex");
         EXPECT_NE(connection.get(), nullptr);
+
+		// Stop Connections
+		ASSERT_NO_THROW(pApp->stopConnections());
+
     }
     
     int ConnectionApp::main(const std::vector< std::string > &args)

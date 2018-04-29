@@ -143,6 +143,7 @@ namespace trader
     public:
         BittrexConnection(const std::string &_connectionid, Bittrex *_exchange)
             : processingConnection(10)
+			, stop(false)
         {
             processingConnection.SetConnectionId(_connectionid);
             processingConnection.SetExchange(_exchange);
@@ -164,6 +165,7 @@ namespace trader
 
         BufferedConnection< BittrexProcessingConnection > processingConnection;
 
+		bool stop;
         static AutoPtr< Interface::Connection > getConnection(const std::string &connectionId);
     };
 

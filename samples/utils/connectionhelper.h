@@ -10,7 +10,8 @@ namespace trader
         void setupAppConnection(ApplicationHelper* appHelper);
         void loadConnections();
         void startConnections();
-        void getConnections(std::vector< AutoPtr< trader::Interface::Connection > > &connections);
+		void stopConnections();
+		void getConnections(std::vector< AutoPtr< trader::Interface::Connection > > &connections);
         AutoPtr< trader::Interface::Connection > &getConnection(const std::string &_connectionName);
         AutoPtr< trader::Interface::Connection > getAppConnection() { return appConnection; }
 

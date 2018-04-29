@@ -105,4 +105,7 @@ namespace trader
 
     void ConnectionHelper::startConnections() { ConnectionManager::instance.get()->DoOperation(DC_START); }
 
+	void ConnectionHelper::stopConnections() { ConnectionManager::instance.get()->DoOperation(DC_STOP); }
+
+
 } // namespace trader

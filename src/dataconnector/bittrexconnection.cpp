@@ -23,6 +23,10 @@ namespace trader
             case DC_START:
                 ConnectionManager::instance.get()->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
                 break;
+			case DC_STOP:
+				stop = true;
+				break;
+
         }
     }
 
@@ -30,7 +34,14 @@ namespace trader
     {
         processingConnection.RunMore();
         processingConnection.Run();
-        ConnectionManager::instance.get()->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
+		if (!stop)
+		{
+			ConnectionManager::instance.get()->pool.startWithPriority(Thread::PRIO_LOWEST, *this);
+		}
+		else
+		{
+			stop = false;
+		}
     }
 
     void BittrexProcessingConnection::RunMore()

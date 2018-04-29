@@ -45,14 +45,18 @@ namespace trader
 
     void ConnectionData::DoOperation(DataConnectorOperation _operation)
     {
-        switch (_operation)
+		for (auto &connectionPair : connections)
+		{
+			Poco::AutoPtr< trader::Interface::Connection > connection = connectionPair.second;
+			connection->DoOperation(_operation);
+		}
+
+		switch (_operation)
         {
             case DC_START:
-                for (auto &connectionPair : connections)
-                {
-                    Poco::AutoPtr< trader::Interface::Connection > connection = connectionPair.second;
-                    connection->DoOperation(_operation);
-                }
+				break;
+			case DC_STOP:
+				pool.joinAll();
                 break;
         }
     }

@@ -10,5 +10,6 @@
 
 enum DataConnectorOperation
 {
-    DC_START = 0
+    DC_START = 0,
+	DC_STOP
 };
