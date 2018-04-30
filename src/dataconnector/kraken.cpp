@@ -18,7 +18,7 @@ namespace trader
     }
 
     Kraken::Kraken()
-        : api(AppManager::instance.get()->getApp(), this)
+        : api(AppManager::instance.getApp(), this)
         , executeTimer(0, 1000)
         , dataBase(new KrakenDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
     {

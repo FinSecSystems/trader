@@ -14,7 +14,7 @@ namespace trader
     }
 
     Exchangeratelab::Exchangeratelab()
-        : api(AppManager::instance.get()->getApp(), this)
+        : api(AppManager::instance.getApp(), this)
     {
     }
 

@@ -138,31 +138,20 @@ namespace trader
 
     int BittrexApp::main(const std::vector< std::string > &args)
     {
-        (void)args;
-#if defined(__GNUC__)
-        std::set_terminate(__gnu_cxx::__verbose_terminate_handler);
-#endif
-        try
-        {
-            // Setup logs, proxy settings, db
-            setup();
-
-            // Bootstrap subsystems
-            start();
-        }
-        catch (Exception &exc)
-        {
-            cerr << exc.displayText() << std::endl;
-            Logger::get("Logs").information("Application Error: %s", exc.displayText());
-            poco_debugger();
-       }
-		return Application::EXIT_SOFTWARE;
+		(void)args;
+		poco_bugcheck();
+		return 0;
 	}
 
-	void setup(Poco::AutoPtr<trader::ApplicationHelper> pApp)
+	void setup(trader::ApplicationHelper* pApp)
 	{
 		pApp->setup();
 		pApp->start();
+	}
+
+	void destroy(trader::ApplicationHelper* pApp)
+	{
+		pApp->destroy();
 	}
 
 } // namespace trader
@@ -171,12 +160,12 @@ namespace trader
 int wmain(int argc, wchar_t **argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
-	Poco::AutoPtr<trader::ApplicationHelper> pApp = new trader::BittrexApp;
+	trader::ApplicationHelper* pApp = new trader::BittrexApp;
 	pApp->init(argc, argv);
 	trader::setup(pApp);
 
 	int res = RUN_ALL_TESTS();
-	trader::AppManager::instance.get()->setApp(nullptr);
+	trader::destroy(pApp);
 	return res;
 }
 #else

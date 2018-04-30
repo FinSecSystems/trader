@@ -93,7 +93,7 @@ namespace trader
         HTTPSClientSession::setGlobalProxyConfig(proxyConfig);
 
         // Make application globally aware
-        AppManager::instance.get()->setApp(this);
+        AppManager::instance.setApp(this);
 
         // Initialize DB
         ostringstream dbNameStream;
@@ -106,7 +106,7 @@ namespace trader
 	{
 		Logger::destroy("Logs");
 		DbManager::instance.setDb(nullptr);
-        AppManager::instance.get()->setApp(nullptr);
+        AppManager::instance.setApp(nullptr);
 	}
 
     void ApplicationHelper::start() { this->initialize(*this); }

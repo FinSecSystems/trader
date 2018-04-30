@@ -89,6 +89,11 @@ if(![System.IO.Directory]::Exists("..\packages\Microsoft.googletest.v140.windesk
 	& "..\tools\bin\nuget\nuget.exe" install Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn -OutputDirectory ..\packages
 }
 
+#Visual Leak Detector
+if(![System.IO.Directory]::Exists("..\packages\VisualLeakDetector.2.5.0.0")) {
+	& "..\tools\bin\nuget\nuget.exe" install VisualLeakDetector -OutputDirectory ..\packages
+}
+
 Pop-Location
 [Environment]::CurrentDirectory = $PWD
 

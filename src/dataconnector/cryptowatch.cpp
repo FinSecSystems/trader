@@ -16,7 +16,7 @@ namespace trader
     }
 
     Cryptowatch::Cryptowatch()
-        : api(AppManager::instance.get()->getApp(), this)
+        : api(AppManager::instance.getApp(), this)
         , dataBase(new CryptowatchDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
     {
         dataBase->init();

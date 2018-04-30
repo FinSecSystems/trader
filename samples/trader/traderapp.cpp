@@ -64,7 +64,7 @@ namespace trader
         void react(OnMarketDataReady const &) override
         {
             MarketDataSubSystem &marketDataSys =
-                AppManager::instance.get()->getApp()->getSubsystem< MarketDataSubSystem >();
+                AppManager::instance.getApp()->getSubsystem< MarketDataSubSystem >();
             std::vector< std::string > markets;
             marketDataSys.retrieveMarkets(markets);
             for (auto &market : markets)
@@ -81,7 +81,7 @@ namespace trader
         void entry() override
         {
             MarketDataSubSystem &marketDataSys =
-                AppManager::instance.get()->getApp()->getSubsystem< MarketDataSubSystem >();
+                AppManager::instance.getApp()->getSubsystem< MarketDataSubSystem >();
             marketDataSys.requestMarketData("bittrex;config1_readonly:USDT-BTC");
         }
 

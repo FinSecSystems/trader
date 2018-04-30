@@ -12,7 +12,7 @@ namespace trader
     using namespace BittrexDatabase;
 
     Bittrex::Bittrex()
-        : api(AppManager::instance.get()->getApp(), this)
+        : api(AppManager::instance.getApp(), this)
         , dataBase(new BittrexDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
         , configurationIdx(0)
     {

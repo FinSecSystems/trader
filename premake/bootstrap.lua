@@ -37,3 +37,10 @@ project "bootstrap"
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/*.pdb %{wks.location}/bin/%{cfg.platform}/release-shared",
 		}
 
+	configuration "with-vld"
+		buildcommands {
+			"{COPY} %{wks.location}/%{visualLeakDetectorPath}lib/native/address-model-64/lib/*.* %{wks.location}/bin/%{cfg.platform}/debug-shared",
+			"{COPY} %{wks.location}/%{visualLeakDetectorPath}lib/native/address-model-64/lib/*.* %{wks.location}/bin/%{cfg.platform}/debug-static",
+			"{COPY} %{wks.location}/%{visualLeakDetectorPath}lib/native/address-model-64/lib/*.* %{wks.location}/bin/%{cfg.platform}/release-shared",
+			"{COPY} %{wks.location}/%{visualLeakDetectorPath}lib/native/address-model-64/lib/*.* %{wks.location}/bin/%{cfg.platform}/release-static"
+		}

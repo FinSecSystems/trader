@@ -9,16 +9,15 @@ namespace trader
         virtual bool findFile(Poco::Path &path) const = 0;
     };
 
-    class DATACONNECTOR_DLL AppManager : public SingletonHolder< AppManager >
-    {
+    class DATACONNECTOR_DLL AppManager {
       public:
         AppManager() {}
 
         ~AppManager() {}
 
-        void setApp(Poco::AutoPtr< App > _app) { application = _app; }
+		void setApp(Poco::AutoPtr< App > _app) { application = _app; }
 
-        Poco::AutoPtr< App > getApp() { return application; }
+		Poco::AutoPtr< App > getApp() { return application; }
 
         static AppManager instance;
 

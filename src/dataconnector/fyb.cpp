@@ -17,7 +17,7 @@ namespace trader
     }
 
     Fyb::Fyb()
-        : api(AppManager::instance.get()->getApp(), this)
+        : api(AppManager::instance.getApp(), this)
         , executeTimer(0, 1000)
         , dataBase(new FybDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
     {

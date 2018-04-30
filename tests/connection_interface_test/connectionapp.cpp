@@ -27,7 +27,7 @@ namespace trader
         std::vector< std::string > connectionStrings;
         connectionStrings.push_back("bittrex");
 
-        AutoPtr<trader::ConnectionApp> pApp = trader::AppManager::instance.get()->getApp().unsafeCast<trader::ConnectionApp>();
+        AutoPtr<trader::ConnectionApp> pApp = trader::AppManager::instance.getApp().unsafeCast<trader::ConnectionApp>();
         ASSERT_NO_THROW(pApp->setupConnections(connectionStrings));
 
         // Start Connections
@@ -65,10 +65,15 @@ namespace trader
 		return Application::EXIT_SOFTWARE;
 	}
 
-	void setup(Poco::AutoPtr<trader::ApplicationHelper> pApp)
+	void setup(trader::ApplicationHelper* pApp)
 	{
 		pApp->setup();
 		pApp->start();
+	}
+
+	void destroy(trader::ApplicationHelper* pApp)
+	{
+		pApp->destroy();
 	}
 
 } // namespace trader
@@ -82,7 +87,7 @@ int wmain(int argc, wchar_t **argv)
 	trader::setup(pApp);
 
 	int res = RUN_ALL_TESTS();
-	trader::AppManager::instance.get()->setApp(nullptr);
+	trader::destroy(pApp);
 	return res;
 }
 #else

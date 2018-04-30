@@ -5,12 +5,15 @@ gTestPackage = "gtest-vc140-static-64"
 gTestPackageVersion = "1.1.0"
 gTestPackageDynamic = "Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn"
 gTestPackageVersionDynamic = "1.8.0"
+visualLeakDetector = "VisualLeakDetector"
+visualLeakDetectorVersion = "2.5.0.0"
 
 pocoPathVS2015	= "packages/%{pocoPackageVS2015}.%{pocoPackageVersion}/"
 pocoPathVS2017	= "packages/%{pocoPackageVS2017}.%{pocoPackageVersion}/"
 gtestPath		= "packages/%{gTestPackage}.%{gTestPackageVersion}/"
 gtestPathDynamic = "packages/%{gTestPackageDynamic}.%{gTestPackageVersionDynamic}/"
 intelSEAPIPath  = "packages/IntelSEAPI-Windows/"
+visualLeakDetectorPath = "packages/%{visualLeakDetector}.%{visualLeakDetectorVersion}/"
 
 -------------------------------------------------------------------------------
 
@@ -33,6 +36,27 @@ configurations {
 }
 
 objdir "tmp"
+
+-- Command line options
+
+newoption {
+   trigger     = "with-vld",
+   description = "Compile with Visual Leak Detector"
+}
+
+configuration "with-vld"
+	libdirs {
+		"%{visualLeakDetectorPath}lib/native/address-model-64/lib"
+	}
+	includedirs {
+		"%{visualLeakDetectorPath}lib/native/include"
+	}
+	forceincludes {
+		"vld.h"
+	}
+	defines {
+		"VLD_FORCE_ENABLE"
+	}
 
 --- Clean Unnecessary platforms
 filter { "system:linux" }
