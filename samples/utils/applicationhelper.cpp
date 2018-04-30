@@ -97,6 +97,7 @@ namespace trader
 
         // Initialize DB
         ostringstream dbNameStream;
+
         dbNameStream << commandName() << ".db";
         DbManager::instance.setDb(new Db(new Data::Session("SQLite", dbNameStream.str())));
     }

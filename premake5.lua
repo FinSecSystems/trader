@@ -186,7 +186,7 @@ filter { "system:windows", "platforms:Win64", "configurations:debug-static" }
 --- Windows, Debug, Release Lib Only
 filter { "system:windows", "platforms:Win64", "configurations:release-static" }
 	libdirs { 
-		"%{gtestPath}lib/native/libs/x64/static/Debug/"
+		"%{gtestPath}lib/native/libs/x64/static/Release/"
 	}
 
 --- Windows, Debug, Dynamic Lib Only
