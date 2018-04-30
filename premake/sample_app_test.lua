@@ -1,10 +1,9 @@
 project "sample_app_test"
 	location "%{wks.location}/tmp/projects"
-	configmap {
-		["debug-static"] = "debug-static",
-		["debug-shared"] = "debug-static",
-		["release-static"] = "release-static",
-		["release-shared"] = "release-static",
+	removeconfigurations 
+	{
+		"debug-shared",
+		"release-shared"
 	}
 	targetname	"sample_app_test"
 	language	"C++"
