@@ -31,12 +31,7 @@ install:
 #  - cmd: msbuild tmp\projects\genproj.vcxproj /t:Build /p:Configuration="debug-static Win64" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:SolutionDir=..\..\ -p:Platform=x64
 
 before_build:
-  - cmd: msbuild generators.sln /t:Build /p:Configuration="debug" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
-    on:
-      configuration: debug-static
-  - cmd: msbuild generators.sln /t:Build /p:Configuration="release" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
-    on:
-      configuration: release-static
+  - cmd: msbuild generators.sln /t:Build /p:Configuration="%configuration%" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
 
 build:
   project: trader.sln
