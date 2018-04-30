@@ -33,10 +33,11 @@ namespace trader
 
     TEST_F(SampleAppTests, RunApp)
     {
-        Poco::AutoPtr< App > pApp = new trader::SampleApp;
+        Poco::AutoPtr< trader::SampleApp > pApp = new trader::SampleApp;
 		ASSERT_NO_THROW(pApp->init(savedArgc, savedArgv));
 
         ASSERT_NO_THROW(pApp->run());
+        ASSERT_NO_THROW(pApp->destroy());
     }
 
     TEST_F(SampleAppTests, SetupApp)

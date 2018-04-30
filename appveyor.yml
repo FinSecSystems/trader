@@ -15,6 +15,8 @@ environment:
 configuration:
   - debug-static
   - release-static
+  - debug-shared
+  - release-shared
 
 install:
   - cmd: git submodule update --init --recursive

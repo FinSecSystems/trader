@@ -44,6 +44,8 @@ namespace trader
 		friend class SampleAppTests_SetupApp_Test;
 		/// <summary> A sample application tests start application test. </summary>
 		friend class SampleAppTests_StartApp_Test;
+        /// <summary> A sample application tests run application test. </summary>
+        friend class SampleAppTests_RunApp_Test;
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/// <summary> Setups the given p application. </summary>
