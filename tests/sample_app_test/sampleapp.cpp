@@ -45,6 +45,8 @@ namespace trader
 		ASSERT_NO_THROW(pApp->init(savedArgc, savedArgv));
 
         ASSERT_NO_THROW(pApp->setup());
+
+        ASSERT_NO_THROW(pApp->destroy());
     }
 
     TEST_F(SampleAppTests, StartApp)
@@ -55,6 +57,8 @@ namespace trader
 		ASSERT_NO_THROW(pApp->setup());
 
         ASSERT_NO_THROW(pApp->start());
+
+        ASSERT_NO_THROW(pApp->destroy());
     }
 
     int SampleApp::main(const std::vector< std::string > &args)

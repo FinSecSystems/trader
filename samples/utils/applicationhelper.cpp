@@ -105,6 +105,7 @@ namespace trader
 	{
 		Logger::destroy("Logs");
 		DbManager::instance.setDb(nullptr);
+        AppManager::instance.get()->setApp(nullptr);
 	}
 
     void ApplicationHelper::start() { this->initialize(*this); }

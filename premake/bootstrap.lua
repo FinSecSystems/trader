@@ -10,7 +10,9 @@ project "bootstrap"
 			"{COPY} %{wks.location}/%{pocoPathVS2015}/build/native/x64/*.dll %{wks.location}/bin/%{cfg.platform}/debug-shared/",
 			"{COPY} %{wks.location}/%{pocoPathVS2015}/build/native/x64/*.dll %{wks.location}/bin/%{cfg.platform}/release-shared/",
 			"{COPY} %{wks.location}/%{pocoPathVS2015}/build/native/x64/*.pdb %{wks.location}/bin/%{cfg.platform}/debug-shared/",
-			"{COPY} %{wks.location}/%{pocoPathVS2015}/build/native/x64/*.pdb %{wks.location}/bin/%{cfg.platform}/release-shared/"
+			"{COPY} %{wks.location}/%{pocoPathVS2015}/build/native/x64/*.pdb %{wks.location}/bin/%{cfg.platform}/release-shared/",
+			"{COPY} %{wks.location}/%{pocoPathVS2015}/lib/native/lib64/*.pdb %{wks.location}/lib/%{cfg.platform}/debug-static/",
+			"{COPY} %{wks.location}/%{pocoPathVS2015}/lib/native/lib64/*.pdb %{wks.location}/lib/%{cfg.platform}/release-static/"
 		}
 
 	filter { "action:vs2017", "system:windows" }
@@ -18,7 +20,9 @@ project "bootstrap"
 			"{COPY} %{wks.location}/%{pocoPathVS2017}/build/native/x64/*.dll %{wks.location}/bin/%{cfg.platform}/debug-shared/",
 			"{COPY} %{wks.location}/%{pocoPathVS2017}/build/native/x64/*.dll %{wks.location}/bin/%{cfg.platform}/release-shared/",
 			"{COPY} %{wks.location}/%{pocoPathVS2017}/build/native/x64/*.pdb %{wks.location}/bin/%{cfg.platform}/debug-shared/",
-			"{COPY} %{wks.location}/%{pocoPathVS2017}/build/native/x64/*.pdb %{wks.location}/bin/%{cfg.platform}/release-shared/"
+			"{COPY} %{wks.location}/%{pocoPathVS2017}/build/native/x64/*.pdb %{wks.location}/bin/%{cfg.platform}/release-shared/",
+			"{COPY} %{wks.location}/%{pocoPathVS2017}/lib/native/lib64/*.pdb %{wks.location}/lib/%{cfg.platform}/debug-static/",
+			"{COPY} %{wks.location}/%{pocoPathVS2017}/lib/native/lib64/*.pdb %{wks.location}/lib/%{cfg.platform}/release-static/"
 		}
 
 	filter { "system:windows" }
