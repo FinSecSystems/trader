@@ -18,12 +18,19 @@ intelSEAPIPath  = "packages/IntelSEAPI-Windows/"
 editorintegration "On"
 
 platforms {
-		"Win64",
-		"Win64-Clang",
-		"Win64-MSClang",
-		"Linux64-gcc",
-		"Linux64-Clang"
-	}
+	"Win64",
+	"Win64-Clang",
+	"Win64-MSClang",
+	"Linux64-gcc",
+	"Linux64-Clang"
+}
+
+configurations {
+	"debug-static",
+	"debug-shared",
+	"release-static",
+	"release-shared"
+}
 
 objdir "tmp"
 
@@ -265,14 +272,11 @@ filter "files:premake5.lua"
 
 --- Workspaces
 workspace "generators"
-	configurations {
-			"debug",
-			"release",
-		}
 
 	group "Tools"
-		project "codegen"
 		project "gencode"
+		project "codegen"
+		project "bootstrap"
 
 	group "Generators"
 		project "apis"
@@ -288,18 +292,14 @@ workspace "generators"
 	include "premake/databases.lua"
 	include "premake/configs.lua"
 	include "premake/gencode.lua"	
+	include "premake/bootstrap.lua"
 
 -------------------------------------------------------------------------------
 
 workspace "trader"
-	configurations {
-			"debug-static",
-			"debug-shared",
-			"release-static",
-			"release-shared"
-		}
 
 	group "Tools"
+---		project "bootstrap"
 		project "genproj"
 
 	group "Modules"
@@ -317,7 +317,7 @@ workspace "trader"
 	
 	group ""
 
-	include "premake/genproj"
+	include "premake/genproj.lua"
 	include "premake/dataconnector.lua"
 	include "premake/trader.lua"
 	include "premake/bittrex_api_test.lua"

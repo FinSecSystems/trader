@@ -39,6 +39,7 @@
 *.sln
 ./*.db
 /bin/Win64
+/bin/Linux64-gcc
 *.log
 /*.make
 * - Copy.*

@@ -22,6 +22,10 @@ project "codegen"
 		"%{wks.location}/src/codegen/**.cpp",
 		"%{wks.location}/include/**.h"
 	}
+	dependson
+	{
+		"bootstrap"
+	}
 
 	filter {"system:windows"}
 		files {
@@ -51,34 +55,34 @@ project "codegen"
 			"PocoXML"
         }
 
-    filter { "platforms:Win64", "system:windows", "configurations:debug" }		
+	filter { "platforms:Win64", "system:windows", "configurations:debug-static" }
 		links { 
-            "PocoFoundationd.lib",
-            "PocoUtild.lib",
-            "PocoJSONd.lib",
-			"PocoXMLd.lib"
-        }
+			"PocoFoundationmtd.lib",
+			"PocoUtilmtd.lib",
+			"PocoJSONmtd.lib",
+			"PocoXMLmtd.lib"
+		}
 
-    filter { "platforms:Win64", "system:windows", "configurations:release" }		
-		links	{ 
+	filter { "platforms:Win64", "system:windows", "configurations:release-static" }
+		links { 
+			"PocoFoundationmt.lib",
+			"PocoUtilmt.lib",
+			"PocoJSONmt.lib",
+			"PocoXMLmt.lib"
+		}
+
+	filter { "platforms:Win64", "system:windows", "configurations:debug-shared" }
+		links { 
+			"PocoFoundationd.lib",
+			"PocoUtild.lib",
+			"PocoJSONd.lib",
+			"PocoXMLd.lib"
+		}
+
+	filter { "platforms:Win64", "system:windows", "configurations:release-shared" }
+		links { 
 			"PocoFoundation.lib",
 			"PocoUtil.lib",
 			"PocoJSON.lib",
 			"PocoXML.lib"
-		}
-
-	filter { "configurations:debug" }
-		postbuildcommands {
-			"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-static",
-			"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-shared",
-			"{COPY} %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.targetname}%{cfg.linktarget.extension} %{wks.location}/bin/%{cfg.platform}/debug-static",
-			"{COPY} %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.targetname}%{cfg.linktarget.extension} %{wks.location}/bin/%{cfg.platform}/debug-shared"
-		}
-
-    filter { "configurations:release" }		
-		postbuildcommands {
-			"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-static",
-			"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-shared",
-			"{COPY} %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.targetname}%{cfg.linktarget.extension} %{wks.location}/bin/%{cfg.platform}/release-static",
-			"{COPY} %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/%{prj.targetname}%{cfg.linktarget.extension} %{wks.location}/bin/%{cfg.platform}/release-shared"
 		}
