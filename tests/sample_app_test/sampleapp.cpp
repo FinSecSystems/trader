@@ -33,7 +33,7 @@ namespace trader
 
     TEST_F(SampleAppTests, RunApp)
     {
-        Poco::AutoPtr< trader::SampleApp > pApp = new trader::SampleApp;
+        trader::SampleApp* pApp = new trader::SampleApp;
 		ASSERT_NO_THROW(pApp->init(savedArgc, savedArgv));
 
         ASSERT_NO_THROW(pApp->run());
@@ -42,7 +42,7 @@ namespace trader
 
     TEST_F(SampleAppTests, SetupApp)
     {
-        Poco::AutoPtr< trader::SampleApp > pApp = new trader::SampleApp;
+        trader::SampleApp* pApp = new trader::SampleApp;
 		ASSERT_NO_THROW(pApp->init(savedArgc, savedArgv));
 
         ASSERT_NO_THROW(pApp->setup());
@@ -52,7 +52,7 @@ namespace trader
 
     TEST_F(SampleAppTests, StartApp)
     {
-        Poco::AutoPtr< trader::SampleApp > pApp = new trader::SampleApp;
+        trader::SampleApp* pApp = new trader::SampleApp;
 		ASSERT_NO_THROW(pApp->init(savedArgc, savedArgv));
 
 		ASSERT_NO_THROW(pApp->setup());
@@ -64,9 +64,9 @@ namespace trader
 
     int SampleApp::main(const std::vector< std::string > &args)
     {
-        (void)args;
-        setup();
-        start();
+		(void)args;
+		setup();
+		start();
         return Poco::Util::Application::EXIT_OK;
     }
 
