@@ -10,6 +10,19 @@ New-Item "..\tmp" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\tools" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\tools\bin" -itemtype directory -ErrorAction SilentlyContinue
 
+Write-Host "Check packages and tools directories"
+Get-ChildItem -Path "..\packages"
+Get-ChildItem -Path "..\tools" –Recurse
+
+#Set Github Credentials
+$global:my_github_credentials = ""
+if (Test-Path env:my_github_username) {
+	if (Test-Path env:my_github_password) {
+		Set-Variable -Name my_github_credentials -Value ($env:my_github_username + ':' + $env:my_github_password + '@') -Scope Global
+		Write-Host "Retrieved Credentials"
+	}
+}
+
 #intelseapi
 $intelseapiDir = "$dir\..\packages\IntelSEAPI-Windows\"
 if(![System.IO.Directory]::Exists($intelseapiDir)){
@@ -17,10 +30,10 @@ if(![System.IO.Directory]::Exists($intelseapiDir)){
 	$repo = "intel/IntelSEAPI"
 	$exename = "IntelSEAPI-Windows.exe"
 	$destinationdir = "..\tmp"
-	$releases = "https://api.github.com/repos/$repo/releases"
+	$releases = "https://${my_github_credentials}api.github.com/repos/$repo/releases"
 	$url = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets[2].browser_download_url
-	$download = "https://github.com/$repo/releases/download/$tag/$exename"
-	Write-Host $download
+	$download = "https://${my_github_credentials}github.com/$repo/releases/download/$tag/$exename"
+	Write-Host "https:/github.com/$repo/releases/download/$tag/$exename"
 	Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 
 	Invoke-WebRequest $url -Out $destinationdir\$exename
 	& "$destinationdir\$exename" /S  /D=$intelseapiDir
@@ -32,11 +45,11 @@ $destinationdir = "..\tools\bin\vswhere"
 if(![System.IO.File]::Exists("$destinationdir\$exename")){
 	Write-Host "Installing VSWhere"
 	$repo = "Microsoft/vswhere"
-	$releases = "https://api.github.com/repos/$repo/releases"
+	$releases = "https://${my_github_credentials}api.github.com/repos/$repo/releases"
 	$url = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets[0].browser_download_url
-	$download = "https://github.com/$repo/releases/download/$tag/$exename"
+	$download = "https://${my_github_credentials}github.com/$repo/releases/download/$tag/$exename"
 	New-Item $destinationdir -itemtype directory -ErrorAction SilentlyContinue 
-	Write-Host $download
+	Write-Host "https://github.com/$repo/releases/download/$tag/$exename"
 	Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 
 	Invoke-WebRequest $url -Out $destinationdir\$exename
 }
@@ -57,15 +70,15 @@ if(![System.IO.File]::Exists("$destinationdir\$exename")){
 	Write-Host "Installing Premake"
 	$repo = "premake/premake-core"
 	$file = "premake.zip"
-	$releases = "https://api.github.com/repos/$repo/releases"
+	$releases = "https://${my_github_credentials}api.github.com/repos/$repo/releases"
 	$tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name.Substring(1)
 	$name = $file.Split(".")[0]
 	$zip = "$name-$tag-windows.zip"
 	$dir = "$name-$tag"
 	$zipfile = "..\tmp\$name-$tag-windows.zip"
-	$download = "https://github.com/$repo/releases/download/v$tag/$zip"
+	$download = "https://${my_github_credentials}github.com/$repo/releases/download/v$tag/$zip"
 	New-Item $destinationdir -itemtype directory -ErrorAction SilentlyContinue
-	Write-Host $download
+	Write-Host "https://github.com/$repo/releases/download/v$tag/$zip"
 	Invoke-WebRequest $download -Out $zipfile
 	Expand-Archive $zipfile -Force -DestinationPath "..\tmp"
 	Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 

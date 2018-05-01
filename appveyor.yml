@@ -6,6 +6,10 @@ os:
 environment:
   my_secret:
     secure: 1+nl/M+SEHCHODFx1uJfZA==
+  my_github_username:
+	secure: dVKOiMJnhBO0y+8aZxCYDg==
+  my_github_password:
+    secure: LcITt+0DCnllqTcdDo3Ee3yO+L0CWbGVNqwnfYgvQz3LPoQ3VZupN4rkvAQTrz8f
   matrix:
   - TOOLSET: vs2017
     VS_PLATFORM_TOOLSET: v141
