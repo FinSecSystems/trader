@@ -15,10 +15,19 @@ Get-ChildItem -Path "..\packages"
 Get-ChildItem -Path "..\tools" –Recurse
 
 #Set Github Credentials
-$global:my_github_credentials = ""
+
+function Get-BasicAuthCreds {
+    param([string]$Username,[string]$Password)
+    $AuthString = "{0}:{1}" -f $Username,$Password
+    $AuthBytes  = [System.Text.Encoding]::Ascii.GetBytes($AuthString)
+    return [Convert]::ToBase64String($AuthBytes)
+}
+
+$global:headers = $null
 if (Test-Path env:my_github_username) {
 	if (Test-Path env:my_github_password) {
-		Set-Variable -Name my_github_credentials -Value ($env:my_github_username + ':' + $env:my_github_password + '@') -Scope Global
+		$BasicCreds = Get-BasicAuthCreds -Username $env:my_github_username -Password $env:my_github_password
+		$global:headers = @{"Authorization"="Basic $BasicCreds"}
 		Write-Host "Retrieved Credentials"
 	}
 }
@@ -30,12 +39,12 @@ if(![System.IO.Directory]::Exists($intelseapiDir)){
 	$repo = "intel/IntelSEAPI"
 	$exename = "IntelSEAPI-Windows.exe"
 	$destinationdir = "..\tmp"
-	$releases = "https://${my_github_credentials}api.github.com/repos/$repo/releases"
-	$url = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets[2].browser_download_url
-	$download = "https://${my_github_credentials}github.com/$repo/releases/download/$tag/$exename"
-	Write-Host "https:/github.com/$repo/releases/download/$tag/$exename"
+	$releases = "https://api.github.com/repos/$repo/releases"
+	$url = (Invoke-WebRequest $releases -Headers $headers | ConvertFrom-Json)[0].assets[2].browser_download_url
+	$download = "https://github.com/$repo/releases/download/$tag/$exename"
+	Write-Host $download
 	Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 
-	Invoke-WebRequest $url -Out $destinationdir\$exename
+	Invoke-WebRequest $url -Out $destinationdir\$exename -Headers $headers
 	& "$destinationdir\$exename" /S  /D=$intelseapiDir
 }
 
@@ -45,13 +54,13 @@ $destinationdir = "..\tools\bin\vswhere"
 if(![System.IO.File]::Exists("$destinationdir\$exename")){
 	Write-Host "Installing VSWhere"
 	$repo = "Microsoft/vswhere"
-	$releases = "https://${my_github_credentials}api.github.com/repos/$repo/releases"
-	$url = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].assets[0].browser_download_url
-	$download = "https://${my_github_credentials}github.com/$repo/releases/download/$tag/$exename"
+	$releases = "https://api.github.com/repos/$repo/releases"
+	$url = (Invoke-WebRequest $releases -Headers $headers | ConvertFrom-Json)[0].assets[0].browser_download_url
+	$download = "https://github.com/$repo/releases/download/$tag/$exename"
 	New-Item $destinationdir -itemtype directory -ErrorAction SilentlyContinue 
-	Write-Host "https://github.com/$repo/releases/download/$tag/$exename"
+	Write-Host $download 
 	Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 
-	Invoke-WebRequest $url -Out $destinationdir\$exename
+	Invoke-WebRequest $url -Out $destinationdir\$exename -Headers $headers
 }
 
 # Nuget
@@ -70,16 +79,16 @@ if(![System.IO.File]::Exists("$destinationdir\$exename")){
 	Write-Host "Installing Premake"
 	$repo = "premake/premake-core"
 	$file = "premake.zip"
-	$releases = "https://${my_github_credentials}api.github.com/repos/$repo/releases"
-	$tag = (Invoke-WebRequest $releases | ConvertFrom-Json)[0].tag_name.Substring(1)
+	$releases = "https://api.github.com/repos/$repo/releases"
+	$tag = (Invoke-WebRequest $releases -Headers $headers | ConvertFrom-Json)[0].tag_name.Substring(1)
 	$name = $file.Split(".")[0]
 	$zip = "$name-$tag-windows.zip"
 	$dir = "$name-$tag"
 	$zipfile = "..\tmp\$name-$tag-windows.zip"
-	$download = "https://${my_github_credentials}github.com/$repo/releases/download/v$tag/$zip"
+	$download = "https://github.com/$repo/releases/download/v$tag/$zip"
 	New-Item $destinationdir -itemtype directory -ErrorAction SilentlyContinue
-	Write-Host "https://github.com/$repo/releases/download/v$tag/$zip"
-	Invoke-WebRequest $download -Out $zipfile
+	Write-Host $download 
+	Invoke-WebRequest $download -Out $zipfile -Headers $headers
 	Expand-Archive $zipfile -Force -DestinationPath "..\tmp"
 	Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 
 	Move-Item ..\tmp\$exename -Destination $destinationdir\$exename -Force
