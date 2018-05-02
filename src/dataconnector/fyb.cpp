@@ -11,10 +11,18 @@ namespace trader
     using namespace FybApi;
     using namespace FybDatabase;
 
-    AutoPtr< Interface::Connection > Fyb::getConnection(const std::string &connectionId)
-    {
-        return new FybConnection(connectionId, new Fyb());
-    }
+	void Fyb::setParams(const std::string& paramString)
+	{
+		for (UInt32 idx = 0; idx < api.config.data.size(); ++idx)
+		{
+			if (paramString.compare(api.config.data[idx].name) == 0)
+			{
+				configurationIdx = idx;
+				return;
+			}
+		}
+		throw Poco::NotFoundException("Fyb Error: Params not found in config.json", paramString);
+	}
 
     Fyb::Fyb()
         : api(AppManager::instance.getApp(), this)
@@ -357,13 +365,13 @@ namespace trader
             form.setEncoding(HTMLForm::ENCODING_URL);
 
             // Key
-            req.set("key", api.config.dataObject.consumer_key);
+            req.set("key", api.config.data[configurationIdx].consumer_key);
 
             // Sign
             ostringstream paramStream;
             form.write(paramStream);
             string signatureBase = paramStream.str();
-            string signingKey = api.config.dataObject.consumer_secret;
+            string signingKey = api.config.data[configurationIdx].consumer_secret;
             HMACEngine< SHA1Engine > hmacEngine(signingKey);
             hmacEngine.update(signatureBase);
             DigestEngine::Digest digest = hmacEngine.digest();

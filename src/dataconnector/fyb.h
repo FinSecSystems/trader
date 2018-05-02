@@ -19,23 +19,6 @@ namespace trader
         class Tables;
     };
 
-    class Fyb;
-
-    class FybConnection : public Interface::CallConnection, public Poco::Runnable
-    {
-      public:
-        FybConnection(const std::string &connectionid, Fyb *_exchange)
-            : exchange(_exchange)
-        {
-            (void)connectionid;
-        }
-
-        void run() {}
-
-      private:
-        Fyb *exchange;
-    };
-
     class Fyb : public Api
     {
       public:
@@ -44,6 +27,8 @@ namespace trader
         ~Fyb();
 
         Poco::Dynamic::Var invoke(const std::string &httpMethod, Poco::URI &uri);
+
+		void setParams(const std::string&);
 
         void run();
         void execute(Poco::Timer &timer);
@@ -70,6 +55,7 @@ namespace trader
         Poco::AutoPtr< FybDatabase::Tables > dataBase;
         Poco::AutoPtr< trader::Db > app;
         std::vector< std::function< void(Poco::Timer &) > > serialExecutionList;
+		Poco::UInt32 configurationIdx;
     };
 
 } // namespace trader

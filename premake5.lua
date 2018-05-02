@@ -323,7 +323,6 @@ workspace "generators"
 workspace "trader"
 
 	group "Tools"
----		project "bootstrap"
 		project "genproj"
 
 	group "Modules"
@@ -336,6 +335,7 @@ workspace "trader"
 
 	group "Tests"
 		project "bittrex_api_test"
+		project "fyb_api_test"
 		project "sample_app_test"
 		project "connection_interface_test"
 	
@@ -345,5 +345,6 @@ workspace "trader"
 	include "premake/dataconnector.lua"
 	include "premake/trader.lua"
 	include "premake/bittrex_api_test.lua"
+	include "premake/fyb_api_test.lua"
 	include "premake/sample_app_test.lua"
 	include "premake/connection_interface_test.lua"
