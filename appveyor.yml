@@ -25,14 +25,7 @@ configuration:
 install:
   - cmd: git submodule update --init --recursive
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\deploy_tools.ps1
-  - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
-  - cmd: appveyor-tools\secure-file -decrypt bin\trader.properties.enc -secret %my_secret%
-  - cmd: appveyor-tools\secure-file -decrypt bin\bittrex.config.json.enc -secret %my_secret%
-  - cmd: appveyor-tools\secure-file -decrypt bin\bittrex_api_test.properties.enc -secret %my_secret%
-  - cmd: appveyor-tools\secure-file -decrypt bin\connection_interface_test.properties.enc -secret %my_secret%
-  - cmd: appveyor-tools\secure-file -decrypt bin\exchangeratelab.config.json.enc -secret %my_secret%
-  - cmd: appveyor-tools\secure-file -decrypt bin\kraken.config.json.enc -secret %my_secret%
-  - cmd: appveyor-tools\secure-file -decrypt bin\sample_app_test.properties.enc -secret %my_secret%
+  - cmd: powershell -ExecutionPolicy Bypass -File .\build\decrypt_configs.ps1
   - cmd: build\genproj.cmd
 
 before_build:
@@ -43,10 +36,10 @@ build:
 
 cache:
   - packages -> premake5.lua
-  - tools -> build\deploy_tools.ps1
+  - tools -> build\deploy_tools.ps1, build\decrypt_configs.ps1
 
 after_build:
-  7z a trader_tests_%configuration%_%APPVEYOR_BUILD_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*.dll %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
+  7z a trader_%configuration%_%APPVEYOR_BUILD_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*.dll %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
 
 artifacts:
   - path: trader_%configuration%_%APPVEYOR_BUILD_VERSION%.zip
