@@ -36,8 +36,6 @@ namespace trader
         dataBase->init();
         // dataBase->clear();
 
-        serialExecutionList.push_back(std::bind(&Fyb::executeTickerDetailed, this, _1));
-        serialExecutionList.push_back(std::bind(&Fyb::executeAccountInfo, this, _1));
         serialExecutionList.push_back(std::bind(&Fyb::executeTradeHistory, this, _1));
         serialExecutionList.push_back(std::bind(&Fyb::executeOrderBook, this, _1));
         serialExecutionList.push_back(std::bind(&Fyb::executePendingOrders, this, _1));
@@ -51,44 +49,6 @@ namespace trader
         idx = 0;
         serialExecutionList[idx % serialExecutionList.size()](timer);
         ++idx;
-    }
-
-    void Fyb::executeTickerDetailed(Timer &timer)
-    {
-        (void)timer;
-        AutoPtr< TickerDetailed > tickerDetailedData = api.GetTickerDetailed();
-
-        Ticker_Detailed::Record rec;
-        rec.timeStamp = (Int32)std::time(nullptr);
-        rec.ask = tickerDetailedData->dataObject.ask;
-        rec.bid = tickerDetailedData->dataObject.bid;
-        rec.last = tickerDetailedData->dataObject.last;
-        rec.vol = tickerDetailedData->dataObject.vol;
-
-        dataBase->ticker_DetailedTable->insertAndDeleteUnchanged(rec);
-    }
-
-    void Fyb::executeAccountInfo(Timer &timer)
-    {
-        (void)timer;
-        AutoPtr< AccountInfo > accountInfo = api.GetAccountInfo();
-
-        Account_Balance::Record rec;
-        rec.timeStamp = (Int32)std::time(nullptr);
-        rec.sgdBal = accountInfo->dataObject.sgdBal;
-        rec.btcBal = accountInfo->dataObject.btcBal;
-
-        dataBase->account_BalanceTable->insertAndDeleteUnchanged(rec);
-
-        std::ostringstream accountInfoStream;
-        accountInfoStream << "FYB" << accountInfo->dataObject.accNo;
-
-        Account_Info::Record recInfo;
-        recInfo.accNum = accountInfoStream.str();
-        recInfo.btcAddress = accountInfo->dataObject.btcDeposit;
-        recInfo.email = accountInfo->dataObject.email;
-
-        dataBase->account_InfoTable->insertOnce(recInfo);
     }
 
     void Fyb::executeTradeHistory(Timer &timer)

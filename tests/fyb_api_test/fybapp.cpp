@@ -33,6 +33,7 @@ namespace trader
 
     TEST_F(FybTests, GetTickerDetailedData)
     {
+		Thread::sleep(1000);
 		AutoPtr< TickerDetailed > tickerDetailedData;
 		ASSERT_NO_THROW(tickerDetailedData = fyb->api.GetTickerDetailed());
 		TickerDetailed::DataObject & item = tickerDetailedData->dataObject;
@@ -41,7 +42,40 @@ namespace trader
 		EXPECT_TRUE(item.isSetLast());
 		EXPECT_TRUE(item.isSetVol());
     }
-    
+
+	TEST_F(FybTests, GetAccountInfo)
+	{
+		Thread::sleep(1000);
+		AutoPtr< AccountInfo > accountInfo;
+		ASSERT_NO_THROW(accountInfo = fyb->api.GetAccountInfo());
+		AccountInfo::DataObject & item = accountInfo->dataObject;
+		EXPECT_TRUE(item.isSetSgdBal());
+		EXPECT_TRUE(item.isSetAccNo());
+		EXPECT_TRUE(item.isSetBtcDeposit());
+		EXPECT_TRUE(item.isSetEmail());
+		EXPECT_TRUE(item.isSetBtcBal());
+		EXPECT_TRUE(item.isSetError());
+	}
+
+	TEST_F(FybTests, GetTrades)
+	{
+		Thread::sleep(1000);
+		AutoPtr< TradesParams> tradesParams = new TradesParams();
+		tradesParams->dataObject.SetSince(2749925);
+		AutoPtr< Trades > trades;
+		ASSERT_NO_THROW(trades = fyb->api.GetTrades(tradesParams));
+		for (auto &trade : trades->data)
+		{
+			EXPECT_TRUE(trade.isSetAmount());
+			EXPECT_TRUE(trade.isSetDate());
+			EXPECT_TRUE(trade.isSetPrice());
+			EXPECT_TRUE(trade.isSetTid());
+		}
+	}
+
+
+
+
      int FybApp::main(const std::vector< std::string > &args)
     {
 		(void)args;
