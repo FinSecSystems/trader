@@ -159,7 +159,17 @@ filter { "system:windows", "platforms:Win64" }
 		-- "/GR-"  //Keep rtti enabled because Poco uses dynamic cast
 		}
 	warnings "Extra"
-	disablewarnings { "4251" }
+	disablewarnings {
+		"4251",
+		"4702",
+		"4705",
+		"4100",
+		"4715"
+	}
+	linkoptions { 
+		"/IGNORE:4221",
+		"/IGNORE:4006"
+	}
 	includedirs {
 		"%{gtestPath}lib/native/include",
 		"%{intelSEAPIPath}/include"
