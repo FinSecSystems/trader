@@ -1,9 +1,11 @@
 project "bootstrap"
-	toolset "v140"
     kind "Makefile"
 	location "%{wks.location}/tmp/projects"
 	targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/"
 	targetname "libeay64MD.dll"
+
+	filter { "system:linux" }
+---		toolset "v140"
 
 	filter { "action:vs2015", "system:windows" }
 		buildcommands {

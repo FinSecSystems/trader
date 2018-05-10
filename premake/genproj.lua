@@ -1,5 +1,4 @@
 project "genproj"
-	toolset "v140"
     kind "Makefile"
 	location "%{wks.location}/tmp/projects"
 	targetdir "%{wks.location}"
@@ -54,6 +53,7 @@ project "genproj"
 		}
 
 	filter { "system:windows" }
+---		toolset "v140"
 		files {
 			"%{gtestPath}lib/native/include/**.h"			
 		}

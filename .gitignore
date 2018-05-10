@@ -55,3 +55,5 @@ deps/*.make
 /*.pdb/*
 packages/
 tools/bin/appveyor-tools/
+autom4te.cache/
+configure

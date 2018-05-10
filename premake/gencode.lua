@@ -1,5 +1,4 @@
 project "gencode"
-	toolset "v140"
 	location "%{wks.location}/tmp/projects"
 	targetdir "%{wks.location}"
 	targetname  "%{wks.name}.sln"
@@ -49,6 +48,7 @@ project "gencode"
 		}
 
 	filter { "system:windows" }
+---		toolset "v140"
 		files {
 			"%{gtestPath}lib/native/include/**.h"			
 		}
