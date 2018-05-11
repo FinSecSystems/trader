@@ -4,8 +4,8 @@ project "bootstrap"
 	targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/"
 	targetname "libeay64MD.dll"
 
-	filter { "system:linux" }
----		toolset "v140"
+	filter { "system:windows" }
+		toolset "v140"
 
 	filter { "action:vs2015", "system:windows" }
 		buildcommands {

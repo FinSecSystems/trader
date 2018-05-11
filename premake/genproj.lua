@@ -53,7 +53,7 @@ project "genproj"
 		}
 
 	filter { "system:windows" }
----		toolset "v140"
+		toolset "v140"
 		files {
 			"%{gtestPath}lib/native/include/**.h"			
 		}
