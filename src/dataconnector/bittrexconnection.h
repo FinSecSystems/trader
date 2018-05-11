@@ -1,14 +1,12 @@
-// ***********************************************************************
-// Assembly         : trader
-// Author           : Viknash
-// ***********************************************************************
-// <copyright file="bittrex.h" >
-//     Copyright (c) FinSec Systems. All rights reserved.
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="bittrexconnection.h" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
 // </copyright>
-// <summary>
-//     Communication interface with the Bittrex exchange
-// </summary>
-// ***********************************************************************
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>Declares the API class</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include "api.h"
@@ -23,6 +21,7 @@
 namespace trader
 {
 
+    /// <summary> A bittrex processing connection. </summary>
     class BittrexProcessingConnection : public Interface::MessageReceivingConnection
     {
       public:
@@ -93,49 +92,73 @@ namespace trader
         /// <param name="newOrderSingleData.TransactTime">Time of order creation(expressed in UTC).</param>
         void NewOrderSingle(Poco::AutoPtr< Interface::NewOrderSingleData > newOrderSingleData) override;
 
-        // TODO: Documentation
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> TODO: Documentation. </summary>
+        ///
+        /// <param name="orderCancelRequestData"> Information describing the order cancel request. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void OrderCancelRequest(Poco::AutoPtr< Interface::OrderCancelRequestData > orderCancelRequestData) override;
 
-        // TODO: Documentation
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> TODO: Documentation. </summary>
+        ///
+        /// <param name="tradeCaptureReportRequestData"> Information describing the trade capture report request. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void TradeCaptureReportRequest(
             Poco::AutoPtr< Interface::TradeCaptureReportRequestData > tradeCaptureReportRequestData) override;
 
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Sets connection identifier. </summary>
+        ///
+        /// <param name="_connectionId"> Identifier for the connection. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void SetConnectionId(const std::string &_connectionId) { connectionId = _connectionId; }
 
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Sets an exchange. </summary>
+        ///
+        /// <param name="_exchange"> [in,out] If non-null, the exchange. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
         void SetExchange(Bittrex *_exchange) { exchange = _exchange; }
 
+        /// <summary> Executes the more operation. </summary>
         void RunMore();
 
         Bittrex *exchange;
 
         std::string connectionId;
 
-        // In-memory cache of marketdata
+        /// <summary> In-memory cache of marketdata. </summary>
         struct BittrexMarketData
         {
+            /// <summary> Initializes a new instance of the bittrexconnection class. </summary>
             BittrexMarketData()
                 : lastCachedId(0)
             {
             }
+            /// <summary> Defines an alias representing the market data map. </summary>
             typedef std::unordered_map< Poco::Int32, BittrexApi::History::DataObject::ResultArray > MarketDataMap;
-            MarketDataMap marketDataMap;
-            Poco::Int32 lastCachedId;
+            MarketDataMap marketDataMap;	///< The market data map
+            Poco::Int32 lastCachedId;   ///< Identifier for the last cached
         };
 
+        /// <summary> Defines an alias representing the symbol identifier map. </summary>
         typedef std::unordered_map< std::string, BittrexMarketData > SymIDMap;
-        SymIDMap marketToTradeHistoryMap;
+        SymIDMap marketToTradeHistoryMap;   ///< The market to trade history map
 
+        /// <summary> A market data request retrieval data. </summary>
         struct MarketDataRequestRetrievalData
         {
-            Poco::AutoPtr< Interface::MarketDataRequestData > marketRequestData;
+            Poco::AutoPtr< Interface::MarketDataRequestData > marketRequestData;	///< Information describing the market request
 
-            // The id of the last marketData entry that was sent to the requester
+            /// <summary> The id of the last marketData entry that was sent to the requester. </summary>
             typedef std::unordered_map< std::string, Poco::Int32 > LastCacheIdMap;
-            LastCacheIdMap lastCacheIdMap;
+            LastCacheIdMap lastCacheIdMap;  ///< The last cache identifier map
         };
 
+        /// <summary> Defines an alias representing the market data update map. </summary>
         typedef std::unordered_map< std::string, MarketDataRequestRetrievalData > MarketDataUpdateMap;
-        MarketDataUpdateMap marketDataUpdateMap;
+        MarketDataUpdateMap marketDataUpdateMap;	///< The market data update map
     };
 
     class BittrexConnection : public Interface::CallConnection, public Poco::Runnable

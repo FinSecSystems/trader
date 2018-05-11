@@ -1,8 +1,10 @@
-// stdafx.cpp : source file that includes just the standard includes
-// Practice.pch will be the pre-compiled header
-// stdafx.obj will contain the pre-compiled type information
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="stdafx.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>PCH File</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-
-// TODO: reference any additional headers you need in STDAFX.H
-// and not in this file

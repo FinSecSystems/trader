@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="bittrexconnection.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>BittrexConnection Class Implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "bittrex.h"
 #include "app.h"
@@ -11,11 +20,23 @@ namespace trader
     using namespace BittrexApi;
     using namespace BittrexDatabase;
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gets a connection. </summary>
+    ///
+    /// <param name="connectionId"> Identifier for the connection. </param>
+    ///
+    /// <returns> The connection. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     AutoPtr< Interface::Connection > BittrexConnection::getConnection(const std::string &connectionId)
     {
         return new BittrexConnection(connectionId, new Bittrex());
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the operation operation. </summary>
+    ///
+    /// <param name="_operation"> The operation. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void BittrexConnection::DoOperation(Poco::Int32 _operation)
     {
         switch (_operation)
@@ -30,6 +51,7 @@ namespace trader
         }
     }
 
+    /// <summary> Runs this object. </summary>
     void BittrexConnection::run()
     {
         processingConnection.RunMore();
@@ -44,6 +66,7 @@ namespace trader
 		}
     }
 
+    /// <summary> Executes the more operation. </summary>
     void BittrexProcessingConnection::RunMore()
     {
         for (auto &marketData : marketDataUpdateMap)
@@ -52,6 +75,11 @@ namespace trader
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Security list request. </summary>
+    ///
+    /// <param name="securityListRequestData"> Information describing the security list request. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void BittrexProcessingConnection::SecurityListRequest(
         Poco::AutoPtr< Interface::SecurityListRequestData > securityListRequestData)
     {
@@ -90,6 +118,11 @@ namespace trader
         receivingConnection->SecurityList(securityListData);
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gets unique response identifier. </summary>
+    ///
+    /// <returns> The unique response identifier. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     std::string GetUniqueResponseId()
     {
         static std::atomic< std::int32_t > idx = 0;
@@ -98,6 +131,11 @@ namespace trader
         return uniqueResponseIdStream.str();
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Market data request. </summary>
+    ///
+    /// <param name="marketDataRequestData"> Information describing the market data request. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void BittrexProcessingConnection::MarketDataRequest(
         Poco::AutoPtr< Interface::MarketDataRequestData > marketDataRequestData)
     {
@@ -320,6 +358,11 @@ namespace trader
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Creates a new order single. </summary>
+    ///
+    /// <param name="newOrderSingleData"> Information describing the new order single. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void BittrexProcessingConnection::NewOrderSingle(Poco::AutoPtr< Interface::NewOrderSingleData > newOrderSingleData)
     {
         // [Server-Side]
@@ -334,6 +377,11 @@ namespace trader
         poco_bugcheck_msg("NewOrderSingle not implemented.");
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Order cancel request. </summary>
+    ///
+    /// <param name="orderCancelRequestData"> Information describing the order cancel request. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void BittrexProcessingConnection::OrderCancelRequest(
         Poco::AutoPtr< Interface::OrderCancelRequestData > orderCancelRequestData)
     {

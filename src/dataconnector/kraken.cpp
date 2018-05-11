@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="kraken.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>Kraken connection implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "kraken.h"
 #include "api.h"
@@ -12,11 +21,19 @@ namespace trader
     using namespace KrakenApi;
     using namespace KrakenDatabase;
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gets a connection. </summary>
+    ///
+    /// <param name="connectionId"> Identifier for the connection. </param>
+    ///
+    /// <returns> The connection. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     AutoPtr< Interface::Connection > Kraken::getConnection(const std::string &connectionId)
     {
         return new KrakenConnection(connectionId, new Kraken());
     }
 
+    /// <summary> Initializes a new instance of the Kraken class. </summary>
     Kraken::Kraken()
         : api(AppManager::instance.getApp(), this)
         , executeTimer(0, 1000)
@@ -24,6 +41,7 @@ namespace trader
     {
     }
 
+    /// <summary> Runs this object. </summary>
     void Kraken::run()
     {
         dataBase->init();
@@ -32,6 +50,11 @@ namespace trader
         executeTimer.start(TimerCallback< Kraken >(*this, &Kraken::execute));
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the given timer. </summary>
+    ///
+    /// <param name="timer"> [in,out] The timer. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void Kraken::execute(Timer &timer)
     {
         static std::atomic< std::int32_t > idx;
@@ -43,8 +66,19 @@ namespace trader
         }
     }
 
+    /// <summary> Finalizes an instance of the Kraken class. </summary>
     Kraken::~Kraken() {}
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Signatures the given file. </summary>
+    ///
+    /// <param name="path">	    Full pathname of the file. </param>
+    /// <param name="nonce">    The nonce. </param>
+    /// <param name="postdata"> The postdata. </param>
+    /// <param name="secret">   The secret. </param>
+    ///
+    /// <returns> A std::string. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     std::string signature(const std::string &path, const std::string &nonce, const std::string &postdata,
                           const std::string &secret)
     {
@@ -61,6 +95,17 @@ namespace trader
         return b64_encode(hmac_sha512(data, b64_decode(secret)));
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the given operation on a different thread, and waits for the result. </summary>
+    ///
+    /// <exception cref="TimeoutException">	    Thrown when a Timeout error condition occurs. </exception>
+    /// <exception cref="ApplicationException"> Thrown when an Application error condition occurs. </exception>
+    ///
+    /// <param name="httpMethod"> The HTTP method. </param>
+    /// <param name="uri">		  [in,out] URI of the document. </param>
+    ///
+    /// <returns> A Dynamic::Var. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Dynamic::Var Kraken::invoke(const std::string &httpMethod, URI &uri)
     {
         static FastMutex lock;

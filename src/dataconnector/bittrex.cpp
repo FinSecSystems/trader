@@ -1,3 +1,12 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="bittrex.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>Bittrex Class Implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "bittrex.h"
 #include "app.h"
@@ -11,6 +20,7 @@ namespace trader
     using namespace BittrexApi;
     using namespace BittrexDatabase;
 
+    /// <summary> Initializes a new instance of the Bittrex class. </summary>
     Bittrex::Bittrex()
         : api(AppManager::instance.getApp(), this)
         , dataBase(new BittrexDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
@@ -18,6 +28,7 @@ namespace trader
     {
     }
 
+    /// <summary> Runs this object. </summary>
     void Bittrex::run()
     {
 #if 0
@@ -163,8 +174,17 @@ namespace trader
 #endif
     }
 
+    /// <summary> Finalizes an instance of the Bittrex class. </summary>
     Bittrex::~Bittrex() {}
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gets hmac 2. </summary>
+    ///
+    /// <param name="keyParam"> The key parameter. </param>
+    /// <param name="message">  The message. </param>
+    ///
+    /// <returns> The hmac 2. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     string getHMAC2(string keyParam, string message)
     {
         char key[10000];
@@ -183,6 +203,16 @@ namespace trader
         return output;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the given operation on a different thread, and waits for the result. </summary>
+    ///
+    /// <exception cref="ApplicationException"> Thrown when an Application error condition occurs. </exception>
+    ///
+    /// <param name="httpMethod"> The HTTP method. </param>
+    /// <param name="uri">		  [in,out] URI of the document. </param>
+    ///
+    /// <returns> A Dynamic::Var. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Dynamic::Var Bittrex::invoke(const string &httpMethod, URI &uri)
     {
         (void)httpMethod;
@@ -268,6 +298,13 @@ namespace trader
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Sets the parameters. </summary>
+    ///
+    /// <exception cref="Poco::NotFoundException"> Thrown when the requested element is not present. </exception>
+    ///
+    /// <param name="paramString"> The parameter string. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void Bittrex::setParams(const std::string& paramString)
     {
         for (UInt32 idx = 0; idx < api.config.data.size(); ++idx)

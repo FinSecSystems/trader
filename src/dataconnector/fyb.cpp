@@ -1,3 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="fyb.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>FYB Api connection implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "fyb.h"
 #include "api.h"
@@ -11,6 +20,13 @@ namespace trader
     using namespace FybApi;
     using namespace FybDatabase;
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// <summary> Sets the parameters. </summary>
+	///
+	/// <exception cref="Poco::NotFoundException"> Thrown when the requested element is not present. </exception>
+	///
+	/// <param name="paramString"> The parameter string. </param>
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void Fyb::setParams(const std::string& paramString)
 	{
 		for (UInt32 idx = 0; idx < api.config.data.size(); ++idx)
@@ -24,6 +40,7 @@ namespace trader
 		throw Poco::NotFoundException("Fyb Error: Params not found in config.json", paramString);
 	}
 
+    /// <summary> Initializes a new instance of the Fyb class. </summary>
     Fyb::Fyb()
         : api(AppManager::instance.getApp(), this)
         , executeTimer(0, 1000)
@@ -31,6 +48,7 @@ namespace trader
     {
     }
 
+    /// <summary> Runs this object. </summary>
     void Fyb::run()
     {
         dataBase->init();
@@ -43,6 +61,11 @@ namespace trader
         executeTimer.start(TimerCallback< Fyb >(*this, &Fyb::execute));
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the given timer. </summary>
+    ///
+    /// <param name="timer"> [in,out] The timer. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void Fyb::execute(Timer &timer)
     {
         static std::atomic< std::int32_t > idx;
@@ -51,6 +74,11 @@ namespace trader
         ++idx;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the trade history operation. </summary>
+    ///
+    /// <param name="timer"> [in,out] The timer. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void Fyb::executeTradeHistory(Timer &timer)
     {
         (void)timer;
@@ -79,6 +107,15 @@ namespace trader
         dataBase->trade_HistoryTable->insertMultipleUnique(tradeHistoryRecord);
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Searches for the first missing. </summary>
+    ///
+    /// <typeparam name="RECORDTYPE"> Type of the recordtype. </typeparam>
+    /// <param name="orders">		  [in,out] The orders. </param>
+    /// <param name="records">		  [in,out] The records. </param>
+    /// <param name="missingRecords"> [in,out] The missing records. </param>
+    /// <param name="ascending">	  (Optional) True to ascending. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     template < typename RECORDTYPE >
     void findMissing(std::vector< RECORDTYPE > &orders, std::vector< RECORDTYPE > &records,
                      std::vector< RECORDTYPE > &missingRecords, bool ascending = true)
@@ -116,6 +153,11 @@ namespace trader
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the order book operation. </summary>
+    ///
+    /// <param name="timer"> [in,out] The timer. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void Fyb::executeOrderBook(Timer &timer)
     {
         (void)timer;
@@ -199,6 +241,11 @@ namespace trader
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the pending orders operation. </summary>
+    ///
+    /// <param name="timer"> [in,out] The timer. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void Fyb::executePendingOrders(Timer &timer)
     {
         (void)timer;
@@ -243,6 +290,11 @@ namespace trader
             dataBase->my_Pending_Sell_OrdersTable->insertMultipleUnique(sellRecords);
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the order history operation. </summary>
+    ///
+    /// <param name="timer"> [in,out] The timer. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void Fyb::executeOrderHistory(Timer &timer)
     {
         (void)timer;
@@ -283,8 +335,20 @@ namespace trader
         dataBase->my_Trade_HistoryTable->insertMultipleUnique(records);
     }
 
+    /// <summary> Finalizes an instance of the Fyb class. </summary>
     Fyb::~Fyb() {}
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the given operation on a different thread, and waits for the result. </summary>
+    ///
+    /// <exception cref="TimeoutException">	    Thrown when a Timeout error condition occurs. </exception>
+    /// <exception cref="ApplicationException"> Thrown when an Application error condition occurs. </exception>
+    ///
+    /// <param name="httpMethod"> The HTTP method. </param>
+    /// <param name="uri">		  [in,out] URI of the document. </param>
+    ///
+    /// <returns> A Dynamic::Var. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Dynamic::Var Fyb::invoke(const std::string &httpMethod, URI &uri)
     {
         static FastMutex lock;
