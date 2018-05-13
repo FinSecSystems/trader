@@ -1,9 +1,17 @@
-#pragma once
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="db.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>DbManager implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "db.h"
 
-namespace trader {
+namespace trader
+{
 
-    DbManager DbManager::instance;
-
+    DbManager DbManager::instance;  ///< The database manager instance
 }

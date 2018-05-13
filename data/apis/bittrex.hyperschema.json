@@ -42,6 +42,14 @@
                 "type": "bool"
               },
               "Created": {
+                "pattern": "%Y-%m-%dT%H:%M:%S",
+                "format": "time",
+                "type": "string"
+              },
+              "LogoUrl": {
+                "type": "string"
+              },
+              "Notice": {
                 "type": "string"
               }
             }
@@ -90,6 +98,7 @@
       "type": "object",
       "properties": {
         "Currency": {
+          "description": "a string literal for the market (ex: BTC-LTC)",
           "type": "string"
         }
       }
@@ -122,10 +131,12 @@
                 "format": "double",
                 "type": "number"
               },
-              "Filltype": {
+              "FillType": {
+                "pattern": "FILL|PARTIAL_FILL",
                 "type": "string"
               },
               "OrderType": {
+                "pattern": "BUY|SELL",
                 "type": "string"
               }
             }
@@ -137,7 +148,85 @@
       "type": "object",
       "properties": {
         "market": {
+          "description": "a string literal for the market (ex: BTC-LTC)",
           "type": "string"
+        }
+      }
+    },
+    "OrderBookParams": {
+      "type": "object",
+      "properties": {
+        "market": {
+          "description": "a string literal for the market (ex: BTC-LTC)",
+          "type": "string"
+        },
+        "type": {
+          "pattern": "buy|sell|both",
+          "description": "buy, sell or both to identify the type of orderbook to return",
+          "type": "string"
+        }
+      }
+    },
+    "OrderBookBoth": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "buy": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Quantity": {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  "Rate": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "sell": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Quantity": {
+                    "format": "double",
+                    "type": "number"
+                  },
+                  "Rate": {
+                    "format": "double",
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "OrderBook": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Quantity": {
+                "format": "double",
+                "type": "number"
+              },
+              "Rate": {
+                "format": "double",
+                "type": "number"
+              }
+            }
+          }
         }
       }
     }
@@ -187,6 +276,36 @@
       ],
       "schema": {
         "$ref": "#/definitions/HistoryParams"
+      }
+    },
+    {
+      "href": "public/getorderbook",
+      "description": "Used to get retrieve the orderbook for a given market",
+      "method": "GET",
+      "title": "GetOrderBook",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/OrderBook"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/OrderBookParams"
+      }
+    },
+    {
+      "href": "public/getorderbook",
+      "description": "Used to get retrieve the orderbook for a given market",
+      "method": "GET",
+      "title": "GetBothOrderBooks",
+      "rel": "create",
+      "targetSchemas": [
+        {
+          "$ref": "#/definitions/OrderBookBoth"
+        }
+      ],
+      "schema": {
+        "$ref": "#/definitions/OrderBookParams"
       }
     }
   ],

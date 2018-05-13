@@ -1,69 +1,135 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="fyb.h" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>FYB Api Class</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 #pragma once
 
-#include "dataconnector/db.h"
-#include "dataconnector/api.h"
+#include "api.h"
+#include "db.h"
 #include "fybapi.h"
 #include "fybdatabase.h"
 #include "interface.h"
 
-namespace trader {
+namespace trader
+{
 
-    namespace FybApi {
+    namespace FybApi
+    {
         class EndPoints;
     };
 
-    namespace FybDatabase {
+    namespace FybDatabase
+    {
         class Tables;
     };
 
-    class Fyb;
-
-    class FybConnection : public Interface::Connection
+    /// <summary> A fyb. </summary>
+    class Fyb : public Api
     {
-    public:
-        FybConnection(const std::string& connectionid, Fyb* _exchange)
-            : exchange(_exchange)
-        {
-            (void)connectionid;
-        }
-    private:
-        Fyb* exchange;
+      public:
+        /// <summary> Initializes a new instance of the Fyb class. </summary>
+        Fyb();
+
+        /// <summary> Finalizes an instance of the Fyb class. </summary>
+        ~Fyb();
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Executes the given operation on a different thread, and waits for the result. </summary>
+        ///
+        /// <param name="httpMethod"> The HTTP method. </param>
+        /// <param name="uri">		  [in,out] URI of the document. </param>
+        ///
+        /// <returns> A Poco::Dynamic::Var. </returns>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Poco::Dynamic::Var invoke(const std::string &httpMethod, Poco::URI &uri);
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// <summary> Sets the parameters. </summary>
+		///
+		/// <param name="parameter1"> The first parameter. </param>
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		void setParams(const std::string&);
+
+        /// <summary> Runs this object. </summary>
+        void run();
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Executes the given timer. </summary>
+        ///
+        /// <param name="timer"> [in,out] The timer. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void execute(Poco::Timer &timer);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Executes the trade history operation. </summary>
+        ///
+        /// <param name="timer"> [in,out] The timer. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void executeTradeHistory(Poco::Timer &timer);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Executes the order book operation. </summary>
+        ///
+        /// <param name="timer"> [in,out] The timer. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void executeOrderBook(Poco::Timer &timer);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Executes the pending orders operation. </summary>
+        ///
+        /// <param name="timer"> [in,out] The timer. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void executePendingOrders(Poco::Timer &timer);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Executes the order history operation. </summary>
+        ///
+        /// <param name="timer"> [in,out] The timer. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void executeOrderHistory(Poco::Timer &timer);
+
+        FybApi::EndPoints api;  ///< The API
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Gets a connection. </summary>
+        ///
+        /// <param name="connectionId"> Identifier for the connection. </param>
+        ///
+        /// <returns> The connection. </returns>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        static AutoPtr< Interface::Connection > getConnection(const std::string &connectionId);
+
+      protected:
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Initializes a new instance of the Fyb class. </summary>
+        ///
+        /// <param name="parameter1"> The first parameter. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Fyb(const Fyb &);
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Assignment operator. </summary>
+        ///
+        /// <param name="parameter1"> The first parameter. </param>
+        ///
+        /// <returns> A shallow copy of this object. </returns>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Fyb &operator=(const Fyb &);
+
+        std::string _uri;   ///< _URI of the document
+
+      private:
+        Poco::Timer executeTimer;   ///< The execute timer
+        Poco::AutoPtr< FybDatabase::Tables > dataBase;  ///< The data base
+        Poco::AutoPtr< trader::Db > app;	///< The application
+        std::vector< std::function< void(Poco::Timer &) > > serialExecutionList;	///< List of serial executions
+		Poco::UInt32 configurationIdx;  ///< Zero-based index of the configuration
     };
 
-	class Fyb : public Api
-	{
-	public:
-		Fyb();
-
-		~Fyb();
-
-		Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
-
-		void run();
-		void execute(Poco::Timer& timer);
-
-		void executeTickerDetailed(Poco::Timer& timer);
-		void executeAccountInfo(Poco::Timer& timer);
-		void executeTradeHistory(Poco::Timer& timer);
-		void executeOrderBook(Poco::Timer& timer);
-		void executePendingOrders(Poco::Timer& timer);
-		void executeOrderHistory(Poco::Timer& timer);
-
-        FybApi::EndPoints api;
-
-        static AutoPtr<Interface::Connection> getConnection(const std::string& connectionId);
-
-	protected:
-		Fyb(const Fyb&);
-		Fyb& operator = (const Fyb&);
-
-		std::string _uri;
-
-	private:
-		Poco::Timer executeTimer;
-		Poco::AutoPtr<FybDatabase::Tables> dataBase;
-		Poco::AutoPtr<trader::Db> app;
-		std::vector<std::function<void(Poco::Timer&)>> serialExecutionList;
-	};
-
-}
+} // namespace trader

@@ -1,0 +1,34 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="fybconnection.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>FYB Api connection implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "fyb.h"
+#include "app.h"
+#include "fybapi.h"
+#include "fybconnection.h"
+#include "connectionmanager.h"
+
+namespace trader
+{
+
+    using namespace FybApi;
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// <summary> Gets a connection. </summary>
+	///
+	/// <param name="connectionId"> Identifier for the connection. </param>
+	///
+	/// <returns> The connection. </returns>
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	AutoPtr< Interface::Connection > Fyb::getConnection(const std::string &connectionId)
+	{
+		return new FybConnection(connectionId, new Fyb());
+	}
+
+} // namespace trader

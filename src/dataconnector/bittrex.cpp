@@ -1,51 +1,37 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="bittrex.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>Bittrex Class Implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "stdafx.h"
 #include "bittrex.h"
+#include "app.h"
 #include "bittrexapi.h"
 #include "helper.h"
 #include "shautils.h"
-#include "app.h"
 
-namespace trader {
+namespace trader
+{
 
     using namespace BittrexApi;
     using namespace BittrexDatabase;
 
-    AutoPtr<Interface::Connection> Bittrex::getConnection(const std::string& connectionId)
+    /// <summary> Initializes a new instance of the Bittrex class. </summary>
+    Bittrex::Bittrex()
+        : api(AppManager::instance.getApp(), this)
+        , dataBase(new BittrexDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
+        , configurationIdx(0)
     {
-        return new BittrexConnection(connectionId, new Bittrex());
     }
 
-    Bittrex::Bittrex()
-        : api(AppManager::instance.get()->getApp(), this)
-        , dataBase(new BittrexDatabase::Tables(DbManager::instance.get()->getDb()->getDbSession()))
-    {
-    }
-    
+    /// <summary> Runs this object. </summary>
     void Bittrex::run()
     {
-        static bool useStorage = false;
-        //Get Markets and create tables
-        AutoPtr<Markets> balance = api.GetMarkets();
-        for (auto& market : balance->dataObject.result)
-        {
-            if (market.isActive && market.isSetMarketName())
-            {
-                //Add market if it does not already exist
-                std::unordered_map<std::string, MarketData>::const_iterator marketExists = marketToTradeHistoryMap.find(market.marketName);
-                if (marketExists == marketToTradeHistoryMap.end())
-                {
-                    Poco::AutoPtr<Trade_History> tradeHistoryTable = new Trade_History(dataBase->db, market.marketName);
-                    MarketData marketData;
-                    marketData.storage = tradeHistoryTable;
-                    marketToTradeHistoryMap.insert({ market.marketName, marketData });
-                    if (useStorage)
-                    {
-                        tradeHistoryTable->init();
-                    }
-                }
-            }
-        }
-
+#if 0
         //Populate Trade History
         for (auto& market : marketToTradeHistoryMap)
         {
@@ -185,67 +171,107 @@ namespace trader {
                 }
             }
         }
+#endif
     }
 
-    Bittrex::~Bittrex()
+    /// <summary> Finalizes an instance of the Bittrex class. </summary>
+    Bittrex::~Bittrex() {}
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gets hmac 2. </summary>
+    ///
+    /// <param name="keyParam"> The key parameter. </param>
+    /// <param name="message">  The message. </param>
+    ///
+    /// <returns> The hmac 2. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    string getHMAC2(string keyParam, string message)
     {
+        char key[10000];
+        char data[10000];
+        strcpy(key, keyParam.c_str());
+        strncpy(data, message.c_str(), sizeof(data));
+
+        unsigned char *digest;
+        digest = HMAC(EVP_sha512(), key, (int)strlen(key), (unsigned char *)data, (int)strlen(data), NULL, NULL);
+        char mdString[SHA512_DIGEST_LENGTH * 2 + 1];
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
+            sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+        mdString[SHA512_DIGEST_LENGTH * 2] = '\0';
+
+        string output = mdString;
+        return output;
     }
 
-	string getHMAC2(string keyParam, string message)
-	{
-		char key[10000];
-		char data[10000];
-		strcpy(key, keyParam.c_str());
-		strncpy(data, message.c_str(), sizeof(data));
-
-		unsigned char* digest;
-		digest = HMAC(EVP_sha512(), key, (int)strlen(key), (unsigned char*)data, (int)strlen(data), NULL, NULL);
-		char mdString[SHA512_DIGEST_LENGTH*2+1];
-		for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
-			sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
-		mdString[SHA512_DIGEST_LENGTH * 2] = '\0';
-
-		string output = mdString;
-		return output;
-	}
-
-    Dynamic::Var Bittrex::invoke(const string& httpMethod, URI& uri)
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the given operation on a different thread, and waits for the result. </summary>
+    ///
+    /// <exception cref="ApplicationException"> Thrown when an Application error condition occurs. </exception>
+    ///
+    /// <param name="httpMethod"> The HTTP method. </param>
+    /// <param name="uri">		  [in,out] URI of the document. </param>
+    ///
+    /// <returns> A Dynamic::Var. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Dynamic::Var Bittrex::invoke(const string &httpMethod, URI &uri)
     {
         (void)httpMethod;
 
-		time_t currentTimeStamp = std::time(nullptr);
+        //Throttle Connection
+        static FastMutex mutex;
+        FastMutex::ScopedLock lock(mutex);
+        static time_point<system_clock> lastInvokeTime;
+        static long long minMillisecondsBetweenInvokes = (long long) ((double)1 / api.config.data[configurationIdx].requests_per_minute)*1000*60;
+        time_point<system_clock> currentInvokeTime = system_clock::now();
 
-		bool privateApi = (uri.getHost().find("public") == std::string::npos);
+        auto millisecondsDiff = duration_cast<milliseconds>(currentInvokeTime - lastInvokeTime);
+        long long diffLastRun = minMillisecondsBetweenInvokes - millisecondsDiff.count();
+        if (diffLastRun > 0)
+        {
+            Logger::get("Logs").information("Bittrex Info: Throttling connection request speed");
+            Sleep((DWORD)diffLastRun);
+            lastInvokeTime = system_clock::now();
+        }
+        else
+        {
+            lastInvokeTime = currentInvokeTime;
+        }
 
-		// Sign request
-		if (privateApi)
-		{
-			//Add api key
-			uri.addQueryParameter(string("apikey"), api.config.dataObject.api_key);
+        //Assemble Request
 
-			//Add nonce
-			ostringstream nonceStream;
-			nonceStream << currentTimeStamp;
-			uri.addQueryParameter(string("nonce"), nonceStream.str());
-		}
+        time_t currentTimeStamp = std::time(nullptr);
+
+        bool privateApi = (uri.getHost().find("public") == std::string::npos);
+
+        // Sign request
+        if (privateApi)
+        {
+            // Add api key
+            uri.addQueryParameter(string("apikey"), api.config.data[configurationIdx].api_key);
+
+            // Add nonce
+            ostringstream nonceStream;
+            nonceStream << currentTimeStamp;
+            uri.addQueryParameter(string("nonce"), nonceStream.str());
+        }
 
         // Create the request URI.
         HTTPSClientSession session(uri.getHost(), uri.getPort());
         HTTPRequest req(HTTPRequest::HTTP_GET, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
 
-		if (privateApi)
-		{
-			req.set("apisign", getHMAC2(api.config.dataObject.api_secret, uri.toString()));
-		}
+        if (privateApi)
+        {
+            req.set("apisign", getHMAC2(api.config.data[configurationIdx].api_secret, uri.toString()));
+        }
 
-		//Submit
-		session.sendRequest(req);
+        // Submit
+        session.sendRequest(req);
 
         Logger::get("Logs").information("Send Request: %s", uri.toString());
 
         // Receive the response.
         HTTPResponse res;
-        istream& rs = session.receiveResponse(res);
+        istream &rs = session.receiveResponse(res);
 
         // Parse the JSON
         JSON::Parser parser;
@@ -258,17 +284,39 @@ namespace trader {
         // Otherwise throw an exception.
         if (res.getStatus() == HTTPResponse::HTTP_OK)
         {
-            Poco::AutoPtr<ResultIntrospector> msg = new ResultIntrospector();
+            Poco::AutoPtr< ResultIntrospector > msg = new ResultIntrospector();
             msg->read(result);
             if (!msg->dataObject.success)
             {
-                throw ApplicationException("Bittrex Error", "Received Error Response");
+                throw ApplicationException("Bittrex Error: Received Error Response:", msg->dataObject.isSetMessage() ? msg->dataObject.message : "None");
             }
             return result;
         }
         else
         {
-            throw ApplicationException("Bittrex Error", "");
+            throw ApplicationException("Bittrex Error", "HTTP Error", res.getStatus());
         }
     }
-}
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Sets the parameters. </summary>
+    ///
+    /// <exception cref="Poco::NotFoundException"> Thrown when the requested element is not present. </exception>
+    ///
+    /// <param name="paramString"> The parameter string. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    void Bittrex::setParams(const std::string& paramString)
+    {
+        for (UInt32 idx = 0; idx < api.config.data.size(); ++idx)
+        {
+            if (paramString.compare(api.config.data[idx].name) == 0)
+            {
+                configurationIdx = idx;
+                return;
+            }
+        }
+        throw Poco::NotFoundException("Bittrex Error: Params not found in config.json", paramString);
+    }
+
+
+} // namespace trader

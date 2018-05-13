@@ -1,144 +1,125 @@
 #include "stdafx.h"
 
 #include "config.h"
-#include "fileoutputstream.h"
 #include "endpoint.h"
-#include "helpers.h"
+#include "fileoutputstream.h"
 #include "fixspec.h"
+#include "helpers.h"
 
-using Poco::Util::Application;
-using Poco::Util::Option;
-using Poco::Util::OptionSet;
-using Poco::Util::HelpFormatter;
-using Poco::Util::AbstractConfiguration;
-using Poco::Util::OptionCallback;
-using Poco::DirectoryIterator;
-using Poco::File;
-using Poco::Path;
-using Poco::XML::DOMParser;
-using Poco::XML::InputSource;
-using Poco::XML::Document;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::AutoPtr;
-using Poco::Exception;
-using namespace Poco;
-using namespace std;
-using namespace Poco::XML;
+namespace trader
+{
+    FixSpec FixSpec::instance;
 
-namespace trader {
-	FixSpec FixSpec::instance;
-
-	const char* FixSpec::getCppType(const string& dbType)
-	{
-		if (dbType.compare("STRING") == 0
-            || dbType.compare("CHAR") == 0
-            || dbType.compare("CURRENCY") == 0
-            || dbType.compare("EXCHANGE") == 0
-            || dbType.compare("MULTIPLECHARVALUE") == 0
-            || dbType.compare("MULTIPLESTRINGVALUE") == 0
-            || dbType.compare("COUNTRY") == 0
-            || dbType.compare("DATA") == 0
-            || dbType.compare("XMLDATA") == 0
-            )
-		{
-			return "std::string";
-		}
-		else if (dbType.compare("PRICE") == 0
-            || dbType.compare("QTY") == 0
-            || dbType.compare("AMT") == 0
-            || dbType.compare("PRICEOFFSET") == 0
-            )
-		{
-			return "double";
-		}
-        else if (dbType.compare("FLOAT") == 0
-            || dbType.compare("PERCENTAGE") == 0
-            )
+    const char *FixSpec::getCppType(const string &dbName, const string &dbType)
+    {
+        if (dbType.compare("STRING") == 0 || dbType.compare("CHAR") == 0 || dbType.compare("CURRENCY") == 0 ||
+            dbType.compare("EXCHANGE") == 0 || dbType.compare("MULTIPLECHARVALUE") == 0 ||
+            dbType.compare("MULTIPLESTRINGVALUE") == 0 || dbType.compare("COUNTRY") == 0 ||
+            dbType.compare("DATA") == 0 || dbType.compare("XMLDATA") == 0)
         {
+            typenameToTypeMap.insert({ dbName, InterfaceType_STRING });
+            return "std::string";
+        }
+        else if (dbType.compare("PRICE") == 0 || dbType.compare("QTY") == 0 || dbType.compare("AMT") == 0 ||
+                 dbType.compare("PRICEOFFSET") == 0)
+        {
+            typenameToTypeMap.insert({ dbName, InterfaceType_DOUBLE });
+            return "double";
+        }
+        else if (dbType.compare("FLOAT") == 0 || dbType.compare("PERCENTAGE") == 0)
+        {
+            typenameToTypeMap.insert({ dbName, InterfaceType_FLOAT });
             return "float";
         }
-		else if (dbType.compare("SEQNUM") == 0
-			|| dbType.compare("INT") == 0
-			|| dbType.compare("UTCTIMESTAMP") == 0
-			|| dbType.compare("LENGTH") == 0
-            || dbType.compare("LOCALMKTDATE") == 0
-            || dbType.compare("MONTHYEAR") == 0
-            || dbType.compare("NUMINGROUP") == 0
-            || dbType.compare("UTCDATEONLY") == 0
-            || dbType.compare("UTCTIMEONLY") == 0
-            || dbType.compare("TZTIMEONLY") == 0
-            || dbType.compare("TZTIMESTAMP") == 0
-            || dbType.compare("LANGUAGE") == 0
-            )
-		{
-			return "Poco::Int32";
-		}
-		else if (dbType.compare("BOOLEAN") == 0)
-		{
-			return "bool";
-		}
-		return dbType.c_str();
-	}
+        else if (dbType.compare("SEQNUM") == 0 || dbType.compare("INT") == 0 || dbType.compare("UTCTIMESTAMP") == 0 ||
+                 dbType.compare("LENGTH") == 0 || dbType.compare("LOCALMKTDATE") == 0 ||
+                 dbType.compare("MONTHYEAR") == 0 || dbType.compare("NUMINGROUP") == 0 ||
+                 dbType.compare("UTCDATEONLY") == 0 || dbType.compare("UTCTIMEONLY") == 0 ||
+                 dbType.compare("TZTIMEONLY") == 0 || dbType.compare("TZTIMESTAMP") == 0 ||
+                 dbType.compare("LANGUAGE") == 0)
+        {
+            typenameToTypeMap.insert({ dbName, InterfaceType_INTEGER });
+            return "Poco::Int32";
+        }
+        else if (dbType.compare("BOOLEAN") == 0)
+        {
+            typenameToTypeMap.insert({ dbName, InterfaceType_BOOL });
+            return "bool";
+        }
+        return dbType.c_str();
+    }
+
+    string FixSpec::getDefaultType(const string &dbName, InterfaceType interfaceType)
+    {
+        string retStr;
+        switch (interfaceType)
+        {
+            case InterfaceType_STRING:
+                retStr = "\"Unset\"";
+                break;
+            case InterfaceType_DOUBLE:
+                retStr = "std::numeric_limits<double>::max()";
+                break;
+            case InterfaceType_FLOAT:
+                retStr ="std::numeric_limits<float>::max()";
+                break;
+            case InterfaceType_INTEGER:
+                retStr = "std::numeric_limits<unsigned int>::max()";
+                break;
+            case InterfaceType_BOOL:
+                retStr = "false";
+                break;
+            case InterfaceType_ENUM:
+                ostringstream str;
+                str << dbName << "_" << "UNSET";
+                retStr = str.str();
+                break;
+        }
+        return retStr;
+    }
 
     // Class to represent a graph
-    template<class Vertex>
-    class Graph
+    template < class Vertex > class Graph
     {
-        typedef std::map < Vertex, std::list<Vertex> > AdjMat;
+        typedef std::map< Vertex, std::list< Vertex > > AdjMat;
         AdjMat adjMat;
 
-        void topologicalSortUtil(Vertex v, std::map<Vertex, bool>& visited, std::stack<Vertex>& resultStack);
+        void topologicalSortUtil(Vertex v, std::map< Vertex, bool > &visited, std::stack< Vertex > &resultStack);
 
-        bool hasCycleUtil(Vertex v, std::vector<Vertex> &traversedVertices);
+        bool hasCycleUtil(Vertex v, std::vector< Vertex > &traversedVertices);
 
-    public:
-
+      public:
         void addEdge(Vertex v, Vertex w);
 
         void addVertex(Vertex v);
 
-        void topologicalSort(std::stack<Vertex>& Stack);
+        void topologicalSort(std::stack< Vertex > &Stack);
 
-        bool findCycles(std::vector<Vertex>& traversedVertices);
-
+        bool findCycles(std::vector< Vertex > &traversedVertices);
     };
 
-    template<class Vertex>
-    void Graph<Vertex>::addVertex(Vertex v)
+    template < class Vertex > void Graph< Vertex >::addVertex(Vertex v)
     {
-        std::list<Vertex> dummy;
-        adjMat.insert({ v, dummy });
+        std::list< Vertex > dummy;
+        adjMat.insert({v, dummy});
     }
 
-    template<class Vertex>
-    void Graph<Vertex>::addEdge(Vertex v, Vertex w)
+    template < class Vertex > void Graph< Vertex >::addEdge(Vertex v, Vertex w)
     {
-        AdjMat::iterator it = adjMat.find(v);
+        typename AdjMat::iterator it = adjMat.find(v);
         poco_assert(it != adjMat.end());
-        /*if (it == adjMat.end())
-        {
-            std::list<Vertex> dummy;
-            dummy.push_back(w);
-            adjMat.insert({ v, dummy });
-        }
-        else
-        */
-        {
-            it->second.push_back(w); // Add w to v’s list.
-        }
+        it->second.push_back(w); // Add w to v’s list.
     }
 
-    template<class Vertex>
-    void Graph<Vertex>::topologicalSortUtil(Vertex v, std::map<Vertex, bool>& visited , std::stack<Vertex> &resultStack)
+    template < class Vertex >
+    void Graph< Vertex >::topologicalSortUtil(Vertex v, typename std::map< Vertex, bool > &visited,
+                                              typename std::stack< Vertex > &resultStack)
     {
         // Mark the current node as visited.
         visited[v] = true;
 
         // Recur for all the vertices adjacent to this vertex
-        std::list<Vertex>::iterator it;
+        typename std::list< Vertex >::iterator it;
         for (it = adjMat[v].begin(); it != adjMat[v].end(); ++it)
             if (!visited[*it])
                 topologicalSortUtil(*it, visited, resultStack);
@@ -147,14 +128,15 @@ namespace trader {
         resultStack.push(v);
     }
 
-    template<class Vertex>
-    bool Graph<Vertex>::hasCycleUtil(Vertex v, std::vector<Vertex> &traversedVertices)
+    template < class Vertex >
+    bool Graph< Vertex >::hasCycleUtil(Vertex v, typename std::vector< Vertex > &traversedVertices)
     {
         // Recur for all the vertices adjacent to this vertex
-        std::list<Vertex>::iterator it;
+        typename std::list< Vertex >::iterator it;
         for (it = adjMat[v].begin(); it != adjMat[v].end(); ++it)
         {
-            std::vector<Vertex>::iterator itVertex = std::find(traversedVertices.begin(), traversedVertices.end(), *it);
+            typename std::vector< Vertex >::iterator itVertex =
+                std::find(traversedVertices.begin(), traversedVertices.end(), *it);
             if (itVertex != traversedVertices.end())
             {
                 traversedVertices.push_back(*it);
@@ -169,11 +151,10 @@ namespace trader {
         return false;
     }
 
-    template<class Vertex>
-    bool Graph<Vertex>::findCycles(std::vector<Vertex>& traversedVertices)
+    template < class Vertex > bool Graph< Vertex >::findCycles(typename std::vector< Vertex > &traversedVertices)
     {
         traversedVertices.clear();
-        for (AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
+        for (typename AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
         {
             traversedVertices.push_back(it->first);
             if (hasCycleUtil(it->first, traversedVertices))
@@ -185,46 +166,40 @@ namespace trader {
         return false;
     }
 
-    template<class Vertex>
-    void Graph<Vertex>::topologicalSort(std::stack<Vertex>& resultStack)
+    template < class Vertex > void Graph< Vertex >::topologicalSort(typename std::stack< Vertex > &resultStack)
     {
         // Mark all the vertices as not visited
-        std::map<Vertex, bool> visited;
-        for (std::map<Vertex, bool>::iterator it = visited.begin(); it != visited.end(); it++)
+        typename std::map< Vertex, bool > visited;
+        for (typename std::map< Vertex, bool >::iterator it = visited.begin(); it != visited.end(); it++)
         {
             it->second = false;
         }
 
         // Call the recursive helper function to store Topological
         // Sort starting from all vertices one by one
-        for (AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
+        for (typename AdjMat::iterator it = adjMat.begin(); it != adjMat.end(); it++)
         {
             if (visited[it->first] == false)
             {
                 topologicalSortUtil(it->first, visited, resultStack);
             }
         }
-
     }
 
+    void FixSpec::process(const string &namespacename, const string &filename, const string &outputdirectory)
+    {
+        InputSource src(filename);
+        DOMParser parser;
+        AutoPtr< Document > pDoc = parser.parse(&src);
 
-	void FixSpec::process(const string& namespacename, const string& filename, const string& outputdirectory)
-	{
-		InputSource src(filename);
-		DOMParser parser;
-		AutoPtr<Document> pDoc = parser.parse(&src);
+        Element *root = (Element *)pDoc->firstChild();
 
-		Element* root = (Element*)pDoc->firstChild();
+        Config config;
+        config.outputDir = outputdirectory;
+        config.nameSpace = namespacename;
+        config.headerFileName = outputdirectory + Path::separator() + "interface.h";
 
-		Config config;
-		config.outputDir = outputdirectory;
-		config.nameSpace = namespacename;
-		config.headerFileName = outputdirectory + Path::separator() + "interface.h";
-		//config.cppFileName = outputdirectory + Path::separator() + "interface.cpp";
-	
-
-		ApiFileOutputStream header(config.headerFileName);
-		//ApiFileOutputStream cpp(config.cppFileName);
+        ApiFileOutputStream header(config.headerFileName);
 
         startHeader(header, 0);
         {
@@ -233,114 +208,118 @@ namespace trader {
                 std::string interfaceName = "Interface";
                 ScopedNamespace scopedNamespaceInterface(header, interfaceName);
 
-                Element* fieldsNode = root->getChildElement("fields");
-                NodeList* fieldNodeList = fieldsNode->childNodes();
+                Element *fieldsNode = root->getChildElement("fields");
+                NodeList *fieldNodeList = fieldsNode->childNodes();
 
                 for (UInt32 i = 0; i < fieldNodeList->length(); i++)
                 {
-                    Node* child = fieldNodeList->item(i);
+                    Node *child = fieldNodeList->item(i);
                     if (child->nodeType() == Node::ELEMENT_NODE)
                     {
-                        Element* fieldNode = (Element*)child;
+                        Element *fieldNode = (Element *)child;
                         string name = fieldNode->getAttribute("name");
                         if (fieldNode->hasChildNodes())
                         {
-                            header << "enum " << name << " ";
+                            typenameToTypeMap.insert({ name, InterfaceType_ENUM });
+                            header << "enum " << name << " : unsigned int ";
                             {
-                                ScopedStream<ApiFileOutputStream> enumScope(header);
-                                NodeList* enumNodeList = fieldNode->childNodes();
+                                ScopedStream< ApiFileOutputStream > enumScope(header);
+                                NodeList *enumNodeList = fieldNode->childNodes();
                                 for (UInt32 j = 0; j < enumNodeList->length(); j++)
                                 {
-                                    Node* valueNode = enumNodeList->item(j);
+                                    Node *valueNode = enumNodeList->item(j);
                                     if (valueNode->nodeType() == Node::ELEMENT_NODE)
                                     {
-                                        Element* value = (Element*)valueNode;
+                                        Element *value = (Element *)valueNode;
                                         string description = value->getAttribute("description");
                                         header << name << "_" << description << "," << endl;
                                     }
                                 }
-                                header << "NUM_" << name << endl;
+                                header << "NUM_" << name << "," << endl;
+                                header << name << "_UNSET = 0xFFFFFFFF" << endl;
                             }
                             header << cendl;
                         }
                         else
                         {
                             string type = fieldNode->getAttribute("type");
-                            string cppType = getCppType(type);
+                            string cppType = getCppType(name, type);
                             header << "typedef " << cppType << " " << name << cendl;
                         }
                         header << endl;
                     }
                 }
 
-                Element* componentsNode = root->getChildElement("components");
-                NodeList* componentsNodeList = componentsNode->childNodes();
+                Element *componentsNode = root->getChildElement("components");
+                NodeList *componentsNodeList = componentsNode->childNodes();
 
-                Graph<Node*> nodeGraph;
-                std::map<std::string, Node*> nodeNameToVertexMap;
+                Graph< Node * > nodeGraph;
+                std::map< std::string, Node * > nodeNameToVertexMap;
 
                 for (UInt32 i = 0; i < componentsNodeList->length(); i++)
                 {
-                    Node* componentNode = componentsNodeList->item(i);
+                    Node *componentNode = componentsNodeList->item(i);
                     if (componentNode->nodeType() == Node::ELEMENT_NODE)
                     {
-                        Element* component = (Element*)componentNode;
+                        Element *component = (Element *)componentNode;
                         string name = component->getAttribute("name");
                         ostringstream structName;
                         structName << name << "Object";
                         nodeGraph.addVertex(componentNode);
-                        nodeNameToVertexMap.insert({ structName.str(), componentNode });
+                        nodeNameToVertexMap.insert({structName.str(), componentNode});
                     }
                 }
 
                 for (UInt32 i = 0; i < componentsNodeList->length(); i++)
                 {
-                    Node* componentNode = componentsNodeList->item(i);
+                    Node *componentNode = componentsNodeList->item(i);
                     if (componentNode->nodeType() == Node::ELEMENT_NODE)
                     {
-                        Element* component = (Element*)componentNode;
+                        Element *component = (Element *)componentNode;
                         string name = component->getAttribute("name");
                         ostringstream structName;
                         structName << name << "Object";
                         {
-                            std::map<std::string, Node*>::iterator it = nodeNameToVertexMap.find(structName.str());
+                            std::map< std::string, Node * >::iterator it = nodeNameToVertexMap.find(structName.str());
                             poco_assert(it != nodeNameToVertexMap.end());
                         }
-                        NodeList* componentChildNodeList = componentNode->childNodes();
+                        NodeList *componentChildNodeList = componentNode->childNodes();
                         for (UInt32 j = 0; j < componentChildNodeList->length(); j++)
                         {
-                            Node* componentChildNode = componentChildNodeList->item(j);
+                            Node *componentChildNode = componentChildNodeList->item(j);
                             if (componentChildNode->nodeType() == Node::ELEMENT_NODE)
                             {
-                                Element* groupOrField = (Element*)componentChildNode;
+                                Element *groupOrField = (Element *)componentChildNode;
                                 std::string tagName = groupOrField->tagName();
                                 string groupOrFieldName = groupOrField->getAttribute("name");
                                 if (tagName.compare("group") == 0)
                                 {
                                     {
-                                        NodeList* componentChildNodeList2 = componentChildNode->childNodes();
+                                        NodeList *componentChildNodeList2 = componentChildNode->childNodes();
                                         {
                                             for (UInt32 k = 0; k < componentChildNodeList2->length(); k++)
                                             {
-                                                Node* fieldChildNode = componentChildNodeList2->item(k);
+                                                Node *fieldChildNode = componentChildNodeList2->item(k);
                                                 if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
                                                 {
-                                                    Element* field = (Element*)fieldChildNode;
+                                                    Element *field = (Element *)fieldChildNode;
                                                     string fieldName = field->getAttribute("name");
                                                     string fieldTagName = field->tagName();
                                                     ostringstream structName2;
                                                     if (fieldTagName.compare("field") != 0)
                                                     {
                                                         structName2 << fieldName << "Object";
-                                                        std::map<std::string, Node*>::iterator it = nodeNameToVertexMap.find(structName2.str());
+                                                        std::map< std::string, Node * >::iterator it =
+                                                            nodeNameToVertexMap.find(structName2.str());
                                                         poco_assert(it != nodeNameToVertexMap.end());
                                                         if (it != nodeNameToVertexMap.end())
                                                         {
                                                             nodeGraph.addEdge(componentNode, it->second);
 
-                                                            ostringstream debugStr;
-                                                            debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() << std::endl;
-                                                            Debugger::message(debugStr.str());
+                                                            // ostringstream debugStr;
+                                                            // debugStr << "Add Edge " << structName.str() << " -> " <<
+                                                            // structName2.str() << std::endl;
+                                                            // Debugger::message(debugStr.str());
                                                         }
                                                     }
                                                 }
@@ -352,15 +331,16 @@ namespace trader {
                                 {
                                     ostringstream structName2;
                                     structName2 << groupOrFieldName << "Object";
-                                    std::map<std::string, Node*>::iterator it = nodeNameToVertexMap.find(structName2.str());
+                                    std::map< std::string, Node * >::iterator it =
+                                        nodeNameToVertexMap.find(structName2.str());
                                     poco_assert(it != nodeNameToVertexMap.end());
                                     if (it != nodeNameToVertexMap.end())
                                     {
                                         nodeGraph.addEdge(componentNode, it->second);
 
-                                        ostringstream debugStr;
-                                        debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() << std::endl;
-                                        Debugger::message(debugStr.str());
+                                        // ostringstream debugStr;
+                                        // debugStr << "Add Edge " << structName.str() << " -> " << structName2.str() <<
+                                        // std::endl; Debugger::message(debugStr.str());
                                     }
                                 }
                             }
@@ -368,12 +348,13 @@ namespace trader {
                     }
                 }
 
-                std::vector<Node*> traversedVertices;
+                std::vector< Node * > traversedVertices;
                 if (nodeGraph.findCycles(traversedVertices))
                 {
-                    for (std::vector<Node*>::iterator itVertices = traversedVertices.begin(); itVertices != traversedVertices.end(); itVertices++)
+                    for (std::vector< Node * >::iterator itVertices = traversedVertices.begin();
+                         itVertices != traversedVertices.end(); itVertices++)
                     {
-                        Element* component = (Element*)*itVertices;
+                        Element *component = (Element *)*itVertices;
                         string name = component->getAttribute("name");
                         ostringstream structName;
                         structName << name << "Object";
@@ -383,10 +364,10 @@ namespace trader {
                     poco_assert(0);
                 }
 
-                std::stack<Node*> nodeStack;
+                std::stack< Node * > nodeStack;
                 nodeGraph.topologicalSort(nodeStack);
 
-                std::stack<Node*> nodeStackReverse;
+                std::stack< Node * > nodeStackReverse;
                 while (!nodeStack.empty())
                 {
                     nodeStackReverse.push(nodeStack.top());
@@ -395,36 +376,92 @@ namespace trader {
 
                 while (!nodeStackReverse.empty())
                 {
-                    Node* componentNode = nodeStackReverse.top();
+                    Node *componentNode = nodeStackReverse.top();
                     nodeStackReverse.pop();
                     if (componentNode && componentNode->nodeType() == Node::ELEMENT_NODE)
                     {
-                        Element* component = (Element*)componentNode;
+                        Element *component = (Element *)componentNode;
                         string name = component->getAttribute("name");
                         ostringstream structName;
                         structName << name << "Object";
-                        ScopedStruct<0, ApiFileOutputStream> scopedStruct(header, structName.str().c_str());
-                        NodeList* componentChildNodeList = componentNode->childNodes();
+                        ScopedStruct< 0, ApiFileOutputStream > scopedStruct(header, structName.str().c_str());
+                        NodeList *componentChildNodeList = componentNode->childNodes();
+
+                        header << structName.str().c_str() << "()" << endl;
+                        bool first = true;
                         for (UInt32 j = 0; j < componentChildNodeList->length(); j++)
                         {
-                            Node* componentChildNode = componentChildNodeList->item(j);
+                            Node *componentChildNode = componentChildNodeList->item(j);
                             if (componentChildNode->nodeType() == Node::ELEMENT_NODE)
                             {
-                                Element* groupOrField = (Element*)componentChildNode;
-                                std::string tagName = groupOrField->tagName();
+                                Element *groupOrField = (Element *)componentChildNode;
+                                string groupOrFieldName = groupOrField->getAttribute("name");
+                                string tagName = groupOrField->tagName();
+                                if (tagName.compare("field") == 0)
+                                {
+                                    auto it = typenameToTypeMap.find(groupOrFieldName);
+                                    if (it != typenameToTypeMap.end())
+                                    {
+                                        string sym = (first ? ":" : ",");
+                                        header << sym << var_name(groupOrFieldName) << "(" << getDefaultType(groupOrFieldName, it->second) << ")" << endl;
+                                        first = false;
+                                    }
+                                }
+                            }
+                        }
+                        {
+                            ScopedStream< ApiFileOutputStream > constructScope(header);
+                        }
+
+                        for (UInt32 j = 0; j < componentChildNodeList->length(); j++)
+                        {
+                            Node *componentChildNode = componentChildNodeList->item(j);
+                            if (componentChildNode->nodeType() == Node::ELEMENT_NODE)
+                            {
+                                Element *groupOrField = (Element *)componentChildNode;
+                                string tagName = groupOrField->tagName();
                                 string groupOrFieldName = groupOrField->getAttribute("name");
                                 if (tagName.compare("group") == 0)
                                 {
                                     {
-                                        ScopedStruct<0, ApiFileOutputStream> scopedStructGroup(header, groupOrFieldName.c_str());
-                                        NodeList* componentChildNodeList2 = componentChildNode->childNodes();
+                                        ScopedStruct< 0, ApiFileOutputStream > scopedStructGroup(
+                                            header, groupOrFieldName.c_str());
+                                        NodeList *componentChildNodeList2 = componentChildNode->childNodes();
                                         {
+
+                                            header << groupOrFieldName.c_str() << "()" << endl;
+                                            bool first2 = true;
                                             for (UInt32 k = 0; k < componentChildNodeList2->length(); k++)
                                             {
-                                                Node* fieldChildNode = componentChildNodeList2->item(k);
+                                                Node *fieldChildNode = componentChildNodeList2->item(k);
                                                 if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
                                                 {
-                                                    Element* field = (Element*)fieldChildNode;
+                                                    Element *field = (Element *)fieldChildNode;
+                                                    string fieldName = field->getAttribute("name");
+                                                    string fieldTagName = field->tagName();
+                                                    if (fieldTagName.compare("field") == 0)
+                                                    {
+                                                        auto it = typenameToTypeMap.find(fieldName);
+                                                        if (it != typenameToTypeMap.end())
+                                                        {
+                                                            std::string sym = (first2 ? ":" : ",");
+                                                            header << sym << var_name(fieldName) << "(" << getDefaultType(fieldName,it->second) << ")" << endl;
+                                                            first2 = false;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            {
+                                                ScopedStream< ApiFileOutputStream > constructScope(header);
+                                            }
+
+
+                                            for (UInt32 k = 0; k < componentChildNodeList2->length(); k++)
+                                            {
+                                                Node *fieldChildNode = componentChildNodeList2->item(k);
+                                                if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
+                                                {
+                                                    Element *field = (Element *)fieldChildNode;
                                                     string fieldName = field->getAttribute("name");
                                                     string fieldTagName = field->tagName();
                                                     if (fieldTagName.compare("field") == 0)
@@ -433,13 +470,16 @@ namespace trader {
                                                     }
                                                     else
                                                     {
-                                                        header << fieldName << "Object " << var_name(fieldName) << cendl;
+                                                        header << fieldName << "Object " << var_name(fieldName)
+                                                               << cendl;
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                    header << "std::vector<" << groupOrFieldName << "> " << var_name(groupOrFieldName) << cendl;
+                                    header << "typedef std::vector<" << groupOrFieldName << "> " << groupOrFieldName
+                                           << "Array" << cendl;
+                                    header << groupOrFieldName << "Array " << var_name(groupOrFieldName) << cendl;
                                 }
                                 else if (tagName.compare("field") == 0)
                                 {
@@ -454,19 +494,19 @@ namespace trader {
                     }
                 }
 
-                Element* messagesNode = root->getChildElement("messages");
-                NodeList* messagesNodelist = messagesNode->childNodes();
+                Element *messagesNode = root->getChildElement("messages");
+                NodeList *messagesNodelist = messagesNode->childNodes();
 
                 header << comment("Messages Enum") << endl;
                 header << "enum MESSAGES ";
                 {
-                    ScopedStream<ApiFileOutputStream> enumScope(header);
+                    ScopedStream< ApiFileOutputStream > enumScope(header);
                     for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                     {
-                        Node* messageNode = messagesNodelist->item(i);
+                        Node *messageNode = messagesNodelist->item(i);
                         if (messageNode->nodeType() == Node::ELEMENT_NODE)
                         {
-                            Element* message = (Element*)messageNode;
+                            Element *message = (Element *)messageNode;
                             string name = message->getAttribute("name");
                             header << name << "_TYPE ," << endl;
                         }
@@ -478,109 +518,168 @@ namespace trader {
                 header << "typedef Poco::UInt64 MessageId" << cendl;
 
                 {
-                    ScopedClass<1> scopedMessageDataClass(header, "IMessageData", "Poco::RefCountedObject");
+                    ScopedClass< 1 > scopedMessageDataClass(header, "IMessageData", "Poco::RefCountedObject");
                     header << "virtual enum MESSAGES GetType() = 0" << cendl;
+                    header << endl;
+                    header << "MessageId getUniqueMessageId()" << endl;
+                    {
+                        ScopedStream< ApiFileOutputStream > funcScope(header);
+                        header << "static std::atomic<MessageId> nextMessageId" << cendl;
+                        header << "return ++nextMessageId" << cendl;
+                    }
+
+                    header << "void setSourceConnection(const std::string& _sourceConnection)" << endl;
+                    {
+                        ScopedStream< ApiFileOutputStream > funcScope(header);
+                        header << "sourceConnection = _sourceConnection" << cendl;
+                    }
+
+                    header << "const std::string& getSourceConnection() const" << endl;
+                    {
+                        ScopedStream< ApiFileOutputStream > funcScope(header);
+                        header << "return sourceConnection" << cendl;
+                    }
+
+                    header << "std::string sourceConnection" << cendl;
                     header << "MessageId messageId" << cendl;
                 }
 
+                header << comment("Message Data") << endl;
+                for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                 {
-                    ScopedClass<0> scopedClass(header, "IConnection");
-                    header << "virtual void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData) = 0" << cendl;
-                }
-
-                {
-                    ScopedClass<1> scopedConnectionClass(header, "Connection", "IConnection, public Poco::RefCountedObject");
-
-                    header << comment("Message Data") << endl;
-                    for (UInt32 i = 0; i < messagesNodelist->length(); i++)
+                    Node *messageNode = messagesNodelist->item(i);
+                    if (messageNode->nodeType() == Node::ELEMENT_NODE)
                     {
-                        Node* messageNode = messagesNodelist->item(i);
-                        if (messageNode->nodeType() == Node::ELEMENT_NODE)
+                        Element *message = (Element *)messageNode;
+                        string attribName = message->getAttribute("name");
+                        ostringstream className;
+                        className << attribName << "Data";
+                        ScopedStruct< 1, ApiFileOutputStream > scopedStruct(header, className.str().c_str(),
+                                                                            "IMessageData");
+                        if (className.str().find("Request") != std::string::npos)
                         {
-                            Element* message = (Element*)messageNode;
-                            string attribName = message->getAttribute("name");
-                            ostringstream className;
-                            className << attribName << "Data";
-                            ScopedStruct<1, ApiFileOutputStream> scopedStruct(header, className.str().c_str(), "IMessageData");
-                            header << "virtual enum MESSAGES GetType()" << endl;
+                            header << className.str().c_str() << "()" << endl;
                             {
-                                ScopedStream<ApiFileOutputStream> funcScope(header);
-                                header << "return MESSAGES::" << attribName << "_TYPE" << cendl;
+                                ScopedStream< ApiFileOutputStream > funcScope(header);
+                                header << "messageId = getUniqueMessageId()" << cendl;
                             }
-                            NodeList* messageChildNodeList = messageNode->childNodes();
-                            for (UInt32 j = 0; j < messageChildNodeList->length(); j++)
+                        }
+
+                        header << "virtual enum MESSAGES GetType()" << endl;
+                        {
+                            ScopedStream< ApiFileOutputStream > funcScope(header);
+                            header << "return MESSAGES::" << attribName << "_TYPE" << cendl;
+                        }
+                        NodeList *messageChildNodeList = messageNode->childNodes();
+                        for (UInt32 j = 0; j < messageChildNodeList->length(); j++)
+                        {
+                            Node *messageChildNode = messageChildNodeList->item(j);
+                            if (messageChildNode->nodeType() == Node::ELEMENT_NODE)
                             {
-                                Node* messageChildNode = messageChildNodeList->item(j);
-                                if (messageChildNode->nodeType() == Node::ELEMENT_NODE)
+                                Element *groupOrField = (Element *)messageChildNode;
+                                std::string tagName = groupOrField->tagName();
+                                string attribName2 = groupOrField->getAttribute("name");
+                                if (tagName.compare("group") == 0)
                                 {
-                                    Element* groupOrField = (Element*)messageChildNode;
-                                    std::string tagName = groupOrField->tagName();
-                                    string attribName2 = groupOrField->getAttribute("name");
-                                    if (tagName.compare("group") == 0)
                                     {
+                                        ScopedStruct< 0, ApiFileOutputStream > scopedStruct3(header,
+                                                                                             attribName2.c_str());
+                                        NodeList *fieldNodeList2 = messageChildNode->childNodes();
                                         {
-                                            ScopedStruct<0, ApiFileOutputStream> scopedStruct3(header, attribName2.c_str());
-                                            NodeList* fieldNodeList2 = messageChildNode->childNodes();
+                                            for (UInt32 k = 0; k < fieldNodeList2->length(); k++)
                                             {
-                                                for (UInt32 k = 0; k < fieldNodeList2->length(); k++)
+                                                Node *fieldChildNode = fieldNodeList2->item(k);
+                                                if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
                                                 {
-                                                    Node* fieldChildNode = fieldNodeList2->item(k);
-                                                    if (fieldChildNode->nodeType() == Node::ELEMENT_NODE)
-                                                    {
-                                                        Element* field = (Element*)fieldChildNode;
-                                                        string name3 = field->getAttribute("name");
-                                                        header << name3 << " " << var_name(name3) << cendl;
-                                                    }
+                                                    Element *field = (Element *)fieldChildNode;
+                                                    string name3 = field->getAttribute("name");
+                                                    header << name3 << " " << var_name(name3) << cendl;
                                                 }
                                             }
                                         }
-                                        header << "std::vector<" << attribName2 << "> " << var_name(attribName2) << cendl;
                                     }
-                                    else if (tagName.compare("field") == 0)
-                                    {
-                                        header << attribName2 << " " << var_name(attribName2) << cendl;
-                                    }
-                                    else
-                                    {
-                                        header << attribName2 << "Object " << var_name(attribName2) << cendl;
-                                    }
+                                    header << "std::vector<" << attribName2 << "> " << var_name(attribName2) << cendl;
+                                }
+                                else if (tagName.compare("field") == 0)
+                                {
+                                    header << attribName2 << " " << var_name(attribName2) << cendl;
+                                }
+                                else
+                                {
+                                    header << attribName2 << "Object " << var_name(attribName2) << cendl;
                                 }
                             }
                         }
                     }
+                }
+
+                {
+                    ScopedClass< 0 > scopedClass(header, "IConnection");
 
                     for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                     {
-                        Node* messageNode = messagesNodelist->item(i);
+                        Node *messageNode = messagesNodelist->item(i);
                         if (messageNode->nodeType() == Node::ELEMENT_NODE)
                         {
-                            Element* message = (Element*)messageNode;
+                            Element *message = (Element *)messageNode;
                             string name = message->getAttribute("name");
-                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name) << "Data)";
-                            {
-                                ScopedStream<ApiFileOutputStream> funcScope(header);
-                                header << "poco_bugcheck_msg(\"" << name << " not supported.\")" << cendl;
-                            }
+                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name)
+                                   << "Data) = 0" << cendl;
                         }
                     }
 
+                    header << "virtual void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData) = 0" << cendl;
+
+                    header << "virtual void DoOperation(Poco::Int32 operation) = 0" << cendl;
+                }
+
+                {
+                    ScopedClass< 1 > scopedConnectionClass(header, "Connection",
+                                                           "IConnection, public Poco::RefCountedObject");
+
+                    header << "virtual void SetReceivingConnection(Poco::AutoPtr<Connection> _connection)";
+                    {
+                        ScopedStream< ApiFileOutputStream > enumScope(header);
+                        header << "receivingConnection = _connection" << cendl;
+                    }
+                    header << endl;
+                    header << "virtual void SetName(const std::string& _name)";
+                    {
+                        ScopedStream< ApiFileOutputStream > enumScope(header);
+                        header << "name = _name" << cendl;
+                    }
+                    header << endl;
+                    header << "virtual const std::string& GetName() const";
+                    {
+                        ScopedStream< ApiFileOutputStream > enumScope(header);
+                        header << "return name" << cendl;
+                    }
+                    header << endl;
+                    header << "Poco::AutoPtr<Connection> receivingConnection" << cendl;
+                    header << "std::string name" << cendl;
+                }
+
+                {
+                    ScopedClass< 1 > scopedConnectionClass(header, "MessageReceivingConnection", "Connection");
+
                     header << "void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData)" << endl;
                     {
-                        ScopedStream<ApiFileOutputStream> funcScope(header);
+                        ScopedStream< ApiFileOutputStream > funcScope(header);
                         header << "switch (_messageData->GetType())";
                         {
-                            ScopedStream<ApiFileOutputStream> switchScope(header);
+                            ScopedStream< ApiFileOutputStream > switchScope(header);
                             for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                             {
-                                Node* messageNode = messagesNodelist->item(i);
+                                Node *messageNode = messagesNodelist->item(i);
                                 if (messageNode->nodeType() == Node::ELEMENT_NODE)
                                 {
-                                    Element* message = (Element*)messageNode;
+                                    Element *message = (Element *)messageNode;
                                     string name = message->getAttribute("name");
                                     header << "case MESSAGES::" << name << "_TYPE: ";
                                     {
-                                        ScopedStream<ApiFileOutputStream> caseScope(header);
-                                        header << "Poco::AutoPtr<" << name << "Data> ptr = _messageData.unsafeCast<" << name << "Data>()" << cendl;
+                                        ScopedStream< ApiFileOutputStream > caseScope(header);
+                                        header << "Poco::AutoPtr<" << name << "Data> ptr = _messageData.unsafeCast<"
+                                               << name << "Data>()" << cendl;
                                         header << name << "(ptr)" << cendl;
                                         header << "break" << cendl;
                                     }
@@ -589,26 +688,70 @@ namespace trader {
                         }
                     }
 
-                    header << "virtual void SetReceivingConnection(Poco::AutoPtr<Connection> _connection)";
+                    for (UInt32 i = 0; i < messagesNodelist->length(); i++)
                     {
-                        ScopedStream<ApiFileOutputStream> enumScope(header);
-                        header << "receivingConnection = _connection" << cendl;
+                        Node *messageNode = messagesNodelist->item(i);
+                        if (messageNode->nodeType() == Node::ELEMENT_NODE)
+                        {
+                            Element *message = (Element *)messageNode;
+                            string name = message->getAttribute("name");
+                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name)
+                                   << "Data) override";
+                            {
+                                ScopedStream< ApiFileOutputStream > funcScope(header);
+                                header << "poco_bugcheck_msg(\"" << var_name(name) << " not supported.\")" << cendl;
+                            }
+                        }
                     }
-                    header << endl;
-                    header << "Poco::AutoPtr<Connection> receivingConnection" << cendl;
 
+                    header << "void DoOperation(Poco::Int32 operation)" << endl;
+                    {
+                        ScopedStream< ApiFileOutputStream > funcScope(header);
+                        header << "(void)operation" << cendl;
+                        header << "poco_bugcheck_msg(\"DoOperation not implemented.\")" << cendl;
+                    }
                 }
 
+                {
+                    ScopedClass< 1 > scopedConnectionClass(header, "CallConnection", "Connection");
+
+                    for (UInt32 i = 0; i < messagesNodelist->length(); i++)
+                    {
+                        Node *messageNode = messagesNodelist->item(i);
+                        if (messageNode->nodeType() == Node::ELEMENT_NODE)
+                        {
+                            Element *message = (Element *)messageNode;
+                            string name = message->getAttribute("name");
+                            header << "virtual void " << name << "(Poco::AutoPtr<" << name << "Data> " << var_name(name)
+                                   << "Data) override";
+                            {
+                                ScopedStream< ApiFileOutputStream > funcScope(header);
+                                header << "ProcessMessage(" << var_name(name) << "Data)" << cendl;
+                            }
+                        }
+                    }
+
+                    header << "void ProcessMessage(Poco::AutoPtr<IMessageData> _messageData)" << endl;
+                    {
+                        ScopedStream< ApiFileOutputStream > funcScope(header);
+                        header << "poco_bugcheck_msg(\"ProcessMessage not implemented.\")" << cendl;
+                    }
+
+                    header << "void DoOperation(Poco::Int32 operation)" << endl;
+                    {
+                        ScopedStream< ApiFileOutputStream > funcScope(header);
+                        header << "(void)operation" << cendl;
+                        header << "poco_bugcheck_msg(\"DoOperation not implemented.\")" << cendl;
+                    }
+                }
             }
         }
 
+        // Write
 
-		//Write
+        header << endl;
 
+        // cpp << endl;
+    }
 
-		header << endl;
-
-		//cpp << endl;
-	}
-
-}
+} // namespace trader

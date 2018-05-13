@@ -1,11 +1,32 @@
 {
-  "type": "object",
-  "properties": {
-    "api_key": {
-      "type": "string"
-    },
-    "api_secret": {
-      "type": "string"
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "api_key": {
+        "type": "string"
+      },
+      "api_secret": {
+        "type": "string"
+      },
+      "read_info": {
+        "type": "bool"
+      },
+      "trade_limit": {
+        "type": "bool"
+      },
+      "trade_market": {
+        "type": "bool"
+      },
+      "withdraw": {
+        "type": "bool"
+      },
+      "requests_per_minute": {
+        "type": "number"
+      }
     }
   }
 }

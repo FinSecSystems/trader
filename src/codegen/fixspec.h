@@ -1,19 +1,8 @@
-#include "stdafx.h"
-#include "Poco/Util/Application.h"
-#include "Poco/Util/Option.h"
-#include "Poco/Util/OptionSet.h"
-#include "Poco/Util/HelpFormatter.h"
-#include "Poco/File.h"
-#include "Poco/FileStream.h"
-#include "Poco/StreamCopier.h"
-#include "Poco/DirectoryIterator.h"
-#include "Poco/JSON/Parser.h"
-#include "Poco/JSON/ParseHandler.h"
-#include "Poco/JSON/JSONException.h"
-#include "Poco/StringTokenizer.h"
+#pragma once
+
 #include "endpoint.h"
 #include "fileoutputstream.h"
-#pragma once
+#include <unordered_map>
 
 
 namespace trader {
@@ -25,7 +14,20 @@ namespace trader {
 	{
 	public:
 		void process(const string& _namespace, const string& _inputDir, const string& outputdirectory);
-		const char* getCppType(const string& dbType);
+		const char* getCppType(const string& dbName, const string& dbType);
+        enum InterfaceType
+        {
+            InterfaceType_STRING,
+            InterfaceType_DOUBLE,
+            InterfaceType_FLOAT,
+            InterfaceType_INTEGER,
+            InterfaceType_BOOL,
+            InterfaceType_ENUM,
+            NUM_InterfaceType
+        };
+        string getDefaultType(const string &dbName, InterfaceType interfaceType);
+        typedef std::unordered_map<std::string, InterfaceType> TypenameToTypeMap;
+        TypenameToTypeMap typenameToTypeMap;
 		static FixSpec instance;
 	};
 

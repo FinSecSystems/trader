@@ -1,62 +1,123 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="kraken.h" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>Kraken Api connection declaration</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #pragma once
 
-#include "dataconnector/db.h"
-#include "dataconnector/api.h"
+#include "api.h"
+#include "db.h"
+#include "interface.h"
 #include "krakenapi.h"
 #include "krakendatabase.h"
-#include "interface.h"
 
-namespace trader {
+namespace trader
+{
 
-    namespace KrakenApi {
+    namespace KrakenApi
+    {
         class EndPoints;
     };
 
-    namespace KrakenDatabase {
+    namespace KrakenDatabase
+    {
         class Tables;
     };
 
     class Kraken;
 
-    class KrakenConnection : public Interface::Connection
+    /// <summary> A kraken connection. </summary>
+    class KrakenConnection : public Interface::CallConnection, public Poco::Runnable
     {
-    public:
-        KrakenConnection(const std::string& connectionid, Kraken* _exchange)
+      public:
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Initializes a new instance of the KrakenConnection class. </summary>
+        ///
+        /// <param name="connectionid"> The connectionid. </param>
+        /// <param name="_exchange">    [in,out] If non-null, the exchange. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        KrakenConnection(const std::string &connectionid, Kraken *_exchange)
             : exchange(_exchange)
         {
             (void)connectionid;
         }
-    private:
-        Kraken* exchange;
+
+        /// <summary> Runs this object. </summary>
+        void run() {}
+
+      private:
+        Kraken *exchange;   ///< The exchange
     };
 
-	class Kraken : public Api
-	{
-	public:
+    /// <summary> A kraken. </summary>
+    class Kraken : public Api
+    {
+      public:
+        /// <summary> Initializes a new instance of the Kraken class. </summary>
         Kraken();
 
-		~Kraken();
+        /// <summary> Finalizes an instance of the Kraken class. </summary>
+        ~Kraken();
 
-		Poco::Dynamic::Var invoke(const std::string& httpMethod, Poco::URI& uri);
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Executes the given operation on a different thread, and waits for the result. </summary>
+        ///
+        /// <param name="httpMethod"> The HTTP method. </param>
+        /// <param name="uri">		  [in,out] URI of the document. </param>
+        ///
+        /// <returns> A Poco::Dynamic::Var. </returns>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Poco::Dynamic::Var invoke(const std::string &httpMethod, Poco::URI &uri);
 
-		void run();
-		void execute(Poco::Timer& timer);
+        /// <summary> Runs this object. </summary>
+        void run();
 
-        KrakenApi::EndPoints api;
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Executes the given timer. </summary>
+        ///
+        /// <param name="timer"> [in,out] The timer. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        void execute(Poco::Timer &timer);
 
-        static AutoPtr<Interface::Connection> getConnection(const std::string& connectionId);
+        KrakenApi::EndPoints api;   ///< The API
 
-	protected:
-        Kraken(const Kraken&);
-        Kraken& operator = (const Kraken&);
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Gets a connection. </summary>
+        ///
+        /// <param name="connectionId"> Identifier for the connection. </param>
+        ///
+        /// <returns> The connection. </returns>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        static AutoPtr< Interface::Connection > getConnection(const std::string &connectionId);
 
-		std::string _uri;
+      protected:
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Initializes a new instance of the Kraken class. </summary>
+        ///
+        /// <param name="parameter1"> The first parameter. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Kraken(const Kraken &);
 
-	private:
-		Poco::Timer executeTimer;
-		Poco::AutoPtr<KrakenDatabase::Tables> dataBase;
-		//Poco::AutoPtr<trader::Db> app;
-		std::vector<std::function<void(Poco::Timer&)>> serialExecutionList;
-	};
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Assignment operator. </summary>
+        ///
+        /// <param name="parameter1"> The first parameter. </param>
+        ///
+        /// <returns> A shallow copy of this object. </returns>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        Kraken &operator=(const Kraken &);
 
-}
+        std::string _uri;   ///< _URI of the document
+
+      private:
+        Poco::Timer executeTimer;   ///< The execute timer
+        Poco::AutoPtr< KrakenDatabase::Tables > dataBase;   ///< The data base
+        // Poco::AutoPtr<trader::Db> app;
+        std::vector< std::function< void(Poco::Timer &) > > serialExecutionList;	///< List of serial executions
+    };
+
+} // namespace trader

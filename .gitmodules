@@ -1,39 +1,6 @@
-[submodule "deps/intel_se_api"]
-	path = deps/intel_se_api
-	url = http://github.com/viknash/IntelSEAPI.git
-[submodule "tools/src/vswhere"]
-	path = tools/src/vswhere
-	url = http://github.com/viknash/vswhere.git
-[submodule "tools/src/premake-core"]
-	path = tools/src/premake-core
-	url = http://github.com/viknash/premake-core.git
-[submodule "tools/src/cmake"]
-	path = tools/src/cmake
-	url = http://github.com/viknash/cmake.git
-[submodule "tools/src/js2model"]
-	path = tools/src/js2model
-	url = http://github.com/viknash/js2model.git
-[submodule "deps/poco"]
-	path = deps/poco
-	url = http://github.com/viknash/poco.git
-[submodule "deps/krakenapi"]
-	path = deps/krakenapi
-	url = http://github.com/viknash/krakenapi
-[submodule "deps/optmarket-bittrex"]
-	path = deps/optmarket-bittrex
-	url = https://github.com/vncoelho/optmarket-bittrex
-[submodule "deps/cef"]
-	path = deps/cef
-	url = https://bitbucket.org/chromiumembedded/cef.git
-[submodule "deps/bgfx"]
-	path = deps/bgfx
-	url = https://github.com/viknash/bgfx.git
-[submodule "deps/bx"]
-	path = deps/bx
-	url = https://github.com/viknash/bx.git
-[submodule "deps/bimg"]
-	path = deps/bimg
-	url = https://github.com/viknash/bimg.git
 [submodule "deps/quickfix"]
 	path = deps/quickfix
-	url = https://github.com/viknash/quickfix.git
+	url = https://github.com/FinSecSystems/quickfix.git
+[submodule "deps/tinyfsm"]
+	path = deps/tinyfsm
+	url = https://github.com/FinSecSystems/tinyfsm.git

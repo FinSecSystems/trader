@@ -26,8 +26,13 @@
 #include "Poco/SAX/InputSource.h"
 #include "Poco/Exception.h"
 #include "Poco/Debugger.h"
-#pragma warning( pop ) 
+#include "Poco/StringTokenizer.h"
+#include "Poco/Util/Application.h"
+#include "Poco/Util/HelpFormatter.h"
+#include "Poco/Util/Option.h"
+#include "Poco/Util/OptionSet.h"
 
+#pragma warning( pop ) 
 
 #include <iostream>
 #include <iomanip>
@@ -36,3 +41,25 @@
 #include <algorithm>
 #include <functional>
 #include <stdarg.h>
+
+using Poco::DirectoryIterator;
+using Poco::Exception;
+using Poco::File;
+using Poco::Path;
+using Poco::Util::AbstractConfiguration;
+using Poco::Util::Application;
+using Poco::Util::HelpFormatter;
+using Poco::Util::Option;
+using Poco::Util::OptionCallback;
+using Poco::Util::OptionSet;
+using Poco::XML::AutoPtr;
+using Poco::XML::Document;
+using Poco::XML::DOMParser;
+using Poco::XML::InputSource;
+using Poco::XML::Node;
+using Poco::XML::NodeFilter;
+using Poco::XML::NodeIterator;
+using Poco::XML::NodeList;
+using namespace Poco;
+using namespace std;
+using namespace Poco::XML;

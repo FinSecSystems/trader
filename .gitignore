@@ -38,11 +38,9 @@
 *.vcxproj*
 *.sln
 ./*.db
-/bin
-IntelSEAPI.log
-ALL_BUILD.log
-ZERO_CHECK.log
-Premake5.log
+/bin/Win64
+/bin/Linux64-gcc
+*.log
 /*.make
 * - Copy.*
 Makefile
@@ -52,3 +50,10 @@ deps/*.make
 *.db
 *.log.txt*
 *.properties
+/*.tss
+/lib
+/*.pdb/*
+packages/
+tools/bin/appveyor-tools/
+autom4te.cache/
+configure

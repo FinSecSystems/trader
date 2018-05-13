@@ -4,36 +4,34 @@
 #include "fileoutputstream.h"
 #include "objectschemadefinition.h"
 
-namespace trader {
-	using namespace Poco;
-	using namespace std;
+namespace trader
+{
 
-	struct Config
-	{
-		void read(JSON::Object::Ptr obj)
-		{
-			baseUrl = obj->getValue<string>("baseurl");
-			Dynamic::Var useConfigVar = obj->get("useConfig");
-			if (!useConfigVar.isEmpty())
-			{
-				useConfig = useConfigVar.convert<bool>();
-			}
-		}
+    struct Config
+    {
+        void read(JSON::Object::Ptr obj)
+        {
+            baseUrl = obj->getValue< string >("baseurl");
+            Dynamic::Var useConfigVar = obj->get("useConfig");
+            if (!useConfigVar.isEmpty())
+            {
+                useConfig = useConfigVar.convert< bool >();
+            }
+        }
 
-		Config()
-			: useConfig(false)
-		{}
+        Config()
+            : useConfig(false)
+        {
+        }
 
-		string baseUrl;
-		string outputDir;
-		string nameSpace;
-		string apiName;
-		string headerFileName;
-		string cppFileName;
-		bool   useConfig;
-		typedef std::map<string, ObjectSchemaDefinition> SchemaDefMap;
-		SchemaDefMap schemaDefinitions;
-	};
-}
-
-
+        string baseUrl;
+        string outputDir;
+        string nameSpace;
+        string apiName;
+        string headerFileName;
+        string cppFileName;
+        bool useConfig;
+        typedef std::map< string, ObjectSchemaDefinition > SchemaDefMap;
+        SchemaDefMap schemaDefinitions;
+    };
+} // namespace trader

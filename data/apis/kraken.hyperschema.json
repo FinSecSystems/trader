@@ -521,7 +521,7 @@
           "description": "user reference id.  32-bit signed number.  (optional)",
           "type": "number"
         },
-        "validate ": {
+        "validate": {
           "description": "validate inputs only.  do not submit order (optional)",
           "type": "bool"
         }

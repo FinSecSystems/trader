@@ -1,4 +1,10 @@
-{
-  "api_key": "",
-  "private_key": ""
-}
+[
+  {
+    "name": "",
+    "consumer_key": "",
+    "consumer_secret": "",
+    "read": false,
+    "trade": false,
+    "withdraw": false
+  }
+]

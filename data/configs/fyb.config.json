@@ -1,11 +1,26 @@
 {
-  "type": "object",
-  "properties": {
-    "consumer_key": {
-      "type": "string"
-    },
-    "consumer_secret": {
-      "type": "string"
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "consumer_key": {
+        "type": "string"
+      },
+      "consumer_secret": {
+        "type": "string"
+      },
+      "read": {
+        "type": "bool"
+      },
+      "trade": {
+        "type": "bool"
+      },
+      "withdraw": {
+        "type": "bool"
+      }
     }
   }
 }
