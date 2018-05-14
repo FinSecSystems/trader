@@ -53,12 +53,12 @@ project "gencode"
 			"%{gtestPath}lib/native/include/**.h"			
 		}
 		buildcommands {
-			"$(SolutionDir)build\\genproj.cmd"
+			"$(SolutionDir)build\\win\\genproj.cmd"
 		}
 		rebuildcommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*",
-			"$(SolutionDir)build\\genproj.cmd"
+			"$(SolutionDir)build\\win\\genproj.cmd"
 		}
 		cleancommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",

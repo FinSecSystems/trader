@@ -296,7 +296,7 @@ filter "files:premake5.lua"
 
     -- One or more commands to run (required)
     buildcommands {
-        '$(SolutionDir)build\\genproj.cmd'
+        '$(SolutionDir)build\\win\\genproj.cmd'
     }
 
     -- One or more outputs resulting from the build (required)

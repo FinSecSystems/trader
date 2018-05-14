@@ -11,9 +11,9 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 
 #### Setup Instructions 
 
-- Run build\shell.cmd
-- Run build\deploy_tools.cmd to download necessary packages
-- Run build\genproj.cmd once to generate Visual Studio 2015 or Visual Studio 2017 projects
+- Run build\win\shell.cmd
+- Run build\win\deploy_tools.cmd to download necessary packages
+- Run build\win\genproj.cmd once to generate Visual Studio 2015 or Visual Studio 2017 projects
 
 ## Compilation
 - Open and compile codegen.sln
@@ -49,9 +49,9 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 
 #### Setup Instructions
 Aptitude users
-- Run build\deploy_tools.sh to install required tools
+- Run build/linux/deploy_tools.sh to install required tools
 
-- Run build\genproj.sh once to generate makefiles for the project
+- Run build/linux/genproj.sh once to generate makefiles for the project
 - Copy bin/*.json & bin/*.properties to bin/debug on bin/release and modify the config with the relevant api keys and proxy settings
 
 ## Compilation
@@ -65,10 +65,10 @@ Otherwise
    - make -f trader.make all
 
 ## Running
-- Run using script build/run_debug_<compiler>.sh
+- Run using script build/linux/run_debug_<compiler>.sh
 
 ## Debug
-- Run build/debug_<compiler>.sh
+- Run build/linux/debug_<compiler>.sh
 
 ### MacOS X
 ~This has not been tested~

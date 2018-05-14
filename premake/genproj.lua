@@ -66,12 +66,12 @@ project "genproj"
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/*.dll %{wks.location}/bin/%{cfg.platform}/release-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Debug/*.pdb %{wks.location}/bin/%{cfg.platform}/debug-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/*.pdb %{wks.location}/bin/%{cfg.platform}/release-shared",
-			"$(SolutionDir)build\\genproj.cmd"
+			"$(SolutionDir)build\\win\\genproj.cmd"
 		}
 		rebuildcommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*",
-			"$(SolutionDir)build\\genproj.cmd"
+			"$(SolutionDir)build\\win\\genproj.cmd"
 		}
 		cleancommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
