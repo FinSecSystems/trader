@@ -44,19 +44,18 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 ## Optional
 - Install [Clang Format](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat) Visual Studio Extension to format code
 - Install [Google Test Adapter](https://marketplace.visualstudio.com/items?itemName=ChristianSoltenborn.GoogleTestAdapter) to run tests in Visual Studio 
-- Install [Google Test Adapter](https://marketplace.visualstudio.com/items?itemName=ChristianSoltenborn.GoogleTestAdapter) to run tests in Visual Studio 
 
 ### Linux/WSL
 
 #### Setup Instructions
 Aptitude users
-- Run build\deploy_tools.sh to use apt-get to install necessary packages
+- Run build\deploy_tools.sh to install required tools
 
 - Run build\genproj.sh once to generate makefiles for the project
-- Copy bin\*.json & bin\*.properties to bin\debug on bin\release and modify the config with the relevant api keys and proxy settings
+- Copy bin/*.json & bin/*.properties to bin/debug on bin/release and modify the config with the relevant api keys and proxy settings
 
 ## Compilation
-- Tested with Ubuntu 16 on WSL
+- Tested with Ubuntu 18 on WSL
 For Help
 - Run make -f generators.make help and make -f generators.make help
 Otherwise
@@ -66,10 +65,10 @@ Otherwise
    - make -f trader.make all
 
 ## Running
-- Run using script build\run_debug_<compiler>.sh
+- Run using script build/run_debug_<compiler>.sh
 
 ## Debug
-- Run build\debug_<compiler>.sh
+- Run build/debug_<compiler>.sh
 
 ### MacOS X
 ~This has not been tested~

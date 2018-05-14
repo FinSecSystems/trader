@@ -1,6 +1,6 @@
 #!/bin/bash
 
 pushd $(dirname $0)
-cd ..
+cd ../..
 ./tools/bin/premake/premake5 gmake $1
 popd

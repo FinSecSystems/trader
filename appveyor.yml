@@ -24,9 +24,9 @@ configuration:
 
 install:
   - cmd: git submodule update --init --recursive
-  - cmd: powershell -ExecutionPolicy Bypass -File .\build\deploy_tools.ps1
-  - cmd: powershell -ExecutionPolicy Bypass -File .\build\decrypt_configs.ps1
-  - cmd: build\genproj.cmd
+  - cmd: powershell -ExecutionPolicy Bypass -File .\build\win\deploy_tools.ps1
+  - cmd: powershell -ExecutionPolicy Bypass -File .\build\win\decrypt_configs.ps1
+  - cmd: build\win\genproj.cmd
 
 before_build:
   - cmd: msbuild generators.sln /t:Build /p:Configuration="%configuration%" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
@@ -36,7 +36,7 @@ build:
 
 cache:
   - packages -> premake5.lua
-  - tools -> build\deploy_tools.ps1, build\decrypt_configs.ps1
+  - tools -> build\win\deploy_tools.ps1, build\win\decrypt_configs.ps1
 
 after_build:
   7z a trader_%configuration%_%APPVEYOR_BUILD_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*.dll %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
@@ -61,4 +61,4 @@ deploy:
 
 test_script:
   #Just name test executables as *test.exe and it will be part of the test coverage
-  - cmd: powershell -ExecutionPolicy Bypass -File .\build\run_tests.ps1
+  - cmd: powershell -ExecutionPolicy Bypass -File .\build\win\run_tests.ps1

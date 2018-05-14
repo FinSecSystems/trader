@@ -5,13 +5,13 @@ Push-Location $dir
 
 #[Environment]::SetEnvironmentVariable("configuration", "debug-static")
 
-Get-ChildItem "..\bin\Win64\$($env:configuration)" -Filter *test.exe | 
+Get-ChildItem "..\..\bin\Win64\$($env:configuration)" -Filter *test.exe | 
 Foreach-Object {
 	$testName = $_
 	$fullExePath = $_.FullName
 	$exeName = $_.BaseName
-	$testFileName = '..\' + $testName + '.xml'
-	$testLogFileName = '..\bin\Win64\' + $env:configuration + '\' + $exeName + '.log.txt'
+	$testFileName = '..\..\' + $testName + '.xml'
+	$testLogFileName = '..\..\bin\Win64\' + $env:configuration + '\' + $exeName + '.log.txt'
 
 	& "$fullExePath" --gtest_output=xml:$testFileName
 	#Get-Content $testLogFileName
