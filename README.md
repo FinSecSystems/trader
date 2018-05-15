@@ -1,6 +1,6 @@
 # trader
 
-[![Build Status](https://ci.appveyor.com/api/projects/status/kks53akyvugs7j1w?svg=true)](https://ci.appveyor.com/project/Administrator73626/trader-private)
+[![Build Status](https://ci.appveyor.com/api/projects/status/kks53akyvugs7j1w?svg=true)](https://ci.appveyor.com/project/FinSec/trader-private)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1605/badge)](https://bestpractices.coreinfrastructure.org/projects/1605)
 
 This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.

@@ -1,10 +1,18 @@
-#pragma once
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="shautils.h" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>Sha Utils implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////#pragma once
 
 #include "openssl/ssl.h"
 
 namespace trader
 {
 
+    /// <summary> A sha 512 engine. </summary>
     class SHA512Engine : public SHA2Engine
     {
       public:
@@ -15,6 +23,7 @@ namespace trader
         };
     };
 
+    /// <summary> A sha 256 engine. </summary>
     class SHA256Engine : public SHA2Engine
     {
       public:
@@ -24,6 +33,11 @@ namespace trader
             DIGEST_SIZE = 256 / 8
         };
 
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary> Initializes a new instance of the SHA256Engine class. </summary>
+        ///
+        /// <param name="_str"> The string. </param>
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
         SHA256Engine(std::string _str)
             : SHA2Engine(SHA_256)
         {
@@ -32,13 +46,21 @@ namespace trader
     };
 
 #if defined(POCO_OS_FAMILY_WINDOWS)
-    // MSVC defines this in winsock2.h!?
+    /// <summary> MSVC defines this in winsock2.h!? </summary>
     typedef struct timeval
     {
         long tv_sec;
         long tv_usec;
     } timeval;
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gettimeofdays. </summary>
+    ///
+    /// <param name="tp">  [in,out] If non-null, the TP. </param>
+    /// <param name="tzp"> [in,out] If non-null, the tzp. </param>
+    ///
+    /// <returns> An int. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     inline int gettimeofday(struct timeval *tp, struct timezone *tzp)
     {
         (void)tzp;
@@ -62,6 +84,13 @@ namespace trader
     }
 #endif
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Creates the nonce. </summary>
+    ///
+    /// <exception cref="std::runtime_error"> Raised when a runtime error condition occurs. </exception>
+    ///
+    /// <returns> The new nonce. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     inline std::string create_nonce()
     {
         std::ostringstream oss;
@@ -80,6 +109,13 @@ namespace trader
         return oss.str();
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Sha 256. </summary>
+    ///
+    /// <param name="data"> The data. </param>
+    ///
+    /// <returns> A std::vector&lt;unsigned char &gt; </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     inline std::vector< unsigned char > sha256(const std::string &data)
     {
         std::vector< unsigned char > digest(SHA256_DIGEST_LENGTH);
@@ -92,8 +128,18 @@ namespace trader
         return digest;
     }
 
-    //------------------------------------------------------------------------------
-    // helper function to decode a base64 string to a vector of bytes:
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>
+    /// ------------------------------------------------------------------------------
+    ///  helper function to decode a base64 string to a vector of bytes:
+    /// </summary>
+    ///
+    /// <exception cref="std::runtime_error"> Raised when a runtime error condition occurs. </exception>
+    ///
+    /// <param name="data"> The data. </param>
+    ///
+    /// <returns> A std::vector&lt;unsigned char &gt; </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     inline std::vector< unsigned char > b64_decode(const std::string &data)
     {
         BIO *b64 = BIO_new(BIO_f_base64());
@@ -112,8 +158,16 @@ namespace trader
         return output;
     }
 
-    //------------------------------------------------------------------------------
-    // helper function to encode a vector of bytes to a base64 string:
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>
+    /// ------------------------------------------------------------------------------
+    ///  helper function to encode a vector of bytes to a base64 string:
+    /// </summary>
+    ///
+    /// <param name="data"> The data. </param>
+    ///
+    /// <returns> A std::string. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     inline std::string b64_encode(const std::vector< unsigned char > &data)
     {
         BIO *b64 = BIO_new(BIO_f_base64());
@@ -134,8 +188,17 @@ namespace trader
         return output;
     }
 
-    //------------------------------------------------------------------------------
-    // helper function to hash with HMAC algorithm:
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>
+    /// ------------------------------------------------------------------------------
+    ///  helper function to hash with HMAC algorithm:
+    /// </summary>
+    ///
+    /// <param name="data"> The data. </param>
+    /// <param name="key">  The key. </param>
+    ///
+    /// <returns> A std::vector&lt;unsigned char &gt; </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     inline std::vector< unsigned char > hmac_sha512(const std::vector< unsigned char > &data,
                                                     const std::vector< unsigned char > &key)
     {
