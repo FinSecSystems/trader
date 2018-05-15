@@ -21,11 +21,13 @@ Foreach-Object {
 	$report=[System.IO.Path]::GetFullPath((Join-Path $dir $reportFileName))
 	$workingDirPath='..\bin\Win64\' + $env:configuration
 	$working_dir=[System.IO.Path]::GetFullPath((Join-Path $dir $workingDirPath))
+	$testFileDir = '..\bin\Win64\' + $env:configuration + '\' + $testFileName
+	$test_file_name=[System.IO.Path]::GetFullPath((Join-Path $dir $testFileDir))
 	& "..\tools\bin\OpenCppCoverage\OpenCppCoverage.exe" --sources=$src --export_type=binary:$report --working_dir=$working_dir --excluded_modules=c:\windows\system32* -- $fullExePath --gtest_output=xml:$testFileName
 	#Get-Content $testLogFileName
 	
 	#Upload test reports
-	(new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $testFileName) )
+	(new-object net.webclient).UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $test_file_name) )
 }
 
 # Combine reports
