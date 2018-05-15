@@ -9,6 +9,7 @@ Write-Host "Setup directories"
 New-Item "..\tmp" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\tools" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\tools\bin" -itemtype directory -ErrorAction SilentlyContinue
+New-Item "..\packages" -itemtype directory -ErrorAction SilentlyContinue
 
 Write-Host "Check packages and tools directories"
 Get-ChildItem -Path "..\packages"

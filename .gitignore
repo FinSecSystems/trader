@@ -55,5 +55,6 @@ deps/*.make
 /*.pdb/*
 packages/
 tools/bin/appveyor-tools/
+tools/bin/OpenCppCoverage/
 autom4te.cache/
 configure
