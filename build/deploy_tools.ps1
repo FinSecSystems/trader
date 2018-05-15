@@ -11,10 +11,6 @@ New-Item "..\tools" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\tools\bin" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\packages" -itemtype directory -ErrorAction SilentlyContinue
 
-Write-Host "Check packages and tools directories"
-Get-ChildItem -Path "..\packages"
-Get-ChildItem -Path "..\tools" –Recurse
-
 #Set Github Credentials
 
 function Get-BasicAuthCreds {
@@ -132,6 +128,10 @@ if(![System.IO.Directory]::Exists("..\packages\Microsoft.googletest.v140.windesk
 if(![System.IO.Directory]::Exists("..\packages\VisualLeakDetector.2.5.0.0")) {
 	& "..\tools\bin\nuget\nuget.exe" install VisualLeakDetector -OutputDirectory ..\packages
 }
+
+Write-Host "Check packages and tools directories"
+Get-ChildItem -Path "..\packages"
+Get-ChildItem -Path "..\tools" –Recurse
 
 Pop-Location
 [Environment]::CurrentDirectory = $PWD
