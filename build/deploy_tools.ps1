@@ -32,6 +32,22 @@ if (Test-Path env:my_github_username) {
 	}
 }
 
+#opencppcoverage
+$opencppcoverageDir = "$dir\..\tools\bin\OpenCppCoverage\"
+if(![System.IO.Directory]::Exists($opencppcoverageDir)){
+	Write-Host "Installing OpenCppCoverage $opencppcoverageDir"
+	$repo = "OpenCppCoverage/OpenCppCoverage"
+	$exename = "OpenCppCoverageSetup-x64-0.9.7.0.exe"
+	$destinationdir = "..\tmp"
+	$releases = "https://api.github.com/repos/$repo/releases"
+	$url = (Invoke-WebRequest $releases -Headers $headers | ConvertFrom-Json)[0].assets[0].browser_download_url
+	$download = "https://github.com/$repo/releases/download/$tag/$exename"
+	Write-Host $download
+	Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 
+	Invoke-WebRequest $url -Out $destinationdir\$exename -Headers $headers
+	& "$destinationdir\$exename" /VERYSILENT /DIR="$opencppcoverageDir"
+}
+
 #intelseapi
 $intelseapiDir = "$dir\..\packages\IntelSEAPI-Windows\"
 if(![System.IO.Directory]::Exists($intelseapiDir)){
