@@ -126,7 +126,8 @@ filter { "platforms:Linux64-gcc", "system:linux" }
 	toolset "gcc"
 	buildoptions {
 		"-fpermissive",
-		"-Wl,--no-as-needed"
+		"-Wl,--no-as-needed",
+		"-fPIC"
 	}
 	linkoptions {
 		"-Wl,--no-as-needed"

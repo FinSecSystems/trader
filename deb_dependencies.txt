@@ -1,5 +1,6 @@
 autoconf
 gcc
+g++
 clang
 jq
 python-pip
