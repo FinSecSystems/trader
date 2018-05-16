@@ -109,11 +109,20 @@ if(![System.IO.File]::Exists("$destinationdir\$exename")){
 }
 
 #Poco
-if(![System.IO.Directory]::Exists("..\packages\finsec.poco-windows-v140.1.8.0.1")) {
-	& "..\tools\bin\nuget\nuget.exe" install finsec.poco-windows-v140 -OutputDirectory ..\packages
+if (Test-Path env:VS_PLATFORM_TOOLSET)
+{
+	if(![System.IO.Directory]::Exists("..\packages\finsec.poco-windows-$env:VS_PLATFORM_TOOLSET.1.8.0.1")) {
+		& "..\tools\bin\nuget\nuget.exe" install finsec.poco-windows-$env:VS_PLATFORM_TOOLSET -OutputDirectory ..\packages
+	}
 }
-if(![System.IO.Directory]::Exists("..\packages\finsec.poco-windows-v141.1.8.0.1")) {
-	& "..\tools\bin\nuget\nuget.exe" install finsec.poco-windows-v141 -OutputDirectory ..\packages
+else
+{
+	if(![System.IO.Directory]::Exists("..\packages\finsec.poco-windows-v140.1.8.0.1")) {
+		& "..\tools\bin\nuget\nuget.exe" install finsec.poco-windows-v140 -OutputDirectory ..\packages
+	}
+	if(![System.IO.Directory]::Exists("..\packages\finsec.poco-windows-v141.1.8.0.1")) {
+		& "..\tools\bin\nuget\nuget.exe" install finsec.poco-windows-v141 -OutputDirectory ..\packages
+	}
 }
 
 #gTest
