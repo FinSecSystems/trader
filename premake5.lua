@@ -120,9 +120,6 @@ filter { "system:linux", "platforms:Linux64*"  }
 		"deps/poco/Data/SQLite/include",
 		"deps/poco/NetSSL_OpenSSL/include"
 	}
-	libdirs {
-		"deps/poco/lib/Linux/x86_64"
-	}
 
 --- Linux, GCC Only
 filter { "platforms:Linux64-gcc", "system:linux" }
@@ -303,6 +300,8 @@ filter "files:premake5.lua"
     buildoutputs { '$(SolutionDir)trader.sln' }
 
 -------------------------------------------------------------------------------
+
+include "premake/poco.lua"
 
 --- Workspaces
 workspace "generators"

@@ -39,15 +39,15 @@ project "codegen"
     filter "files:deps/**.*"
         flags { "ExcludeFromBuild" }
 
-	filter { "platforms:Linux64*", "system:linux", "configurations:debug"  }
+	filter { "system:linux", "configurations:debug*"  }
 		links { 
-            "PocoFoundationd",
-            "PocoUtild",
-            "PocoJSONd",
-			"PocoXMLd"
+            "PocoFoundation",
+            "PocoUtil",
+            "PocoJSON",
+			"PocoXML"
         }
 							
-	filter { "platforms:Linux64*", "system:linux", "configurations:release"  }
+	filter { "system:linux", "configurations:release*"  }
 		links { 
             "PocoFoundation",
             "PocoUtil",
