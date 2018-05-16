@@ -66,15 +66,28 @@ project "genproj"
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/*.dll %{wks.location}/bin/%{cfg.platform}/release-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Debug/*.pdb %{wks.location}/bin/%{cfg.platform}/debug-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/*.pdb %{wks.location}/bin/%{cfg.platform}/release-shared",
-			"$(SolutionDir)build\\genproj.cmd"
 		}
 		rebuildcommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*",
-			"$(SolutionDir)build\\genproj.cmd"
 		}
 		cleancommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*"
 		}
 
+	filter { "action:vs2015", "system:windows" }
+		buildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2015"
+		}
+		rebuildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2015"
+		}
+
+	filter { "action:vs2017", "system:windows" }
+		buildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2017"
+		}
+		rebuildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2017"
+		}
