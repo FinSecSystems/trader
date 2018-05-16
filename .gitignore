@@ -58,3 +58,8 @@ tools/bin/appveyor-tools/
 autom4te.cache/
 configure
 /tools/bin/premake
+
+#Conan
+conanbuildinfo.cmake
+conanbuildinfo.txt
+conaninfo.txt
