@@ -9,5 +9,6 @@ txt
 cmake
 
 [imports]
-lib, *.a -> ./packages/finsec.poco-linux-gcc7.1.9.0/lib @ keep_path=True, folder=True
-include, * -> ./packages/finsec.poco-linux-gcc7.1.9.0/include @ keep_path=True, folder=True
+lib, *.a -> ./lib @ keep_path=True, folder=True
+include, * -> ./include @ keep_path=True, folder=True
+bin, *.so -> ./bin @ keep_path=True, folder=True
