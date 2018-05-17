@@ -122,7 +122,7 @@ filter { "system:linux", "platforms:Linux64*"  }
 	}
 
 --- Linux, GCC Only
-filter { "platforms:Linux64-gcc", "system:linux" }
+filter { "system:linux", "platforms:Linux64-gcc" }
 	toolset "gcc"
 	buildoptions {
 		"-fpermissive",

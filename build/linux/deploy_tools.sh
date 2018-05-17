@@ -11,6 +11,7 @@ else
 	tar zxf ../../tmp/premake.tar.gz -C ../../tools/bin/premake
 fi
 pip install -r ../../requirements.txt
-conan install -if ../../tmp/. ../../.
+conan remote add conan-poco https://api.bintray.com/conan/finsecsystem/finsec.pocoproject
+conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++11
 popd
 

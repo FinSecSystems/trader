@@ -1,10 +1,13 @@
 [requires]
-Poco/1.9.0@pocoproject/stable
+FinSec.Poco/1.9.0@finsecadmin/testing
 
 [options]
-Poco:shared=True # False
-Poco:cxx_14=True
+#Poco:shared=True # False
 
 [generators]
 txt
 cmake
+
+[imports]
+lib, *.a -> ./packages/finsec.poco-linux-gcc7.1.9.0/lib @ keep_path=True, folder=True
+include, * -> ./packages/finsec.poco-linux-gcc7.1.9.0/include @ keep_path=True, folder=True
