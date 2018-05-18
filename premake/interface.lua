@@ -4,12 +4,24 @@ project "interface"
 		"codegen"
 	}
 	kind		"Utility"
-	targetname	"interface.h"
+	targetname	"%{wks.location}/tmp/%{cfg.platform}/codegen/interface.h"
 	targetdir	"%{wks.location}/tmp/%{cfg.platform}/codegen"
 
 	files {
         "%{wks.location}/deps/quickfix/spec/FIX50SP2.xml"
 	}
+
+	filter { "platforms:Linux64*", "system:linux" }
+		prebuildcommands {
+			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:%{wks.location}/deps/quickfix/spec/FIX50SP2.xml -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
+		}
+		rebuildcommands {
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**database.*",
+			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:%{wks.location}/deps/quickfix/spec/FIX50SP2.xml -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
+		}
+		cleancommands {
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**interface.*",
+		}
 
 	filter { "platforms:Win64", "system:windows" }
 		prebuildcommands {
@@ -21,16 +33,4 @@ project "interface"
 		}
 		cleancommands {
 			"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen"
-		}
-
-	filter { "platforms:Linux64*", "system:linux" }
-		prebuildcommands {
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:deps/quickfix/spec/FIX50SP2.xml -o:tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
-		}
-		rebuildcommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**database.*",
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:deps/quickfix/spec/FIX50SP2.xml -o:tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
-		}
-		cleancommands {
-			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**interface.*",
 		}

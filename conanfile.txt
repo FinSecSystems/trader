@@ -9,6 +9,6 @@ txt
 cmake
 
 [imports]
-lib, *.a -> ./lib @ keep_path=True, folder=True
+lib, *.a -> ./lib 
+lib, *.so* -> ./lib 
 include, * -> ./include @ keep_path=True, folder=True
-bin, *.so -> ./bin @ keep_path=True, folder=True

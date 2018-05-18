@@ -149,4 +149,4 @@ project "trader"
 			"PocoDataSQLite",
 			"PocoNetSSL",
 			"PocoCrypto"
-			}
+		}

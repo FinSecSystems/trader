@@ -4,7 +4,7 @@
 
 namespace trader
 {
-
+#if 0
     class SHA512Engine : public SHA2Engine
     {
       public:
@@ -30,7 +30,7 @@ namespace trader
             updateImpl(_str.c_str(), _str.length());
         }
     };
-
+#endif
 #if defined(POCO_OS_FAMILY_WINDOWS)
     // MSVC defines this in winsock2.h!?
     typedef struct timeval

@@ -4,3 +4,4 @@ g++
 clang
 jq
 python-pip
+git

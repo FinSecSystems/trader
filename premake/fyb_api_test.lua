@@ -133,4 +133,4 @@ project "fyb_api_test"
 			"PocoDataSQLite",
 			"PocoNetSSL",
 			"PocoCrypto"
-			}
+		}

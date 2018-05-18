@@ -1,6 +1,6 @@
 project "configs"
 	location "%{wks.location}/tmp/projects"
-	targetname "fybconfig.h"
+	targetname "%{wks.location}/tmp/%{cfg.platform}/codegen/fybconfig.h"
 	dependson { 
 		"codegen"
 	}
@@ -10,6 +10,18 @@ project "configs"
 	{
 		"%{wks.location}/data/configs/**.json"
 	}
+
+	filter { "platforms:Linux64*", "system:linux" }
+		prebuildcommands {
+			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/configs -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
+		}
+		rebuildcommands {
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**config.*",
+			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/configs -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
+		}
+		cleancommands {
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**config.*",
+		}
 
 	filter { "platforms:Win64", "system:windows" }
 		prebuildcommands {
@@ -21,16 +33,4 @@ project "configs"
 		}
 		cleancommands {
 			"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen"
-		}
-
-	filter { "platforms:Linux64*", "system:linux" }
-		prebuildcommands {
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
-		}
-		rebuildcommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**config.*",
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
-		}
-		cleancommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**config.*",
 		}

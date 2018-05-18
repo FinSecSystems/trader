@@ -131,4 +131,4 @@ project "sample_app_test"
 			"PocoDataSQLite",
 			"PocoNetSSL",
 			"PocoCrypto"
-			}
+		}

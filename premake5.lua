@@ -2,7 +2,7 @@ pocoPackageVS2015 = "finsec.poco-windows-v140"
 pocoPackageVS2017 = "finsec.poco-windows-v141"
 pocoPackageLinux  = "finsec.poco-linux-gcc7"
 pocoPackageVersion = "1.8.0.1"
-pocoPackageVersion = "1.9.0"
+pocoPackageVersionLinux = "1.9.0"
 gTestPackage = "gtest-vc140-static-64"
 gTestPackageVersion = "1.1.0"
 gTestPackageDynamic = "Microsoft.googletest.v140.windesktop.msvcstl.dyn.rt-dyn"
@@ -10,11 +10,12 @@ gTestPackageVersionDynamic = "1.8.0"
 visualLeakDetector = "VisualLeakDetector"
 visualLeakDetectorVersion = "2.5.0.0"
 
-pocoPathVS2015	= "packages/%{pocoPackageVS2015}.%{pocoPackageVersion}/"
-pocoPathVS2017	= "packages/%{pocoPackageVS2017}.%{pocoPackageVersion}/"
-gtestPath		= "packages/%{gTestPackage}.%{gTestPackageVersion}/"
+pocoPathVS2015 = "packages/%{pocoPackageVS2015}.%{pocoPackageVersion}/"
+pocoPathVS2017 = "packages/%{pocoPackageVS2017}.%{pocoPackageVersion}/"
+pocoPathLinux = "packages/%{pocoPackageLinux}.%{pocoPackageVersionLinux}-%{cfg.buildcfg}/"
+gtestPath = "packages/%{gTestPackage}.%{gTestPackageVersion}/"
 gtestPathDynamic = "packages/%{gTestPackageDynamic}.%{gTestPackageVersionDynamic}/"
-intelSEAPIPath  = "packages/IntelSEAPI-Windows/"
+intelSEAPIPath = "packages/IntelSEAPI-Windows/"
 visualLeakDetectorPath = "packages/%{visualLeakDetector}.%{visualLeakDetectorVersion}/"
 
 -------------------------------------------------------------------------------
@@ -86,7 +87,7 @@ filter "configurations:release*"
 
 --- Static Libs Only
 filter { "configurations:*static" }
-	defines "USE_SHARED_LIBS"
+	defines "USE_STATIC_LIBS"
 
 --- Dynamic Libs Only
 filter { "configurations:*shared" }
@@ -100,7 +101,7 @@ filter { "system:linux", "platforms:Linux64*"  }
 		"-frtti",
 		"-fexceptions",
 		"-g",
-		"-std=c++11",
+		"-std=c++14",
 		"-shared-libgcc",
 		"-Wno-unknown-pragmas"
 	}
@@ -108,19 +109,12 @@ filter { "system:linux", "platforms:Linux64*"  }
 		"-g"
 	}
 	includedirs {
-		"deps/poco/Foundation/include",
-		"deps/poco/Util/include",
-		"deps/poco/JSON/include",
-		"deps/poco/XML/include",
-		"deps/poco/Net/include",
-		"deps/poco/Crypto/include",
-		"deps/poco/Foundation/include",
-		"deps/poco/Util/include",
-		"deps/poco/openssl/include",
-		"deps/poco/JSON/include",
-		"deps/poco/Data/include",
-		"deps/poco/Data/SQLite/include",
-		"deps/poco/NetSSL_OpenSSL/include"
+		"%{pocoPathLinux}include/FinSec.Poco/",
+		"%{pocoPathLinux}include/OpenSSL/",
+		"%{pocoPathLinux}include/zlib/"
+	}
+	libdirs {
+		"%{pocoPathLinux}lib/",
 	}
 
 --- Linux, GCC Only
@@ -129,7 +123,9 @@ filter { "system:linux", "platforms:Linux64-gcc" }
 	buildoptions {
 		"-fpermissive",
 		"-Wl,--no-as-needed",
-		"-fPIC"
+		"-fPIC",
+		"-no-pie",
+		"-m64"
 	}
 	linkoptions {
 		"-Wl,--no-as-needed"
