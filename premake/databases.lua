@@ -13,11 +13,11 @@ project "databases"
 
 	filter { "platforms:Linux64*", "system:linux" }
 		prebuildcommands {
-			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/databases -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/databases -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
 		}
 		rebuildcommands {
 			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**database.*",
-			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/databases -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/databases -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
 		}
 		cleancommands {
 			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**database.*",

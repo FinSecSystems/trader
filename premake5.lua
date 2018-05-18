@@ -111,10 +111,12 @@ filter { "system:linux", "platforms:Linux64*"  }
 	includedirs {
 		"%{pocoPathLinux}include/FinSec.Poco/",
 		"%{pocoPathLinux}include/OpenSSL/",
-		"%{pocoPathLinux}include/zlib/"
+		"%{pocoPathLinux}include/zlib/",
+		"%{pocoPathLinux}include/gtest/"
 	}
 	libdirs {
 		"%{pocoPathLinux}lib/",
+		"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 	}
 
 --- Linux, GCC Only
@@ -123,9 +125,8 @@ filter { "system:linux", "platforms:Linux64-gcc" }
 	buildoptions {
 		"-fpermissive",
 		"-Wl,--no-as-needed",
-		"-fPIC",
-		"-no-pie",
-		"-m64"
+		"-m64",
+		"-Winvalid-pch"
 	}
 	linkoptions {
 		"-Wl,--no-as-needed"

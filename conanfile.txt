@@ -1,5 +1,6 @@
 [requires]
 FinSec.Poco/1.9.0@finsecadmin/testing
+gtest/1.8.0@bincrafters/stable
 
 [options]
 #Poco:shared=True # False

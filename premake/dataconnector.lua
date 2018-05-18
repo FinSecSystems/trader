@@ -2,7 +2,6 @@ project "dataconnector"
 	location "%{wks.location}/tmp/projects"
 	targetname	"dataconnector"
 	language	"C++"
-	targetdir	"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 	debugdir	"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 	dependson { 
 		"apis",
@@ -39,9 +38,7 @@ project "dataconnector"
 		targetdir	"%{wks.location}/lib/%{cfg.platform}/%{cfg.buildcfg}"
 
 	filter { "configurations:*shared" }
-		defines		"EXPORT_DATACONNECTOR"
 		kind		"SharedLib"
-		implibdir	"%{wks.location}/lib/%{cfg.platform}/%{cfg.buildcfg}"
 		targetdir	"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 
 	filter { "platforms:Linux64*", "system:linux" }
@@ -52,12 +49,18 @@ project "dataconnector"
 			"%{wks.location}/deps/poco/NetSSL_OpenSSL/src/**.cpp"
 		}
 
+	filter { "system:windows", "platforms:Win64", "configurations:*shared" }
+		implibdir "%{wks.location}/lib/%{cfg.platform}/%{cfg.buildcfg}"
+
 	filter { "system:windows", "platforms:Win64" }
 		links {
 			"Iphlpapi.lib",
 			"ws2_32.lib",
 			"crypt32.lib"
 		}
+
+	filter { "system:windows", "configurations:*shared" }
+		defines	"EXPORT_DATACONNECTOR"
 
 	filter { "platforms:Win64", "system:windows", "configurations:debug-static" }
 		links { 
@@ -127,37 +130,4 @@ project "dataconnector"
 			"PocoData.lib",
 			"PocoDataSQLite.lib",
 			"PocoXML.lib"
-		}
-
-	filter { "platforms:Linux64*", "system:linux" }
-		links { 
-			"pthread",
-			"ssl",
-			"crypto"
-		}
-
-	filter { "platforms:Linux64*", "system:linux", "configurations:debug*" }
-		links { 
-			"PocoFoundationd",
-			"PocoUtild",
-			"PocoJSONd",
-			"PocoXMLd",
-			"PocoNetd",
-			"PocoDatad",
-			"PocoDataSQLited",
-			"PocoNetSSLd",
-			"PocoCryptod"
-		}
-
-	filter { "platforms:Linux64*", "system:linux", "configurations:release*" }
-		links { 
-			"PocoFoundation",
-			"PocoUtil",
-			"PocoJSON",
-			"PocoXML",
-			"PocoNet",
-			"PocoData",
-			"PocoDataSQLite",
-			"PocoNetSSL",
-			"PocoCrypto"
 		}

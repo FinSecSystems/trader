@@ -80,6 +80,9 @@ namespace trader
 
 #if defined(_WIN32) && defined(POCO_WIN32_UTF8) && !defined(POCO_NO_WSTRING)
 int wmain(int argc, wchar_t **argv)
+#else
+int main(int argc, char **argv)
+#endif
 {
 	::testing::InitGoogleTest(&argc, argv);
 	Poco::AutoPtr<trader::ApplicationHelper> pApp = new trader::ConnectionApp;
@@ -90,12 +93,3 @@ int wmain(int argc, wchar_t **argv)
 	trader::destroy(pApp);
 	return res;
 }
-#else
-int main(int argc, char **argv)
-{
-	::testing::InitGoogleTest(&argc, argv);
-	savedArgc = argc;
-	savedArgv = argv;
-	return RUN_ALL_TESTS();
-}
-#endif

@@ -102,35 +102,55 @@ project "fyb_api_test"
 			"PocoXMLmt.lib",
 		}
 
-	filter { "platforms:Linux64*", "system:linux" }
+	filter { "platforms:Win64", "system:windows", "configurations:release-static" }
 		links { 
-			"pthread",
-			"ssl",
-			"crypto"
+			"PocoFoundationmt.lib",
+			"PocoNetmt.lib",
+			"PocoNetSSLWinmt.lib",
+			"PocoUtilmt.lib",
+			"PocoCryptomt.lib",
+			"ssleay64MT.lib",
+			"libeay64MT.lib",
+			"PocoJSONmt.lib",
+			"PocoDatamt.lib",
+			"PocoDataSQLitemt.lib",
+			"PocoXMLmt.lib"
 		}
 
 	filter { "platforms:Linux64*", "system:linux", "configurations:debug*" }
 		links { 
-			"PocoFoundationd",
 			"PocoUtild",
 			"PocoJSONd",
 			"PocoXMLd",
 			"PocoNetd",
 			"PocoDatad",
 			"PocoDataSQLited",
+			"PocoEncodingsd",
 			"PocoNetSSLd",
-			"PocoCryptod"
+			"PocoCryptod",
+			"PocoFoundationd",
 		}
 
 	filter { "platforms:Linux64*", "system:linux", "configurations:release*" }
 		links { 
-			"PocoFoundation",
 			"PocoUtil",
 			"PocoJSON",
 			"PocoXML",
 			"PocoNet",
 			"PocoData",
 			"PocoDataSQLite",
+			"PocoEncodings",
 			"PocoNetSSL",
-			"PocoCrypto"
+			"PocoCrypto",
+			"PocoFoundation",
+		}
+
+	filter { "platforms:Linux64*", "system:linux" }
+		links {
+			"gtest",
+			"pthread",
+			"ssl",
+			"crypto",
+			"z",
+			"dl"
 		}

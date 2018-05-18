@@ -100,35 +100,40 @@ project "sample_app_test"
 			"PocoXMLmt.lib"
 		}
 
-	filter { "platforms:Linux64*", "system:linux" }
-		links { 
-			"pthread",
-			"ssl",
-			"crypto"
-		}
-
 	filter { "platforms:Linux64*", "system:linux", "configurations:debug*" }
 		links { 
-			"PocoFoundationd",
 			"PocoUtild",
 			"PocoJSONd",
 			"PocoXMLd",
 			"PocoNetd",
 			"PocoDatad",
 			"PocoDataSQLited",
+			"PocoEncodingsd",
 			"PocoNetSSLd",
-			"PocoCryptod"
+			"PocoCryptod",
+			"PocoFoundationd",
 		}
 
 	filter { "platforms:Linux64*", "system:linux", "configurations:release*" }
 		links { 
-			"PocoFoundation",
 			"PocoUtil",
 			"PocoJSON",
 			"PocoXML",
 			"PocoNet",
 			"PocoData",
 			"PocoDataSQLite",
+			"PocoEncodings",
 			"PocoNetSSL",
-			"PocoCrypto"
+			"PocoCrypto",
+			"PocoFoundation",
+		}
+
+	filter { "platforms:Linux64*", "system:linux" }
+		links {
+			"gtest",
+			"pthread",
+			"ssl",
+			"crypto",
+			"z",
+			"dl"
 		}

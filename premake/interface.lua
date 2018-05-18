@@ -13,11 +13,11 @@ project "interface"
 
 	filter { "platforms:Linux64*", "system:linux" }
 		prebuildcommands {
-			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:%{wks.location}/deps/quickfix/spec/FIX50SP2.xml -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:%{wks.location}/deps/quickfix/spec/FIX50SP2.xml -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
 		}
 		rebuildcommands {
 			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**database.*",
-			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:%{wks.location}/deps/quickfix/spec/FIX50SP2.xml -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -f:%{wks.location}/deps/quickfix/spec/FIX50SP2.xml -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:xmlspec"
 		}
 		cleancommands {
 			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**interface.*",

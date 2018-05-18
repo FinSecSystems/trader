@@ -13,11 +13,11 @@ project "apis"
 
 	filter { "platforms:Linux64*", "system:linux" }
 		prebuildcommands {
-			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/apis -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/apis -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
 		}		
 		rebuildcommands {
 			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**api.*",
-			"%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/apis -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/apis -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
 		}
 		cleancommands {
 			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**api.*",
