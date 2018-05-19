@@ -14,10 +14,9 @@ before_install:
   # - sudo add-apt-repository -y ppa:andykimpe/cmake3
   # linux prereqisite packages
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ./build/linux/deploy_tools.sh; fi 
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo $TRAVIS_BUILD_DIR/build/linux/deploy_tools.sh; fi 
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq; fi
-#  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install -qq -y g++-4.8; fi
 
 services:
 #  - mongodb
@@ -40,7 +39,7 @@ before_script:
 # - if [ "$TRAVIS_OS_NAME" == "linux" ]; then mysql --version; fi
 # - if [ "$TRAVIS_OS_NAME" == "linux" ]; then postgres --version; fi
 # - sqlite3 -version
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then ./build/linux/genproj.sh; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then $TRAVIS_BUILD_DIR/build/linux/genproj.sh; fi
         - 
 
 matrix:
