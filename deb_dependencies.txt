@@ -5,3 +5,5 @@ clang
 jq
 python-pip
 git
+cppcheck
+sloccount
