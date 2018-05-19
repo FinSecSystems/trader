@@ -56,10 +56,11 @@ project "codegen"
 							
 	filter { "system:linux", "configurations:release*"  }
 		links { 
-            "PocoFoundation",
-            "PocoUtil",
-            "PocoJSON",
-			"PocoXML"
+			"PocoEncodings",
+			"PocoUtil",
+			"PocoJSON",
+			"PocoXML",
+			"PocoFoundation"
         }
 
 	filter { "platforms:Win64", "system:windows", "configurations:debug-static" }

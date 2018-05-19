@@ -1,11 +1,11 @@
 project "configs"
 	location "%{wks.location}/tmp/projects"
-	targetname "%{wks.location}/tmp/%{cfg.platform}/codegen/fybconfig.h"
+	targetname "fybconfig.h"
 	dependson { 
 		"codegen"
 	}
 	kind "Utility"
-	targetdir "%{wks.location}/tmp/%{cfg.platform}/codegen"
+	targetdir "%{wks.location}/tmp/%{cfg.platform}/codegen/"
 	files
 	{
 		"%{wks.location}/data/configs/**.json"

@@ -4,8 +4,8 @@ project "interface"
 		"codegen"
 	}
 	kind		"Utility"
-	targetname	"%{wks.location}/tmp/%{cfg.platform}/codegen/interface.h"
-	targetdir	"%{wks.location}/tmp/%{cfg.platform}/codegen"
+	targetname	"interface.h"
+	targetdir	"%{wks.location}/tmp/%{cfg.platform}/codegen/"
 
 	files {
         "%{wks.location}/deps/quickfix/spec/FIX50SP2.xml"

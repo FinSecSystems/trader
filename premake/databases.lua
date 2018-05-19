@@ -4,8 +4,8 @@ project "databases"
 		"codegen"
 	}
 	kind		"Utility"
-	targetdir	"%{wks.location}/tmp/%{cfg.platform}/codegen"
-	targetname	"%{wks.location}/tmp/%{cfg.platform}/codegen/fybdatabase.h"
+	targetdir	"%{wks.location}/tmp/%{cfg.platform}/codegen/"
+	targetname	"fybdatabase.h"
 	files
 	{
         "%{wks.location}/data/databases/**.json"

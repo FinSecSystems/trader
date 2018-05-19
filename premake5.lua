@@ -1,3 +1,5 @@
+require "finseccodelite"
+
 pocoPackageVS2015 = "finsec.poco-windows-v140"
 pocoPackageVS2017 = "finsec.poco-windows-v141"
 pocoPackageLinux  = "finsec.poco-linux-gcc7"

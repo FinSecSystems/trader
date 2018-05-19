@@ -1,10 +1,10 @@
 project "apis"
 	location "%{wks.location}/tmp/projects"
-	targetname "%{wks.location}/tmp/%{cfg.platform}/codegen/fybapi.h"
+	targetname "fybapi.h"
 	dependson { 
 		"codegen"
 	}
-	targetdir "%{wks.location}/tmp/%{cfg.platform}/codegen"
+	targetdir "%{wks.location}/tmp/%{cfg.platform}/codegen/"
 	kind "Utility"
 	files
 	{
