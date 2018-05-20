@@ -103,7 +103,7 @@ filter { "system:linux", "platforms:Linux64*"  }
 		"-frtti",
 		"-fexceptions",
 		"-g",
-		"-std=c++14",
+		"-std=c++11",
 		"-shared-libgcc",
 		"-Wno-unknown-pragmas"
 	}

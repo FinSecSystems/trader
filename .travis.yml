@@ -50,7 +50,9 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo $TRAVIS_BUILD_DIR/build/linux/genproj.sh; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo make -f generators.make help; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ls packages; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ls tools; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo find tools; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo gcc-7 --version; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo g++-7 --version; fi
 
 matrix:
   fast_finish: true
