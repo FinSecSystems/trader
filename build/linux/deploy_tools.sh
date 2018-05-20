@@ -7,7 +7,7 @@ then
 	echo "Premake found..."
 else
 	echo "Installing Premake..."
-	wget `curl -s https://api.github.com/repos/premake/premake-core/releases | jq -r ".[0].assets[] | select(.name | test(\"linux\")) | .browser_download_url"` -O ../../tmp/premake.tar.gz
+	wget -O ../../tmp/premake.tar.gz `curl -s https://api.github.com/repos/premake/premake-core/releases | jq -r ".[0].assets[] | select(.name | test(\"linux\")) | .browser_download_url"`
 	tar zxf ../../tmp/premake.tar.gz -C ../../tools/bin/premake
 	chmod 777 ../../tools/bin/premake
 fi
