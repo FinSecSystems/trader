@@ -2,6 +2,7 @@
 pushd $(dirname $0)
 #apt-get install -qq -y autoconf gcc clang premake libpoco* jq python-pip
 cat ../../deb_dependencies.txt | xargs apt-get install -qq -y
+mkdir -p ../../tmp
 if [ -e ../../tools/bin/premake/premake5 ]
 then
 	echo "Premake found..."
