@@ -1,6 +1,6 @@
 autoconf
-gcc
-g++
+gcc-7
+g++-7
 clang
 jq
 python-pip
