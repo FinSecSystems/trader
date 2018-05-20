@@ -1,8 +1,8 @@
 language: cpp
 
 cache:
-  - apt
-  - ccache
+  apt: true
+  ccache: true
   directories:
     - /home/travis/.conan/
     - packages
