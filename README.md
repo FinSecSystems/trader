@@ -2,6 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/oyjbn65vy8qg176q?svg=true)](https://ci.appveyor.com/project/FinSec/trader)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1605/badge)](https://bestpractices.coreinfrastructure.org/projects/1605)
+[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/15796.svg)](https://scan.coverity.com/projects/finsecsystems-trader)
 
 This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.
 
