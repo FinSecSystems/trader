@@ -130,6 +130,9 @@ filter { "system:linux", "platforms:Linux64-gcc" }
 		"-m64",
 		"-Winvalid-pch"
 	}
+	defines {
+		"_GLIBCXX_USE_CXX11_ABI=0"
+	}
 	linkoptions {
 		"-Wl,--no-as-needed"
 	}
