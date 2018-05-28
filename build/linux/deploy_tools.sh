@@ -15,9 +15,17 @@ else
 fi
 pip install -r ../../requirements.txt
 conan remote add conan-poco https://api.bintray.com/conan/finsecsystem/finsec.pocoproject
-conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++ -s build_type=Release --no-imports -o *:shared=False && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-release-static/
-conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++ -s build_type=Release --no-imports -o *:shared=True  && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-release-shared/
-conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++ -s build_type=Debug   --no-imports -o *:shared=False && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-debug-static/
-conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++ -s build_type=Debug   --no-imports -o *:shared=True  && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-debug-shared/
+if [ "$TRAVIS_OS_NAME" == "linux" ]
+then
+	conan install -if ../../tmp/. ../../. -s compiler.version=4.9 -s compiler.libcxx=libstdc++ -s build_type=Release --no-imports -o *:shared=False && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-release-static/
+	conan install -if ../../tmp/. ../../. -s compiler.version=4.9 -s compiler.libcxx=libstdc++ -s build_type=Release --no-imports -o *:shared=True  && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-release-shared/
+	conan install -if ../../tmp/. ../../. -s compiler.version=4.9 -s compiler.libcxx=libstdc++ -s build_type=Debug   --no-imports -o *:shared=False && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-debug-static/
+	conan install -if ../../tmp/. ../../. -s compiler.version=4.9 -s compiler.libcxx=libstdc++ -s build_type=Debug   --no-imports -o *:shared=True  && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-debug-shared/
+else
+	conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++ -s build_type=Release --no-imports -o *:shared=False && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-release-static/
+	conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++ -s build_type=Release --no-imports -o *:shared=True  && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-release-shared/
+	conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++ -s build_type=Debug   --no-imports -o *:shared=False && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-debug-static/
+	conan install -if ../../tmp/. ../../. -s compiler.libcxx=libstdc++ -s build_type=Debug   --no-imports -o *:shared=True  && conan imports -if ../../tmp/. ../../. -imf ../../packages/finsec.poco-linux-gcc.1.9.0-debug-shared/
+fi
 popd
 
