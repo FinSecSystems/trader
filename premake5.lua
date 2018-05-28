@@ -2,7 +2,7 @@ require "finseccodelite"
 
 pocoPackageVS2015 = "finsec.poco-windows-v140"
 pocoPackageVS2017 = "finsec.poco-windows-v141"
-pocoPackageLinux  = "finsec.poco-linux-gcc7"
+pocoPackageLinux  = "finsec.poco-linux-gcc"
 pocoPackageVersion = "1.8.0.1"
 pocoPackageVersionLinux = "1.9.0"
 gTestPackage = "gtest-vc140-static-64"
