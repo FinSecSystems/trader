@@ -36,6 +36,10 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo $TRAVIS_BUILD_DIR/build/linux/deploy_tools.sh; fi 
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get install g++-7 binutils-2.26; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo export PATH=/usr/lib/binutils-2.26/bin:${PATH}; fi
   - eval "${MATRIX_EVAL}"
 
 before_script:
@@ -53,6 +57,7 @@ before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo find tools; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo gcc-7 --version; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo g++-7 --version; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo ld --version; fi
 
 matrix:
   fast_finish: true
