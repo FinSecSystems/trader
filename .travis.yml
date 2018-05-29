@@ -35,9 +35,11 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
         docker exec -t ubuntu-test bash -c
         "
+            export;
             cd /travis;
             pwd;
             ls -lah
+            apt-get update;
             . build/linux/setup_env.sh;
             build/linux/deploy_tools.sh;
             add-apt-repository -y ppa:ubuntu-toolchain-r/test;
