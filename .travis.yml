@@ -38,7 +38,7 @@ install:
             export;
             cd /travis;
             pwd;
-            ls -lah
+            ls -lah;
             apt-get update;
             . build/linux/setup_env.sh;
             build/linux/deploy_tools.sh;
