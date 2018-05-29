@@ -20,9 +20,9 @@ env:
     - TEST_NAME=""
   matrix:
     - TEST NAME="Linux GCC 7 Debug Static x64"
-    - CC_VER="7"
-    - PREMAKE_CONFIGUATION="debug-static"
-    - PREMAKE_COMPILER="linux64-gcc"
+      CC_VER="7"
+      PREMAKE_CONFIGUATION="debug-static"
+      PREMAKE_COMPILER="linux64-gcc"
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker run -d --name ubuntu-test -v $(pwd):/travis ubuntu:latest tail -f /dev/null; fi
