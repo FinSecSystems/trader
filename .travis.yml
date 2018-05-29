@@ -28,7 +28,7 @@ before_install:
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/deploy_tools.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/setup_env.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/genproj.sh
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker run -d --name ubuntu-test -v $TRAVIS_BUILD_DIR:/travis ubuntu:latest tail -f /dev/null; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker run -d --name ubuntu-test -v $TRAVIS_BUILD_DIR:/travis -v /home/travis:/root ubuntu:latest tail -f /dev/null; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker ps; fi 
 
 install:
@@ -37,6 +37,7 @@ install:
         "
             export;
             cd /travis;
+            echo "Current Directory";
             pwd;
             ls -lah;
             apt-get update;
@@ -45,6 +46,13 @@ install:
             add-apt-repository -y ppa:ubuntu-toolchain-r/test;
             apt-get update;
             lsb_release -a;
+            ls packages;
+            find tools;
+            $(CC) --version;
+            $(CXX) --version;
+            ld --version;
+            ar --version;
+            
         "
     ;fi
 
@@ -54,14 +62,9 @@ before_script:
         docker exec -t ubuntu-test bash -c
         "
             cd /travis;
-            $TRAVIS_BUILD_DIR/build/linux/genproj.sh;
+            . build/linux/setup_env.sh;
+            build/linux/genproj.sh;
             make -f generators.make help;
-            ls packages;
-            find tools;
-            $(CC) --version;
-            $(CXX) --version;
-            ld --version;
-            ar --version;
         "
     ;fi
 
@@ -70,6 +73,7 @@ script:
         docker exec -t ubuntu-test bash -c
         "
             cd /travis;
+            . build/linux/setup_env.sh;
             make -f generators.make configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1
             make -f trader.make     configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1
         "
