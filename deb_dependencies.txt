@@ -6,3 +6,4 @@ git
 cppcheck
 sloccount
 build-essential
+lsb-release
