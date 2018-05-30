@@ -19,16 +19,122 @@ env:
   global: 
     - TEST_NAME=""
   matrix:
-    - TEST NAME="Linux GCC 7 Debug Static x64"
+    - TEST_NAME="Linux GCC 7 Debug Static x64"
       CC_VER="7"
       PREMAKE_CONFIGUATION="debug-static"
       PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 7 Debug Shared x64"
+      CC_VER="7"
+      PREMAKE_CONFIGUATION="debug-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 7 Release Static x64"
+      CC_VER="7"
+      PREMAKE_CONFIGUATION="release-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 7 Release Shared x64"
+      CC_VER="7"
+      PREMAKE_CONFIGUATION="release-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 6 Debug Static x64"
+      CC_VER="6"
+      PREMAKE_CONFIGUATION="debug-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 6 Debug Shared x64"
+      CC_VER="6"
+      PREMAKE_CONFIGUATION="debug-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 6 Release Static x64"
+      CC_VER="6"
+      PREMAKE_CONFIGUATION="release-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 6 Release Shared x64"
+      CC_VER="6"
+      PREMAKE_CONFIGUATION="release-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 5 Debug Static x64"
+      CC_VER="5"
+      PREMAKE_CONFIGUATION="debug-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 5 Debug Shared x64"
+      CC_VER="5"
+      PREMAKE_CONFIGUATION="debug-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 5 Release Static x64"
+      CC_VER="5"
+      PREMAKE_CONFIGUATION="release-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 5 Release Shared x64"
+      CC_VER="5"
+      PREMAKE_CONFIGUATION="release-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+      
+    - TEST_NAME="Linux GCC 4.9 Debug Static x64"
+      CC_VER="4.9"
+      PREMAKE_CONFIGUATION="debug-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 4.9 Debug Shared x64"
+      CC_VER="4.9"
+      PREMAKE_CONFIGUATION="debug-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 4.9 Release Static x64"
+      CC_VER="4.9"
+      PREMAKE_CONFIGUATION="release-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 4.9 Release Shared x64"
+      CC_VER="4.9"
+      PREMAKE_CONFIGUATION="release-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Code Coverage"
+      TRAVIS_STEP="coverage"
+
+    - TEST_NAME="Todo Check"
+      TRAVIS_STEP="coverage"
+
+    - TEST_NAME="Fix Me Check"
+      TRAVIS_STEP="coverage"
+
+    - TEST_NAME="Hack Check"
+      TRAVIS_STEP="coverage"
+
+    - TEST_NAME="Code Statistics"
+      TRAVIS_STEP="code_stats"
 
 before_install:
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/deploy_tools.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/setup_env.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/genproj.sh
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then
         docker run -d
         --name ubuntu-test
         -v $TRAVIS_BUILD_DIR:/travis
@@ -38,10 +144,10 @@ before_install:
         -e PREMAKE_COMPILER=$PREMAKE_COMPILER
         ubuntu:latest tail -f /dev/null
     ; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker ps; fi 
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then docker ps; fi 
 
 install:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then
         docker exec -t -i ubuntu-test bash -c 
         "
             export;
@@ -67,7 +173,7 @@ install:
 
 before_script:
   - echo $TEST_NAME
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then
         docker exec -t -i ubuntu-test bash -c
         "
             cd /travis;
@@ -78,7 +184,7 @@ before_script:
     ;fi
 
 script:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then
         docker exec -t ubuntu-test bash -c
         "
             cd /travis;
@@ -90,18 +196,24 @@ script:
         "
     ;fi
 
-    # # static code analysis with cppcheck (we can add --enable=all later)
-    # - env:    TEST_NAME="cppcheck"
-      # script: cppcheck --force --quiet --inline-suppr -j2 -ipackages -ideps -itools .
-    # # search for TODO within source tree
-    # - env:    TEST_NAME="TODO"
-      # script: grep -r TODO *
-    # # search for FIXME within source tree
-    # - env:    TEST_NAME="FIXME"
-      # script: grep -r FIXME *
-    # # search for HACK within source tree
-    # - env:    TEST_NAME="HACK"
-      # script: grep -r HACK *
-    # # some statistics about the code base
-    # - env:    TEST_NAME="sloccount"
-      # script: sloccount .
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "coverage" ]; then
+        cppcheck --force --quiet --inline-suppr -j2 -ipackages -ideps -itools .
+    ;fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "todo_check" ]; then
+        grep -r TODO *
+    ;fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "fixme_check" ]; then
+        grep -r FIXME *
+    ;fi
+    
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "hack_check" ]; then
+        grep -r HACK *
+    ;fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "code_stats" ]; then
+        sloccount .
+    ;fi
+
