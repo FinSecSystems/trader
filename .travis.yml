@@ -83,7 +83,9 @@ script:
         "
             cd /travis;
             . build/linux/setup_env.sh;
+            cd /travis;
             make -f generators.make configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1;
+            cd /travis;
             make -f trader.make     configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1;
         "
     ;fi
