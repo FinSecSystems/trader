@@ -28,38 +28,47 @@ before_install:
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/deploy_tools.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/setup_env.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/genproj.sh
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker run -d --name ubuntu-test -v $TRAVIS_BUILD_DIR:/travis -v /home/travis:/root ubuntu:latest tail -f /dev/null; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+        docker run -d
+        --name ubuntu-test
+        -v $TRAVIS_BUILD_DIR:/travis
+        -v /home/travis:/root
+        -e CC_VER=$CC_VER
+        -e PREMAKE_CONFIGUATION=$PREMAKE_CONFIGUATION
+        -e PREMAKE_COMPILER=$PREMAKE_COMPILER
+        ubuntu:latest tail -f /dev/null
+    ; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker ps; fi 
 
 install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash -c
+        docker exec -t -i ubuntu-test bash -c 
         "
             export;
             cd /travis;
-            echo "Current Directory";
+            echo Current Directory;
             pwd;
             ls -lah;
             apt-get update;
             . build/linux/setup_env.sh;
+            export;
             build/linux/deploy_tools.sh;
             add-apt-repository -y ppa:ubuntu-toolchain-r/test;
             apt-get update;
             lsb_release -a;
             ls packages;
             find tools;
-            $(CC) --version;
-            $(CXX) --version;
+            $CC --version;
+            $CXX --version;
             ld --version;
             ar --version;
-            
         "
     ;fi
 
 before_script:
-  - echo ${TEST_NAME}
+  - echo $TEST_NAME
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash -c
+        docker exec -t -i ubuntu-test bash -c
         "
             cd /travis;
             . build/linux/setup_env.sh;
@@ -74,8 +83,10 @@ script:
         "
             cd /travis;
             . build/linux/setup_env.sh;
-            make -f generators.make configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1
-            make -f trader.make     configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1
+            cd /travis;
+            make -f generators.make configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1;
+            cd /travis;
+            make -f trader.make     configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1;
         "
     ;fi
 
