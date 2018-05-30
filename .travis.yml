@@ -46,7 +46,7 @@ install:
         "
             export;
             cd /travis;
-            echo "Current Directory";
+            echo Current Directory;
             pwd;
             ls -lah;
             apt-get update;
