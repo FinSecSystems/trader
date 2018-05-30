@@ -33,7 +33,9 @@ before_install:
 
 install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash -c
+        docker exec -t ubuntu-test bash
+        -e CC_VER=$CC_VER
+        -c
         "
             export;
             cd /travis;
@@ -48,18 +50,21 @@ install:
             lsb_release -a;
             ls packages;
             find tools;
-            $(CC) --version;
-            $(CXX) --version;
+            $CC --version;
+            $CXX --version;
             ld --version;
             ar --version;
-            
         "
     ;fi
 
 before_script:
-  - echo ${TEST_NAME}
+  - echo $TEST_NAME
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash -c
+        docker exec -t ubuntu-test bash
+        -e CC_VER=$CC_VER
+        -e PREMAKE_CONFIGUATION=$PREMAKE_CONFIGUATION
+        -e PREMAKE_COMPILER=$PREMAKE_COMPILER
+        -c
         "
             cd /travis;
             . build/linux/setup_env.sh;
@@ -70,7 +75,11 @@ before_script:
 
 script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash -c
+        docker exec -t ubuntu-test bash
+        -e CC_VER=$CC_VER
+        -e PREMAKE_CONFIGUATION=$PREMAKE_CONFIGUATION
+        -e PREMAKE_COMPILER=$PREMAKE_COMPILER       
+        -c
         "
             cd /travis;
             . build/linux/setup_env.sh;
