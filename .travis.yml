@@ -119,13 +119,13 @@ env:
       TRAVIS_STEP="coverage"
 
     - TEST_NAME="Todo Check"
-      TRAVIS_STEP="coverage"
+      TRAVIS_STEP="todo_check"
 
     - TEST_NAME="Fix Me Check"
-      TRAVIS_STEP="coverage"
+      TRAVIS_STEP="fixme_check"
 
     - TEST_NAME="Hack Check"
-      TRAVIS_STEP="coverage"
+      TRAVIS_STEP="hack_check"
 
     - TEST_NAME="Code Statistics"
       TRAVIS_STEP="code_stats"
@@ -134,7 +134,7 @@ before_install:
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/deploy_tools.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/setup_env.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/genproj.sh
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then
         docker run -d
         --name ubuntu-test
         -v $TRAVIS_BUILD_DIR:/travis
@@ -144,10 +144,10 @@ before_install:
         -e PREMAKE_COMPILER=$PREMAKE_COMPILER
         ubuntu:latest tail -f /dev/null
     ; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then docker ps; fi 
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then docker ps; fi 
 
 install:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then
         docker exec -t -i ubuntu-test bash -c 
         "
             export;
@@ -173,7 +173,7 @@ install:
 
 before_script:
   - echo $TEST_NAME
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then
         docker exec -t -i ubuntu-test bash -c
         "
             cd /travis;
@@ -184,36 +184,34 @@ before_script:
     ;fi
 
 script:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "compile" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then
         docker exec -t ubuntu-test bash -c
         "
             cd /travis;
             . build/linux/setup_env.sh;
-            cd /travis;
             make -f generators.make configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1;
-            cd /travis;
             make -f trader.make     configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1;
         "
     ;fi
 
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "coverage" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "coverage" ]; then
         cppcheck --force --quiet --inline-suppr -j2 -ipackages -ideps -itools .
     ;fi
 
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "todo_check" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "todo_check" ]; then
         grep -r TODO *
     ;fi
 
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "fixme_check" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "fixme_check" ]; then
         grep -r FIXME *
     ;fi
     
 
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "hack_check" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "hack_check" ]; then
         grep -r HACK *
     ;fi
 
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "TRAVIS_STEP" == "code_stats" ]; then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "code_stats" ]; then
         sloccount .
     ;fi
 
