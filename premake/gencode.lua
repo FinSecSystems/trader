@@ -23,7 +23,6 @@ project "gencode"
 	filter { "system:linux" }
 		targetname  "%{wks.name}.make"
 		buildcommands {
-			"pwd",
 			"%{wks.location}/tools/bin/premake/premake5 gmake"
 		}
 
