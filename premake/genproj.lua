@@ -17,13 +17,13 @@ project "genproj"
 
 	filter { "system:linux" }
 		buildcommands {
-			"%{wks.location}/tools/bin/premake/premake5 gmake"
+			"%{wks.location}/tools/bin/premake/premake5 gmake --file=%{wks.location}/premake5.lua"
 		}
 
 		rebuildcommands {
 			"{RMDIR} %{wks.location}/Makefile",
 			"{RMDIR} %{wks.location}/*.make",
-			"%{wks.location}/tools/bin/premake/premake5 gmake"
+			"%{wks.location}/tools/bin/premake/premake5 gmake --file=%{wks.location}/premake5.lua"
 		}
 		cleancommands {
 			"{RMDIR} %{wks.location}Makefile",
