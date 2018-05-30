@@ -42,7 +42,7 @@ before_install:
 
 install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash -c 
+        docker exec -t -i ubuntu-test bash -c 
         "
             export;
             cd /travis;
@@ -68,7 +68,7 @@ install:
 before_script:
   - echo $TEST_NAME
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash -c
+        docker exec -t -i ubuntu-test bash -c
         "
             cd /travis;
             . build/linux/setup_env.sh;
