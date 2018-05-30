@@ -1,7 +1,6 @@
 project "gencode"
 	location "%{wks.location}/tmp/projects"
 	targetdir "%{wks.location}"
-	targetname  "%{wks.name}.sln"
     kind "Makefile"
 	dependson {
 		"apis",
@@ -22,7 +21,9 @@ project "gencode"
 	}
 
 	filter { "system:linux" }
+		targetname  "%{wks.name}.make"
 		buildcommands {
+			"pwd",
 			"%{wks.location}/tools/bin/premake/premake5 gmake"
 		}
 
@@ -49,6 +50,7 @@ project "gencode"
 
 	filter { "system:windows" }
 		toolset "v140"
+		targetname  "%{wks.name}.sln"
 		files {
 			"%{gtestPath}lib/native/include/**.h"			
 		}
