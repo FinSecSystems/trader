@@ -28,14 +28,21 @@ before_install:
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/deploy_tools.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/setup_env.sh
   - chmod 777 $TRAVIS_BUILD_DIR/build/linux/genproj.sh
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker run -d --name ubuntu-test -v $TRAVIS_BUILD_DIR:/travis -v /home/travis:/root ubuntu:latest tail -f /dev/null; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+        docker run -d
+        --name ubuntu-test
+        -v $TRAVIS_BUILD_DIR:/travis
+        -v /home/travis:/root
+        -e CC_VER=$CC_VER
+        -e PREMAKE_CONFIGUATION=$PREMAKE_CONFIGUATION
+        -e PREMAKE_COMPILER=$PREMAKE_COMPILER
+        ubuntu:latest tail -f /dev/null
+    ; fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then docker ps; fi 
 
 install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash
-        -e CC_VER=$CC_VER
-        -c
+        docker exec -t ubuntu-test bash -c 
         "
             export;
             cd /travis;
@@ -44,6 +51,7 @@ install:
             ls -lah;
             apt-get update;
             . build/linux/setup_env.sh;
+            export;
             build/linux/deploy_tools.sh;
             add-apt-repository -y ppa:ubuntu-toolchain-r/test;
             apt-get update;
@@ -60,11 +68,7 @@ install:
 before_script:
   - echo $TEST_NAME
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash
-        -e CC_VER=$CC_VER
-        -e PREMAKE_CONFIGUATION=$PREMAKE_CONFIGUATION
-        -e PREMAKE_COMPILER=$PREMAKE_COMPILER
-        -c
+        docker exec -t ubuntu-test bash -c
         "
             cd /travis;
             . build/linux/setup_env.sh;
@@ -75,11 +79,7 @@ before_script:
 
 script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        docker exec -t ubuntu-test bash
-        -e CC_VER=$CC_VER
-        -e PREMAKE_CONFIGUATION=$PREMAKE_CONFIGUATION
-        -e PREMAKE_COMPILER=$PREMAKE_COMPILER       
-        -c
+        docker exec -t ubuntu-test bash -c
         "
             cd /travis;
             . build/linux/setup_env.sh;
