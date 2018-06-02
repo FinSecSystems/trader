@@ -170,8 +170,7 @@ install:
             ar --version;
         ";
         fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" != "compile" ]
-    then
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" != "compile" ]; then
         sudo apt-get update;
         . build/linux/setup_env.sh;
         sudo build/linux/deploy_tools.sh;
