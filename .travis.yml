@@ -168,8 +168,15 @@ install:
             $CXX --version;
             ld --version;
             ar --version;
-        "
-    ;fi
+        ";
+        fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" != "compile" ]
+    then
+        sudo apt-get update;
+        . build/linux/setup_env.sh;
+        sudo build/linux/deploy_tools.sh;
+        sudo apt-get update;
+    fi
 
 before_script:
   - echo $TEST_NAME
@@ -205,7 +212,6 @@ script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "fixme_check" ]; then
         grep -r FIXME *
     ;fi
-    
 
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "hack_check" ]; then
         grep -r HACK *
