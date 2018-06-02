@@ -127,9 +127,7 @@ filter { "system:linux", "platforms:Linux64-gcc" }
 	buildoptions {
 		"-fpermissive",
 		"-Wl,--no-as-needed",
-		"-m64",
-		"-Winvalid-pch",
-		"-fPIC"
+		"-m64",		"-Winvalid-pch"
 	}
 	defines {
 		"_GLIBCXX_USE_CXX11_ABI=0"

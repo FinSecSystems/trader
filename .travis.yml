@@ -67,54 +67,6 @@ env:
       PREMAKE_COMPILER="linux64-gcc"
       TRAVIS_STEP="compile"
 
-    - TEST_NAME="Linux GCC 5 Debug Static x64"
-      CC_VER="5"
-      PREMAKE_CONFIGUATION="debug-static"
-      PREMAKE_COMPILER="linux64-gcc"
-      TRAVIS_STEP="compile"
-
-    - TEST_NAME="Linux GCC 5 Debug Shared x64"
-      CC_VER="5"
-      PREMAKE_CONFIGUATION="debug-shared"
-      PREMAKE_COMPILER="linux64-gcc"
-      TRAVIS_STEP="compile"
-
-    - TEST_NAME="Linux GCC 5 Release Static x64"
-      CC_VER="5"
-      PREMAKE_CONFIGUATION="release-static"
-      PREMAKE_COMPILER="linux64-gcc"
-      TRAVIS_STEP="compile"
-
-    - TEST_NAME="Linux GCC 5 Release Shared x64"
-      CC_VER="5"
-      PREMAKE_CONFIGUATION="release-shared"
-      PREMAKE_COMPILER="linux64-gcc"
-      TRAVIS_STEP="compile"
-      
-    - TEST_NAME="Linux GCC 4.9 Debug Static x64"
-      CC_VER="4.9"
-      PREMAKE_CONFIGUATION="debug-static"
-      PREMAKE_COMPILER="linux64-gcc"
-      TRAVIS_STEP="compile"
-
-    - TEST_NAME="Linux GCC 4.9 Debug Shared x64"
-      CC_VER="4.9"
-      PREMAKE_CONFIGUATION="debug-shared"
-      PREMAKE_COMPILER="linux64-gcc"
-      TRAVIS_STEP="compile"
-
-    - TEST_NAME="Linux GCC 4.9 Release Static x64"
-      CC_VER="4.9"
-      PREMAKE_CONFIGUATION="release-static"
-      PREMAKE_COMPILER="linux64-gcc"
-      TRAVIS_STEP="compile"
-
-    - TEST_NAME="Linux GCC 4.9 Release Shared x64"
-      CC_VER="4.9"
-      PREMAKE_CONFIGUATION="release-shared"
-      PREMAKE_COMPILER="linux64-gcc"
-      TRAVIS_STEP="compile"
-
     - TEST_NAME="Code Coverage"
       TRAVIS_STEP="coverage"
 
