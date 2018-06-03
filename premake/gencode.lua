@@ -41,10 +41,26 @@ project "gencode"
 		files {
 			"%{pocoPathVS2015}lib/native/include/**.h"
 		}
+		buildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2015"
+		}
+		rebuildcommands {
+			"{RMDIR} $(SolutionDir)*.vcxproj*",
+			"{RMDIR} $(SolutionDir)*.sln*",
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2015"
+		}
 
 	filter { "action:vs2017", "system:windows" }
 		files {
 			"%{pocoPathVS2017}lib/native/include/**.h"
+		}
+		buildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2017"
+		}
+		rebuildcommands {
+			"{RMDIR} $(SolutionDir)*.vcxproj*",
+			"{RMDIR} $(SolutionDir)*.sln*",
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2017"
 		}
 
 	filter { "system:windows" }

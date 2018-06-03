@@ -71,10 +71,24 @@ project "genproj"
 		rebuildcommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*",
-			"$(SolutionDir)build\\win\\genproj.cmd"
-		}
+			"$(SolutionDir)build\\win\\genproj.cmd"		}
 		cleancommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*"
 		}
 
+	filter { "action:vs2015", "system:windows" }
+		buildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2015"
+		}
+		rebuildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2015"
+		}
+
+	filter { "action:vs2017", "system:windows" }
+		buildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2017"
+		}
+		rebuildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2017"
+		}

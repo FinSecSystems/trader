@@ -10,6 +10,9 @@ environment:
     secure: dVKOiMJnhBO0y+8aZxCYDg==
   my_github_password:
     secure: LcITt+0DCnllqTcdDo3Ee3yO+L0CWbGVNqwnfYgvQz3LPoQ3VZupN4rkvAQTrz8f
+  my_code_cov_token:
+    secure: 2iuD0Fo0vpxlatuUju4Exef+3iXN9QCVzp4t4nav6LHo1scj3awzLqo3kf4GCV4s
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
   matrix:
   - TOOLSET: vs2017
     VS_PLATFORM_TOOLSET: v141
@@ -27,7 +30,6 @@ install:
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\win\deploy_tools.ps1
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\win\decrypt_configs.ps1
   - cmd: build\win\genproj.cmd
-
 before_build:
   - cmd: msbuild generators.sln /t:Build /p:Configuration="%configuration%" /p:PlatformToolset=%VS_PLATFORM_TOOLSET% /p:Platform=Win64
 
@@ -62,3 +64,9 @@ deploy:
 test_script:
   #Just name test executables as *test.exe and it will be part of the test coverage
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\win\run_tests.ps1
+
+after_test:
+  - ps: |
+      $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
+      Invoke-WebRequest -Uri 'https://codecov.io/bash' -OutFile codecov.sh
+      bash codecov.sh -f "code_coverage_report.xml" -t $env:my_code_cov_token

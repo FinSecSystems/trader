@@ -1,6 +1,16 @@
 #include "stdafx.h"
 #include "cryptowatch.h"
 #include "cryptowatchapi.h"
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="cryptowatch.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>Cryptowatch Implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 #include "cryptowatchdatabase.h"
 #include "helper.h"
 
@@ -10,11 +20,19 @@ namespace trader
     using namespace CryptowatchApi;
     using namespace CryptowatchDatabase;
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gets a connection. </summary>
+    ///
+    /// <param name="connectionId"> Identifier for the connection. </param>
+    ///
+    /// <returns> The connection. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     AutoPtr< Interface::Connection > Cryptowatch::getConnection(const std::string &connectionId)
     {
         return new CryptowatchConnection(connectionId, new Cryptowatch());
     }
 
+    /// <summary> Initializes a new instance of the Cryptowatch class. </summary>
     Cryptowatch::Cryptowatch()
         : api(AppManager::instance.getApp(), this)
         , dataBase(new CryptowatchDatabase::Tables(DbManager::instance.getDb()->getDbSession()))
@@ -22,8 +40,20 @@ namespace trader
         dataBase->init();
     }
 
+    /// <summary> Finalizes an instance of the Cryptowatch class. </summary>
     Cryptowatch::~Cryptowatch() {}
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the given operation on a different thread, and waits for the result. </summary>
+    ///
+    /// <exception cref="TimeoutException">	    Thrown when a Timeout error condition occurs. </exception>
+    /// <exception cref="ApplicationException"> Thrown when an Application error condition occurs. </exception>
+    ///
+    /// <param name="httpMethod"> The HTTP method. </param>
+    /// <param name="uri">		  [in,out] URI of the document. </param>
+    ///
+    /// <returns> A Dynamic::Var. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Dynamic::Var Cryptowatch::invoke(const string &httpMethod, URI &uri)
     {
         (void)httpMethod;

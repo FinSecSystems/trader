@@ -1,4 +1,14 @@
 #include "stdafx.h"
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="exchangeratelab.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>ExchangerateLab class implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 #include "exchangeratelab.h"
 #include "exchangeratelabapi.h"
 #include "exchangeratelabconfig.h"
@@ -8,18 +18,37 @@ namespace trader
 
     using namespace ExchangeratelabApi;
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gets a connection. </summary>
+    ///
+    /// <param name="connectionId"> Identifier for the connection. </param>
+    ///
+    /// <returns> The connection. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     AutoPtr< Interface::Connection > Exchangeratelab::getConnection(const std::string &connectionId)
     {
         return new ExchangeratelabConnection(connectionId, new Exchangeratelab());
     }
 
+    /// <summary> Initializes a new instance of the Exchangeratelab class. </summary>
     Exchangeratelab::Exchangeratelab()
         : api(AppManager::instance.getApp(), this)
     {
     }
 
+    /// <summary> Finalizes an instance of the Exchangeratelab class. </summary>
     Exchangeratelab::~Exchangeratelab() {}
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the given operation on a different thread, and waits for the result. </summary>
+    ///
+    /// <exception cref="ApplicationException"> Thrown when an Application error condition occurs. </exception>
+    ///
+    /// <param name="httpMethod"> The HTTP method. </param>
+    /// <param name="uri">		  [in,out] URI of the document. </param>
+    ///
+    /// <returns> A Dynamic::Var. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     Dynamic::Var Exchangeratelab::invoke(const string &httpMethod, URI &uri)
     {
         (void)httpMethod;

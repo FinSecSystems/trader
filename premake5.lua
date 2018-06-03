@@ -169,7 +169,8 @@ filter { "system:windows", "platforms:Win64" }
 	}
 	linkoptions { 
 		"/IGNORE:4221",
-		"/IGNORE:4006"
+		"/IGNORE:4006",
+		"/IGNORE:4099"
 	}
 	includedirs {
 		"%{gtestPath}lib/native/include",

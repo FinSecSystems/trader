@@ -69,6 +69,7 @@ tools/bin/appveyor-tools/
 *.log.txt*
 *.properties
 /lib
+tools/bin/OpenCppCoverage/
 
 #Conan
 conanbuildinfo.cmake

@@ -9,13 +9,13 @@ Write-Host "Setup directories"
 New-Item "..\..\tmp" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\..\tools" -itemtype directory -ErrorAction SilentlyContinue
 New-Item "..\..\tools\bin" -itemtype directory -ErrorAction SilentlyContinue
+New-Item "..\..\packages" -itemtype directory -ErrorAction SilentlyContinue
 
 Write-Host "Check packages and tools directories"
 Get-ChildItem -Path "..\..\packages"
 Get-ChildItem -Path "..\..\tools" –Recurse
 
-#Set Github Credentials
-
+#Set Github Credentials 
 function Get-BasicAuthCreds {
     param([string]$Username,[string]$Password)
     $AuthString = "{0}:{1}" -f $Username,$Password
@@ -30,6 +30,22 @@ if (Test-Path env:my_github_username) {
 		$global:headers = @{"Authorization"="Basic $BasicCreds"}
 		Write-Host "Retrieved Credentials"
 	}
+}
+
+#opencppcoverage
+$opencppcoverageDir = "$dir\..\..\tools\bin\OpenCppCoverage\"
+if(![System.IO.Directory]::Exists($opencppcoverageDir)){
+	Write-Host "Installing OpenCppCoverage $opencppcoverageDir"
+	$repo = "OpenCppCoverage/OpenCppCoverage"
+	$exename = "OpenCppCoverageSetup-x64-0.9.7.0.exe"
+	$destinationdir = "..\..\tmp"
+	$releases = "https://api.github.com/repos/$repo/releases"
+	$url = (Invoke-WebRequest $releases -Headers $headers | ConvertFrom-Json)[0].assets[0].browser_download_url
+	$download = "https://github.com/$repo/releases/download/$tag/$exename"
+	Write-Host $download
+	Remove-Item $destinationdir\$exename -Force -ErrorAction SilentlyContinue 
+	Invoke-WebRequest $url -Out $destinationdir\$exename -Headers $headers
+	& "$destinationdir\$exename" /VERYSILENT /DIR="$opencppcoverageDir"
 }
 
 #intelseapi
@@ -115,6 +131,10 @@ if(![System.IO.Directory]::Exists("..\packages\Microsoft.googletest.v140.windesk
 if(![System.IO.Directory]::Exists("..\packages\VisualLeakDetector.2.5.0.0")) {
 	& "..\..\tools\bin\nuget\nuget.exe" install VisualLeakDetector -OutputDirectory ..\..\packages
 }
+
+Write-Host "Check packages and tools directories"
+Get-ChildItem -Path "..\..\packages"
+Get-ChildItem -Path "..\..\tools" –Recurse
 
 Pop-Location
 [Environment]::CurrentDirectory = $PWD

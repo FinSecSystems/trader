@@ -1,3 +1,13 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// <copyright file="connectionmanager.cpp" company="FinSec Systems">
+// Copyright (c) 2018 finsec.systems. All rights reserved.
+// </copyright>
+// <author>Viknash</author>
+// <date>12/5/2018</date>
+// <summary>ConnectionManager Implementation</summary>
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 #include "stdafx.h"
 #include "connectionmanager.h"
 #include "bittrexconnection.h"
@@ -9,8 +19,15 @@
 namespace trader
 {
 
-    ConnectionManager ConnectionManager::instance;
+    ConnectionManager ConnectionManager::instance;  ///< The connection manager instance
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Gets a connection. </summary>
+    ///
+    /// <param name="connectionString"> The connection string. </param>
+    ///
+    /// <returns> The connection. </returns>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     AutoPtr< Interface::Connection > ConnectionData::getConnection(const std::string &connectionString)
     {
         AutoPtr< Interface::Connection > connection = nullptr;
@@ -43,6 +60,11 @@ namespace trader
         return connection;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary> Executes the operation operation. </summary>
+    ///
+    /// <param name="_operation"> The operation. </param>
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     void ConnectionData::DoOperation(DataConnectorOperation _operation)
     {
 		for (auto &connectionPair : connections)

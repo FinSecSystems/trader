@@ -1,9 +1,10 @@
 # trader
 
-[![Build Status](https://ci.appveyor.com/api/projects/status/kks53akyvugs7j1w?svg=true)](https://ci.appveyor.com/project/Administrator73626/trader-private)
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1605/badge)](https://bestpractices.coreinfrastructure.org/projects/1605)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org/)
+[![Build Status](https://ci.appveyor.com/api/projects/status/kks53akyvugs7j1w?svg=true)](https://ci.appveyor.com/project/FinSec/trader-private)
 [![Build Status](https://travis-ci.com/FinSecSystems/trader_private.svg?token=eJTztyvpvRC5qWr5SJaS&branch=Linux)](https://travis-ci.com/FinSecSystems/trader_private)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org/)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1605/badge)](https://bestpractices.coreinfrastructure.org/projects/1605)
+[![codecov](https://codecov.io/gh/FinSecSystems/trader_private/branch/master/graph/badge.svg?token=iakVFJ1zWk)](https://codecov.io/gh/FinSecSystems/trader_private)
 
 
 This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.
