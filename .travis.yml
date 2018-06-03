@@ -157,15 +157,15 @@ script:
     ;fi
 
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "todo_check" ]; then
-        grep -r TODO *
+        grep -r TODO * || true
     ;fi
 
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "fixme_check" ]; then
-        grep -r FIXME *
+        grep -r FIXME * || true
     ;fi
 
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "hack_check" ]; then
-        grep -r HACK *
+        grep -r HACK * || true
     ;fi
 
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "code_stats" ]; then
