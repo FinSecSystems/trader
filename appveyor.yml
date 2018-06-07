@@ -37,8 +37,8 @@ build:
   project: trader.sln
 
 cache:
-  - packages -> premake5.lua
-  - tools -> build\win\deploy_tools.ps1, build\win\decrypt_configs.ps1
+  - packages -> premake5.lua, build\appveyor\cleanup_cache.txt
+  - tools -> build\win\deploy_tools.ps1, build\win\decrypt_configs.ps1, build\appveyor\cleanup_cache.txt
 
 after_build:
   7z a trader_%configuration%_%APPVEYOR_BUILD_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*.exe %APPVEYOR_BUILD_FOLDER%\bin\Win64\%configuration%\*.dll %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.properties %APPVEYOR_BUILD_FOLDER%\bin\Win64\*.json
