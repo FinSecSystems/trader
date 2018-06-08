@@ -26,6 +26,7 @@ configuration:
   - release-shared
 
 install:
+  - cmd: del /S /F /Q /A .\tools\bin\premake\finseccodelite
   - cmd: git submodule update --init --recursive
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\win\deploy_tools.ps1
   - cmd: powershell -ExecutionPolicy Bypass -File .\build\win\decrypt_configs.ps1
