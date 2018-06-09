@@ -11,7 +11,7 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 
 ## Documentation
 
-[Brief Markdown Documentation](docs/index.md)
+[Brief Markdown Documentation](https://finsecsystems.github.io/trader/)
 
 [Doxygen Full Documentation](https://finsecsystems.github.io/docs/trader/annotated.html)
 
