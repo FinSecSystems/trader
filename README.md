@@ -9,6 +9,12 @@
 
 This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.
 
+## Documentation
+
+[Brief Markdown Documentation](docs/index.md)
+
+[Doxygen Full Documentation](https://finsecsystems.github.io/docs/trader/annotated.html)
+
 ## Build & Run Instructions
 
 ### Linux/WSL
