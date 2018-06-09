@@ -1,15 +1,40 @@
 # trader
 
-[![Build Status](https://ci.appveyor.com/api/projects/status/kks53akyvugs7j1w?svg=true)](https://ci.appveyor.com/project/FinSec/trader-private)
 [![Build Status](https://travis-ci.com/FinSecSystems/trader_private.svg?token=eJTztyvpvRC5qWr5SJaS&branch=Linux)](https://travis-ci.com/FinSecSystems/trader_private)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org/)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1605/badge)](https://bestpractices.coreinfrastructure.org/projects/1605)
+[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/15796.svg)](https://scan.coverity.com/projects/finsecsystems-trader)
 [![codecov](https://codecov.io/gh/FinSecSystems/trader_private/branch/master/graph/badge.svg?token=iakVFJ1zWk)](https://codecov.io/gh/FinSecSystems/trader_private)
-
 
 This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.
 
 ## Build & Run Instructions
+
+### Linux/WSL
+
+#### Setup Instructions
+Aptitude users
+- Run build/linux/deploy_tools.sh to install required tools
+
+- Run build/linux/genproj.sh once to generate makefiles for the project
+- Copy bin/*.json & bin/*.properties to bin/debug on bin/release and modify the config with the relevant api keys and proxy settings
+
+## Compilation
+- Tested with Ubuntu 18 on WSL
+### For Help
+- Run make -f generators.make help and make -f generators.make help
+Otherwise
+ - Build Generators
+   - make -f generators.make all
+ - Build Trader
+   - make -f trader.make all
+
+## Running
+- Run using script build/linux/run_debug_<compiler>.sh
+
+## Debug
+- Run build/linux/debug_<compiler>.sh
+
 
 ### Windows
 
@@ -49,35 +74,10 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 - Install [Clang Format](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat) Visual Studio Extension to format code
 - Install [Google Test Adapter](https://marketplace.visualstudio.com/items?itemName=ChristianSoltenborn.GoogleTestAdapter) to run tests in Visual Studio 
 
-### Linux/WSL
-
-#### Setup Instructions
-Aptitude users
-- Run build/linux/deploy_tools.sh to install required tools
-
-- Run build/linux/genproj.sh once to generate makefiles for the project
-- Copy bin/*.json & bin/*.properties to bin/debug on bin/release and modify the config with the relevant api keys and proxy settings
-
-## Compilation
-- Tested with Ubuntu 18 on WSL
-For Help
-- Run make -f generators.make help and make -f generators.make help
-Otherwise
- - Build Generators
-   - make -f generators.make all
- - Build Trader
-   - make -f trader.make all
-
-## Running
-- Run using script build/linux/run_debug_<compiler>.sh
-
-## Debug
-- Run build/linux/debug_<compiler>.sh
 
 ### MacOS X
 ~This has not been tested~
 ~Will be supported in the near future~
-
 ## Contribution Guidelines
 1. Format changelist commit comments using conventional commits
 2. Submit pull request for review
