@@ -1,0 +1,15 @@
+[requires]
+FinSec.Poco/1.9.0@finsecadmin/stable
+gtest/1.8.0@bincrafters/stable
+
+[options]
+#Poco:shared=True # False
+
+[generators]
+txt
+cmake
+
+[imports]
+lib, *.a -> ./lib 
+lib, *.so* -> ./lib 
+include, * -> ./include @ keep_path=True, folder=True

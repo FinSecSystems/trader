@@ -158,22 +158,16 @@ namespace trader
 
 #if defined(_WIN32) && defined(POCO_WIN32_UTF8) && !defined(POCO_NO_WSTRING)
 int wmain(int argc, wchar_t **argv)
-{
-	::testing::InitGoogleTest(&argc, argv);
-	trader::ApplicationHelper* pApp = new trader::BittrexApp;
-	pApp->init(argc, argv);
-	trader::setup(pApp);
-
-	int res = RUN_ALL_TESTS();
-	trader::destroy(pApp);
-	return res;
-}
 #else
 int main(int argc, char **argv)
-{
-	::testing::InitGoogleTest(&argc, argv);
-	savedArgc = argc;
-	savedArgv = argv;
-	return RUN_ALL_TESTS();
-}
 #endif
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    trader::ApplicationHelper *pApp = new trader::BittrexApp;
+    pApp->init(argc, argv);
+    trader::setup(pApp);
+
+    int res = RUN_ALL_TESTS();
+    trader::destroy(pApp);
+    return res;
+}

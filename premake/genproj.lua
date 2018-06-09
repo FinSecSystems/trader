@@ -17,13 +17,13 @@ project "genproj"
 
 	filter { "system:linux" }
 		buildcommands {
-			"%{wks.location}/tools/bin/premake/premake5 gmake"
+			"%{wks.location}/tools/bin/premake/premake5 gmake --file=%{wks.location}/premake5.lua"
 		}
 
 		rebuildcommands {
 			"{RMDIR} %{wks.location}/Makefile",
 			"{RMDIR} %{wks.location}/*.make",
-			"%{wks.location}/tools/bin/premake/premake5 gmake"
+			"%{wks.location}/tools/bin/premake/premake5 gmake --file=%{wks.location}/premake5.lua"
 		}
 		cleancommands {
 			"{RMDIR} %{wks.location}Makefile",
@@ -53,7 +53,7 @@ project "genproj"
 		}
 
 	filter { "system:windows" }
----		toolset "v140"
+		toolset "v140"
 		files {
 			"%{gtestPath}lib/native/include/**.h"			
 		}
@@ -66,15 +66,29 @@ project "genproj"
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/*.dll %{wks.location}/bin/%{cfg.platform}/release-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Debug/*.pdb %{wks.location}/bin/%{cfg.platform}/debug-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/*.pdb %{wks.location}/bin/%{cfg.platform}/release-shared",
-			"$(SolutionDir)build\\genproj.cmd"
+			"$(SolutionDir)build\\win\\genproj.cmd"
 		}
 		rebuildcommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*",
-			"$(SolutionDir)build\\genproj.cmd"
-		}
+			"$(SolutionDir)build\\win\\genproj.cmd"		}
 		cleancommands {
 			"{RMDIR} $(SolutionDir)*.vcxproj*",
 			"{RMDIR} $(SolutionDir)*.sln*"
 		}
 
+	filter { "action:vs2015", "system:windows" }
+		buildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2015"
+		}
+		rebuildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2015"
+		}
+
+	filter { "action:vs2017", "system:windows" }
+		buildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2017"
+		}
+		rebuildcommands {
+			"$(SolutionDir)tools\\bin\\premake\\premake5.exe --file=$(SolutionDir)premake5.lua vs2017"
+		}

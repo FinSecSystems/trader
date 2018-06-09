@@ -4,12 +4,24 @@ project "databases"
 		"codegen"
 	}
 	kind		"Utility"
-	targetdir	"%{wks.location}/tmp/%{cfg.platform}/codegen"
+	targetdir	"%{wks.location}/tmp/%{cfg.platform}/codegen/"
 	targetname	"fybdatabase.h"
 	files
 	{
         "%{wks.location}/data/databases/**.json"
 	}
+
+	filter { "platforms:Linux64*", "system:linux" }
+		prebuildcommands {
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/databases -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
+		}
+		rebuildcommands {
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**database.*",
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/databases -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
+		}
+		cleancommands {
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**database.*",
+		}
 
 	filter { "platforms:Win64", "system:windows" }
 		prebuildcommands {
@@ -23,16 +35,4 @@ project "databases"
 
 		cleancommands {
 			"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen"
-		}
-
-	filter { "platforms:Linux64*", "system:linux" }
-		prebuildcommands {
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/databases -o:tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
-		}
-		rebuildcommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**database.*",
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/databases -o:tmp/%{cfg.platform}/codegen -n:trader -t:databaseschema"
-		}
-		cleancommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**database.*",
 		}

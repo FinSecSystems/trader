@@ -1,5 +1,5 @@
 @echo off
-pushd %~dp0\..\..
+pushd %~dp0\..\..\..
 
 for /f "usebackq tokens=1* delims=: " %%i in (`%CD%\tools\bin\vswhere\vswhere -latest -requires Microsoft.Component.MSBuild`) do (
   if /i "%%i"=="installationPath" set LatestVS=%%j

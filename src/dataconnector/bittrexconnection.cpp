@@ -83,7 +83,7 @@ namespace trader
     void BittrexProcessingConnection::SecurityListRequest(
         Poco::AutoPtr< Interface::SecurityListRequestData > securityListRequestData)
     {
-        static std::atomic< std::int32_t > idx = 0;
+        static std::atomic< std::int32_t > idx(0);
 
         Poco::AutoPtr< Interface::SecurityListData > securityListData = new Interface::SecurityListData();
         securityListData->setSourceConnection(connectionId);
@@ -125,7 +125,7 @@ namespace trader
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     std::string GetUniqueResponseId()
     {
-        static std::atomic< std::int32_t > idx = 0;
+        static std::atomic< std::int32_t > idx(0);
         ostringstream uniqueResponseIdStream;
         uniqueResponseIdStream << "MD" << ++idx;
         return uniqueResponseIdStream.str();

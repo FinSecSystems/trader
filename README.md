@@ -1,20 +1,49 @@
 # trader
 
+[![Build Status](https://travis-ci.com/FinSecSystems/trader.svg?branch=master)](https://travis-ci.com/FinSecSystems/trader)
 [![Build status](https://ci.appveyor.com/api/projects/status/oyjbn65vy8qg176q?svg=true)](https://ci.appveyor.com/project/FinSec/trader)
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1605/badge)](https://bestpractices.coreinfrastructure.org/projects/1605)
+[![codecov](https://codecov.io/gh/FinSecSystems/trader/branch/master/graph/badge.svg)](https://codecov.io/gh/FinSecSystems/trader)
 [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/15796.svg)](https://scan.coverity.com/projects/finsecsystems-trader)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org/)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1605/badge)](https://bestpractices.coreinfrastructure.org/projects/1605)
 
 This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.
 
 ## Build & Run Instructions
 
+### Linux/WSL
+
+#### Setup Instructions
+Aptitude users
+- Run build/linux/deploy_tools.sh to install required tools
+
+- Run build/linux/genproj.sh once to generate makefiles for the project
+- Copy bin/*.json & bin/*.properties to bin/debug on bin/release and modify the config with the relevant api keys and proxy settings
+
+## Compilation
+- Tested with Ubuntu 18 on WSL
+### For Help
+- Run make -f generators.make help and make -f generators.make help
+Otherwise
+ - Build Generators
+   - make -f generators.make all
+ - Build Trader
+   - make -f trader.make all
+
+## Running
+- Run using script build/linux/run_debug_<compiler>.sh
+
+## Debug
+- Run build/linux/debug_<compiler>.sh
+
+
 ### Windows
 
 #### Setup Instructions 
 
-- Run build\shell.cmd
-- Run build\deploy_tools.cmd to download necessary packages
-- Run build\genproj.cmd once to generate Visual Studio 2015 or Visual Studio 2017 projects
+- Run build\win\shell.cmd
+- Run build\win\deploy_tools.cmd to download necessary packages
+- Run build\win\genproj.cmd once to generate Visual Studio 2015 or Visual Studio 2017 projects
 
 ## Compilation
 - Open and compile codegen.sln
@@ -45,34 +74,11 @@ This project is a framework to quickly connect with cryptocurrency and tradition
 ## Optional
 - Install [Clang Format](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.ClangFormat) Visual Studio Extension to format code
 - Install [Google Test Adapter](https://marketplace.visualstudio.com/items?itemName=ChristianSoltenborn.GoogleTestAdapter) to run tests in Visual Studio 
-- Install [Google Test Adapter](https://marketplace.visualstudio.com/items?itemName=ChristianSoltenborn.GoogleTestAdapter) to run tests in Visual Studio 
 
-### Linux/WSL
-
-#### Setup Instructions
-Aptitude users
-- Run build\deploy_tools.sh to use apt-get to install necessary packages
-
-- Run build\genproj.sh once to generate makefiles for the project
-- Copy bin\*.json & bin\*.properties to bin\debug on bin\release and modify the config with the relevant api keys and proxy settings
-
-## Compilation
-- Tested with Ubuntu 16 on WSL
-For Help
-- Run make -f generators.make help and make -f generators.make help
-Otherwise
- - Build Generators
-   - make -f generators.make all
- - Build Trader
-   - make -f trader.make all
-
-## Running
-- Run using script build\run_debug_<compiler>.sh
-
-## Debug
-- Run build\debug_<compiler>.sh
 
 ### MacOS X
 ~This has not been tested~
 ~Will be supported in the near future~
-
+## Contribution Guidelines
+1. Format changelist commit comments using conventional commits
+2. Submit pull request for review

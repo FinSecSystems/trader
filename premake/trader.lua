@@ -36,9 +36,6 @@ project "trader"
 	filter "files:%{wks.location}/deps/**.*"
 		flags { "ExcludeFromBuild" }
 
-	filter { "configurations:*shared" }
-		defines "IMPORT_DATACONNECTOR"
-
 	filter { "platforms:Linux64*", "system:linux" }
 		files {
 			"%{wks.location}/deps/poco/openssl/include/**.h",
@@ -46,6 +43,9 @@ project "trader"
 			"%{wks.location}/deps/poco/NetSSL_OpenSSL/include/**.h",
 			"%{wks.location}/deps/poco/NetSSL_OpenSSL/src/**.cpp"
 		}
+
+	filter { "system:windows", "configurations:*shared" }
+		defines "IMPORT_DATACONNECTOR"
 
 	filter { "system:windows", "platforms:Win64" }
 		links {
@@ -118,35 +118,39 @@ project "trader"
 			"PocoXML.lib"
 		}
 
-	filter { "platforms:Linux64*", "system:linux" }
-		links { 
-			"pthread",
-			"ssl",
-			"crypto"
-		}
-
 	filter { "platforms:Linux64*", "system:linux", "configurations:debug*" }
 		links { 
-			"PocoFoundationd",
 			"PocoUtild",
 			"PocoJSONd",
 			"PocoXMLd",
 			"PocoNetd",
 			"PocoDatad",
 			"PocoDataSQLited",
+			"PocoEncodingsd",
 			"PocoNetSSLd",
-			"PocoCryptod"
+			"PocoCryptod",
+			"PocoFoundationd",
 		}
 
 	filter { "platforms:Linux64*", "system:linux", "configurations:release*" }
 		links { 
-			"PocoFoundation",
 			"PocoUtil",
 			"PocoJSON",
 			"PocoXML",
 			"PocoNet",
 			"PocoData",
 			"PocoDataSQLite",
+			"PocoEncodings",
 			"PocoNetSSL",
-			"PocoCrypto"
-			}
+			"PocoCrypto",
+			"PocoFoundation",
+		}
+
+	filter { "platforms:Linux64*", "system:linux" }
+		links { 
+			"pthread",
+			"ssl",
+			"crypto",
+			"z",
+			"dl"
+		}

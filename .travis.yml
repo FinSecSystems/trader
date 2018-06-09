@@ -1,0 +1,174 @@
+language: cpp
+
+cache:
+  apt: true
+  ccache: true
+  directories:
+    - /home/travis/.conan/
+    - packages
+    - tools
+
+services:
+    - docker
+
+branches:
+  except:
+    - /.*pp.eyor.*/
+
+env:
+  global: 
+    - TEST_NAME=""
+  matrix:
+    - TEST_NAME="Linux GCC 7 Debug Static x64"
+      CC_VER="7"
+      PREMAKE_CONFIGUATION="debug-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 7 Debug Shared x64"
+      CC_VER="7"
+      PREMAKE_CONFIGUATION="debug-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 7 Release Static x64"
+      CC_VER="7"
+      PREMAKE_CONFIGUATION="release-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 7 Release Shared x64"
+      CC_VER="7"
+      PREMAKE_CONFIGUATION="release-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 6 Debug Static x64"
+      CC_VER="6"
+      PREMAKE_CONFIGUATION="debug-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 6 Debug Shared x64"
+      CC_VER="6"
+      PREMAKE_CONFIGUATION="debug-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 6 Release Static x64"
+      CC_VER="6"
+      PREMAKE_CONFIGUATION="release-static"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Linux GCC 6 Release Shared x64"
+      CC_VER="6"
+      PREMAKE_CONFIGUATION="release-shared"
+      PREMAKE_COMPILER="linux64-gcc"
+      TRAVIS_STEP="compile"
+
+    - TEST_NAME="Code Coverage"
+      TRAVIS_STEP="coverage"
+
+    - TEST_NAME="Todo Check"
+      TRAVIS_STEP="todo_check"
+
+    - TEST_NAME="Fix Me Check"
+      TRAVIS_STEP="fixme_check"
+
+    - TEST_NAME="Hack Check"
+      TRAVIS_STEP="hack_check"
+
+    - TEST_NAME="Code Statistics"
+      TRAVIS_STEP="code_stats"
+
+before_install:
+  - chmod 777 $TRAVIS_BUILD_DIR/build/linux/deploy_tools.sh
+  - chmod 777 $TRAVIS_BUILD_DIR/build/linux/setup_env.sh
+  - chmod 777 $TRAVIS_BUILD_DIR/build/linux/genproj.sh
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then
+        docker run -d
+        --name ubuntu-test
+        -v $TRAVIS_BUILD_DIR:/travis
+        -v /home/travis:/root
+        -e CC_VER=$CC_VER
+        -e PREMAKE_CONFIGUATION=$PREMAKE_CONFIGUATION
+        -e PREMAKE_COMPILER=$PREMAKE_COMPILER
+        ubuntu:latest tail -f /dev/null
+    ; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then docker ps; fi 
+
+install:
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then
+        docker exec -t -i ubuntu-test bash -c 
+        "
+            export;
+            cd /travis;
+            echo Current Directory;
+            pwd;
+            ls -lah;
+            apt-get update;
+            . build/linux/setup_env.sh;
+            export;
+            build/linux/deploy_tools.sh;
+            add-apt-repository -y ppa:ubuntu-toolchain-r/test;
+            apt-get update;
+            lsb_release -a;
+            ls packages;
+            find tools;
+            $CC --version;
+            $CXX --version;
+            ld --version;
+            ar --version;
+        ";
+        fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" != "compile" ]; then
+        sudo apt-get update;
+        . build/linux/setup_env.sh;
+        sudo build/linux/deploy_tools.sh;
+        sudo apt-get update;
+    fi
+
+before_script:
+  - echo $TEST_NAME
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then
+        docker exec -t -i ubuntu-test bash -c
+        "
+            cd /travis;
+            . build/linux/setup_env.sh;
+            build/linux/genproj.sh;
+            make -f generators.make help;
+        "
+    ;fi
+
+script:
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "compile" ]; then
+        docker exec -t ubuntu-test bash -c
+        "
+            cd /travis;
+            . build/linux/setup_env.sh;
+            make -f generators.make configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1;
+            make -f trader.make     configuration=$PREMAKE_CONFIGUATION_$PREMAKE_COMPILER verbose=1;
+        "
+    ;fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "coverage" ]; then
+        cppcheck --force --quiet --inline-suppr -j2 -ipackages -ideps -itools .
+    ;fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "todo_check" ]; then
+        grep -r TODO * || true
+    ;fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "fixme_check" ]; then
+        grep -r FIXME * || true
+    ;fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "hack_check" ]; then
+        grep -r HACK * || true
+    ;fi
+
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] && [ "$TRAVIS_STEP" == "code_stats" ]; then
+        sloccount .
+    ;fi
+

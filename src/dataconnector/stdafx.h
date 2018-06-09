@@ -41,7 +41,6 @@
 #include "Poco/PatternFormatter.h"
 #include "Poco/Poco.h"
 #include "Poco/SHA1Engine.h"
-#include "Poco/SHA2Engine.h"
 #include "Poco/SplitterChannel.h"
 #include "Poco/Stopwatch.h"
 #include "Poco/StreamCopier.h"

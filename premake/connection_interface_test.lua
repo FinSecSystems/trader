@@ -33,9 +33,6 @@ project "connection_interface_test"
 	filter "files:%{wks.location}/deps/**.*"
 		flags { "ExcludeFromBuild" }
 
-	filter { "configurations:*shared" }
-		defines "IMPORT_DATACONNECTOR"
-
 	filter { "platforms:Linux64*", "system:linux" }
 		files {
 			"%{wks.location}/deps/poco/openssl/include/**.h",
@@ -52,6 +49,9 @@ project "connection_interface_test"
 			"crypt32.lib",
 			"gtest.lib"
 		}
+
+	filter { "system:windows", "configurations:*shared" }
+		defines "IMPORT_DATACONNECTOR"
 
 	filter { "platforms:Win64", "system:windows", "configurations:debug-static" }
 		links { 
@@ -112,35 +112,40 @@ project "connection_interface_test"
 			"PocoXML.lib"
 		}
 
-	filter { "platforms:Linux64*", "system:linux" }
-		links { 
-			"pthread",
-			"ssl",
-			"crypto"
-		}
-
 	filter { "platforms:Linux64*", "system:linux", "configurations:debug*" }
 		links { 
-			"PocoFoundationd",
 			"PocoUtild",
 			"PocoJSONd",
 			"PocoXMLd",
 			"PocoNetd",
 			"PocoDatad",
 			"PocoDataSQLited",
+			"PocoEncodingsd",
 			"PocoNetSSLd",
-			"PocoCryptod"
+			"PocoCryptod",
+			"PocoFoundationd",
 		}
 
 	filter { "platforms:Linux64*", "system:linux", "configurations:release*" }
 		links { 
-			"PocoFoundation",
 			"PocoUtil",
 			"PocoJSON",
 			"PocoXML",
 			"PocoNet",
 			"PocoData",
 			"PocoDataSQLite",
+			"PocoEncodings",
 			"PocoNetSSL",
-			"PocoCrypto"
+			"PocoCrypto",
+			"PocoFoundation",
+		}
+
+	filter { "platforms:Linux64*", "system:linux" }
+		links {
+			"gtest",
+			"pthread",
+			"ssl",
+			"crypto",
+			"z",
+			"dl"
 		}

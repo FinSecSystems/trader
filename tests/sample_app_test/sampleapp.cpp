@@ -6,12 +6,11 @@
 #include "interface.h"
 #include "gtest/gtest.h"
 
-#if defined(_WIN32) && defined(POCO_WIN32_UTF8) && !defined(POCO_NO_WSTRING)
 static int savedArgc;
+#if defined(_WIN32) && defined(POCO_WIN32_UTF8) && !defined(POCO_NO_WSTRING)
 static wchar_t **savedArgv;
 #else
-static int savedArgc;
-static wchar_t **savedArgv;
+static char **savedArgv;
 #endif
 
 namespace trader

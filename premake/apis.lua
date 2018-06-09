@@ -4,7 +4,7 @@ project "apis"
 	dependson { 
 		"codegen"
 	}
-	targetdir "%{wks.location}/tmp/%{cfg.platform}/codegen"
+	targetdir "%{wks.location}/tmp/%{cfg.platform}/codegen/"
 	kind "Utility"
 	files
 	{
@@ -13,14 +13,14 @@ project "apis"
 
 	filter { "platforms:Linux64*", "system:linux" }
 		prebuildcommands {
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/apis -o:tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/apis -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
 		}		
 		rebuildcommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**api.*",
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/apis -o:tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**api.*",
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/apis -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:hyperschema"
 		}
 		cleancommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**api.*",
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**api.*",
 		}		
 		
 	filter { "platforms:Win64", "system:windows" }

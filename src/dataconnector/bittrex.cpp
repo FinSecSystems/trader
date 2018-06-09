@@ -229,7 +229,7 @@ namespace trader
         if (diffLastRun > 0)
         {
             Logger::get("Logs").information("Bittrex Info: Throttling connection request speed");
-            Sleep((DWORD)diffLastRun);
+            Thread::sleep(diffLastRun);
             lastInvokeTime = system_clock::now();
         }
         else

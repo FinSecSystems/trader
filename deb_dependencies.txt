@@ -1,0 +1,14 @@
+autoconf
+clang
+jq
+python-pip
+git
+cppcheck
+sloccount
+build-essential
+lsb-release
+curl
+wget
+python-pip
+python-dev
+

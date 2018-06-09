@@ -1,5 +1,5 @@
 @echo off
-pushd %~dp0\..
+pushd %~dp0\..\..
 title Trader
 
 REM Detect 32/64 bit windows

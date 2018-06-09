@@ -30,30 +30,48 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio
 *.lastbuildstate
 *.db-shm
 *.db-wal
 /.vs
-/tmp
 *.vcxproj*
 *.sln
-./*.db
 /bin/Win64
-/bin/Linux64-gcc
-*.log
-/*.make
-* - Copy.*
+/*.tss
+/*.pdb/*
+
+# Linux
 Makefile
-*.config.json
 deps/*.build
 deps/*.make
+autom4te.cache/
+configure
+*.workspace
+*.project
+.codelite/
+
+# Temp Directories
+/tmp
+./*.db
+/bin/Linux64*
+packages/
+tools/bin/appveyor-tools/
+/tools/bin/premake/premake*
+
+# This Project
+/*.make
+*.log
+* - Copy.*
+*.config.json
 *.db
 *.log.txt*
 *.properties
-/*.tss
 /lib
-/*.pdb/*
-packages/
-tools/bin/appveyor-tools/
-autom4te.cache/
-configure
+tools/bin/OpenCppCoverage/
+
+#Conan
+conanbuildinfo.cmake
+conanbuildinfo.txt
+conaninfo.txt

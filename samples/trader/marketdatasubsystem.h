@@ -32,12 +32,12 @@ namespace trader
 #define InterfaceEvent(x)                                                                                              \
     struct On##x : public MarketDataEvent                                                                              \
     {                                                                                                                  \
-        On##x(MarketDataSubSystem *_sys, Poco::AutoPtr< Interface::##x##Data > param)                                  \
+        On##x(MarketDataSubSystem *_sys, Poco::AutoPtr< Interface::x##Data > param)                                    \
             : MarketDataEvent(_sys)                                                                                    \
             , message(param)                                                                                           \
         {                                                                                                              \
         }                                                                                                              \
-        Poco::AutoPtr< Interface::##x##Data > message;                                                                 \
+        Poco::AutoPtr< Interface::x##Data > message;                                                                   \
     };                                                                                                                 \
     virtual void react(On##x const &) {}
 

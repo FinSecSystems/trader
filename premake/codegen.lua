@@ -10,12 +10,6 @@ project "codegen"
 	}
 	pchheader   "stdafx.h"
 	pchsource   "%{wks.location}/src/codegen/stdafx.cpp"
-	debugargs {
-		"/f:$(SolutionDir)deps\\quickfix\\spec\\FIX50SP2.xml",
-		"/o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen",
-		"/n:trader",
-		"/t:xmlspec"
-    }
 	files
 	{
 		"%{wks.location}/src/codegen/**.h",
@@ -35,24 +29,38 @@ project "codegen"
 		links {
 			"Iphlpapi.lib"
 		}
+		debugargs {
+			"/f:$(SolutionDir)deps\\quickfix\\spec\\FIX50SP2.xml",
+			"/o:$(SolutionDir)tmp\\%{cfg.platform}\\codegen",
+			"/n:trader",
+			"/t:xmlspec"
+		}
 
     filter "files:deps/**.*"
         flags { "ExcludeFromBuild" }
 
-	filter { "platforms:Linux64*", "system:linux", "configurations:debug"  }
+	filter { "platforms:Linux64*", "system:linux" }
 		links { 
-            "PocoFoundationd",
-            "PocoUtild",
-            "PocoJSONd",
-			"PocoXMLd"
+			"pthread",
+			"z"
+		}
+
+	filter { "system:linux", "configurations:debug*"  }
+		links { 
+			"PocoEncodingsd",
+			"PocoUtild",
+			"PocoJSONd",
+			"PocoXMLd",
+			"PocoFoundationd"
         }
 							
-	filter { "platforms:Linux64*", "system:linux", "configurations:release"  }
+	filter { "system:linux", "configurations:release*"  }
 		links { 
-            "PocoFoundation",
-            "PocoUtil",
-            "PocoJSON",
-			"PocoXML"
+			"PocoEncodings",
+			"PocoUtil",
+			"PocoJSON",
+			"PocoXML",
+			"PocoFoundation"
         }
 
 	filter { "platforms:Win64", "system:windows", "configurations:debug-static" }

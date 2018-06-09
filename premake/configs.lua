@@ -5,11 +5,23 @@ project "configs"
 		"codegen"
 	}
 	kind "Utility"
-	targetdir "%{wks.location}/tmp/%{cfg.platform}/codegen"
+	targetdir "%{wks.location}/tmp/%{cfg.platform}/codegen/"
 	files
 	{
 		"%{wks.location}/data/configs/**.json"
 	}
+
+	filter { "platforms:Linux64*", "system:linux" }
+		prebuildcommands {
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/configs -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
+		}
+		rebuildcommands {
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**config.*",
+			"LD_LIBRARY_PATH=%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/:$$LD_LIBRARY_PATH %{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:%{wks.location}/data/configs -o:%{wks.location}/tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
+		}
+		cleancommands {
+			"{RMDIR} %{wks.location}/tmp/%{cfg.platform}/codegen/**config.*",
+		}
 
 	filter { "platforms:Win64", "system:windows" }
 		prebuildcommands {
@@ -21,16 +33,4 @@ project "configs"
 		}
 		cleancommands {
 			"{RMDIR} $(SolutionDir)tmp\\%{cfg.platform}\\codegen"
-		}
-
-	filter { "platforms:Linux64*", "system:linux" }
-		prebuildcommands {
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
-		}
-		rebuildcommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**config.*",
-			"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:deps/poco/lib/Linux/x86_64 bin/%{cfg.platform}/%{cfg.buildcfg}/codegen -i:data/configs -o:tmp/%{cfg.platform}/codegen -n:trader -t:jsonschema"
-		}
-		cleancommands {
-			"{RMDIR} tmp/%{cfg.platform}/codegen/**config.*",
 		}

@@ -2,10 +2,23 @@ project "bootstrap"
     kind "Makefile"
 	location "%{wks.location}/tmp/projects"
 	targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}/"
-	targetname "libeay64MD.dll"
+	buildcommands {
+		"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-static",
+		"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-shared",
+		"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-static",
+		"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-shared"
+	}
+
+	filter { "system:windows" }
+		toolset "v140"
+		targetname "libeay64MD.dll"
 
 	filter { "system:linux" }
----		toolset "v140"
+		targetname "libssl.so"
+		buildcommands {
+			"{COPY} %{wks.location}/packages/%{pocoPackageLinux}.%{pocoPackageVersionLinux}-debug-shared/lib/*.* %{wks.location}/bin/%{cfg.platform}/debug-shared/",
+			"{COPY} %{wks.location}/packages/%{pocoPackageLinux}.%{pocoPackageVersionLinux}-release-shared/lib/*.* %{wks.location}/bin/%{cfg.platform}/release-shared/"
+		}
 
 	filter { "action:vs2015", "system:windows" }
 		buildcommands {
@@ -29,10 +42,6 @@ project "bootstrap"
 
 	filter { "system:windows" }
 		buildcommands {
-			"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-static",
-			"{MKDIR} %{wks.location}/bin/%{cfg.platform}/debug-shared",
-			"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-static",
-			"{MKDIR} %{wks.location}/bin/%{cfg.platform}/release-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Debug/*.dll %{wks.location}/bin/%{cfg.platform}/debug-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Release/*.dll %{wks.location}/bin/%{cfg.platform}/release-shared",
 			"{COPY} %{wks.location}/%{gtestPathDynamic}/lib/native/v140/windesktop/msvcstl/dyn/rt-dyn/x64/Debug/*.pdb %{wks.location}/bin/%{cfg.platform}/debug-shared",

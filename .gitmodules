@@ -4,3 +4,6 @@
 [submodule "deps/tinyfsm"]
 	path = deps/tinyfsm
 	url = https://github.com/FinSecSystems/tinyfsm.git
+[submodule "tools/bin/premake/finseccodelite"]
+	path = tools/bin/premake/finseccodelite
+	url = https://github.com/FinSecSystems/finseccodelite.git
