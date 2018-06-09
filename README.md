@@ -1,10 +1,11 @@
 # trader
 
-[![Build Status](https://travis-ci.com/FinSecSystems/trader_private.svg?token=eJTztyvpvRC5qWr5SJaS&branch=Linux)](https://travis-ci.com/FinSecSystems/trader_private)
+[![Build Status](https://travis-ci.com/FinSecSystems/trader.svg?branch=master)](https://travis-ci.com/FinSecSystems/trader)
+[![Build status](https://ci.appveyor.com/api/projects/status/oyjbn65vy8qg176q?svg=true)](https://ci.appveyor.com/project/FinSec/trader)
+[![codecov](https://codecov.io/gh/FinSecSystems/trader/branch/master/graph/badge.svg)](https://codecov.io/gh/FinSecSystems/trader)
+[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/15796.svg)](https://scan.coverity.com/projects/finsecsystems-trader)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org/)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/1605/badge)](https://bestpractices.coreinfrastructure.org/projects/1605)
-[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/15796.svg)](https://scan.coverity.com/projects/finsecsystems-trader)
-[![codecov](https://codecov.io/gh/FinSecSystems/trader_private/branch/master/graph/badge.svg?token=iakVFJ1zWk)](https://codecov.io/gh/FinSecSystems/trader_private)
 
 This project is a framework to quickly connect with cryptocurrency and traditional exchanges that utillize REST JSON, FIX or Websockets.
 
